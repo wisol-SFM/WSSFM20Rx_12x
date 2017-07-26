@@ -1,0 +1,10 @@
+1. ASSET_TRACKER EVB
+  Cfg_board_def.h (development\sigfox_cfg2\source)
+    MODULE_DEFAULT_SCENARIO_TYPE to MODULE_SCENARIO_ASSET_TRACKER
+  * IHERE
+    Cfg_board_def.h (development\sigfox_cfg2\source)
+      #define FEATURE_IHERE_3COLORLED enable
+      
+1. MWC DEMO EVB (wifi password)
+  Cfg_board_def.h (development\sigfox_cfg2\source)
+    MODULE_DEFAULT_SCENARIO_TYPE to MODULE_SCENARIO_MWC_DEMO

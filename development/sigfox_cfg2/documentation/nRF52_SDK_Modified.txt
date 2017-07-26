@@ -1,0 +1,22 @@
+1. micro_ecc library for DFU (ble firmware update)
+external\micro-ecc\nrf52_keil\armgcc\micro_ecc_lib_nrf52.lib
+external\micro-ecc\nrf52_keil\armgcc\LICENSE.txt
+
+2. nfc library for support gcc
+components\nfc\t2t_lib\libnfc_t2t_lib_gcc.a
+
+3. Fix setting area address
+components\libraries\fstorage\fstorage_internal_defs.h
+
+4. fix single bank mode for DFU
+components\libraries\bootloader\dfu\nrf_dfu_utils.c
+
+5. led blink for DFU
+components\libraries\bootloader\dfu\nrf_dfu.c
+components\ble\common\ble_conn_params.c
+
+6. DFU Connect bug fixes
+components\ble\ble_services\ble_dfu\ble_dfu.c
+
+7. ble TX power modify
+components\ble\ble_dtm\ble_dtm.h

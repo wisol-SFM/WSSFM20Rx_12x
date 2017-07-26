@@ -1,0 +1,227 @@
+\hypertarget{cfg__wifi__module_8h}{}\section{cfg\+\_\+wifi\+\_\+module.\+h File Reference}
+\label{cfg__wifi__module_8h}\index{cfg\+\_\+wifi\+\_\+module.\+h@{cfg\+\_\+wifi\+\_\+module.\+h}}
+
+
+control wifi module.  
+
+
+{\ttfamily \#include \char`\"{}cfg\+\_\+board\+\_\+def.\+h\char`\"{}}\newline
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a2d14d1a7e1294e2dce80ae79fec0eaef}\label{cfg__wifi__module_8h_a2d14d1a7e1294e2dce80ae79fec0eaef}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+Result\+\_\+\+OK}~(0)
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_ad56b7f1c2c1da306ce7ea0ae82615c18}\label{cfg__wifi__module_8h_ad56b7f1c2c1da306ce7ea0ae82615c18}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+Result\+\_\+\+Busy}~(-\/1)
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_aa463fb70dddaddeebf634bc2167a9279}\label{cfg__wifi__module_8h_aa463fb70dddaddeebf634bc2167a9279}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+Result\+\_\+\+No\+Device}~(-\/2)
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_ac0d85ae6fa7cfba271b106ab1d20de4e}\label{cfg__wifi__module_8h_ac0d85ae6fa7cfba271b106ab1d20de4e}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+Result\+\_\+\+Not\+Ready}~(-\/3)
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a550d3eaee3719674c3d840d98114fbae}\label{cfg__wifi__module_8h_a550d3eaee3719674c3d840d98114fbae}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+Result\+\_\+\+No\+Data}~(-\/4)
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a9837147efd5e33b5e5d49338168ea766}\label{cfg__wifi__module_8h_a9837147efd5e33b5e5d49338168ea766}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+Result\+\_\+\+Not\+Started}~(-\/5)
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a052f3a8959c2a3d1a4fbefeea36e0958}\label{cfg__wifi__module_8h_a052f3a8959c2a3d1a4fbefeea36e0958}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+Result\+\_\+\+Not\+Supported}~(-\/6)
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a9f8cc79d081298cff2d1b9b8dd92cffa}\label{cfg__wifi__module_8h_a9f8cc79d081298cff2d1b9b8dd92cffa}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+S\+P\+I\+\_\+\+B\+U\+F\+\_\+\+S\+I\+ZE}~80
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_aadac4b911a862aff56f04616bde275fb}\label{cfg__wifi__module_8h_aadac4b911a862aff56f04616bde275fb}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+A\+T\+\_\+\+C\+M\+D\+\_\+\+S\+I\+Z\+E\+\_\+\+M\+AX}~64
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_aa05e5f62164558f0ff3b8266d24f4ffe}\label{cfg__wifi__module_8h_aa05e5f62164558f0ff3b8266d24f4ffe}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+A\+T\+\_\+\+C\+M\+D\+\_\+\+R\+E\+S\+P\+\_\+\+P\+A\+C\+K\+E\+T\+\_\+\+M\+AX}~63
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a318a9226265ad5416ea7d5b32c63b086}\label{cfg__wifi__module_8h_a318a9226265ad5416ea7d5b32c63b086}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+B\+Y\+P\+A\+S\+S\+\_\+\+B\+U\+F\+\_\+\+S\+I\+ZE}~128
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a0e9604695ca6438a9d94f1ed3c115240}\label{cfg__wifi__module_8h_a0e9604695ca6438a9d94f1ed3c115240}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+B\+S\+S\+I\+D\+\_\+\+C\+NT}~2
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_aeb2b268db704b06141d37fd15609337e}\label{cfg__wifi__module_8h_aeb2b268db704b06141d37fd15609337e}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+B\+S\+S\+I\+D\+\_\+\+S\+I\+ZE}~6
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_abe98c6e8411cadede230c4f4c2a99c6d}\label{cfg__wifi__module_8h_abe98c6e8411cadede230c4f4c2a99c6d}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+S\+S\+I\+D\+\_\+\+H\+E\+A\+D\+E\+R\+\_\+\+S\+I\+Z\+E\+\_\+\+M\+AX}~16
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a73116fcfd4e7b613302c7d84eca866d6}\label{cfg__wifi__module_8h_a73116fcfd4e7b613302c7d84eca866d6}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+P\+R\+O\+C\+\_\+\+B\+O\+O\+T\+\_\+\+T\+I\+M\+E\+\_\+\+MS}~500
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a3bfacd5fdc6942e9df6f4e3bfa6a1ade}\label{cfg__wifi__module_8h_a3bfacd5fdc6942e9df6f4e3bfa6a1ade}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+P\+R\+O\+C\+\_\+\+R\+E\+Q\+\_\+\+T\+I\+M\+E\+\_\+\+MS}~10
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a8aec8294bfcf7f5840ab696cbc4e670f}\label{cfg__wifi__module_8h_a8aec8294bfcf7f5840ab696cbc4e670f}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+M\+O\+D\+U\+L\+E\+\_\+\+D\+E\+T\+E\+C\+T\+\_\+\+T\+I\+M\+E\+\_\+\+MS}~100
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_ac92fef8777bd719a44133c775d181c53}\label{cfg__wifi__module_8h_ac92fef8777bd719a44133c775d181c53}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+M\+O\+D\+U\+L\+E\+\_\+\+D\+E\+T\+E\+C\+T\+\_\+\+T\+I\+M\+E\+\_\+\+O\+U\+T\+\_\+\+T\+I\+CK}~5
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a16bab10d28af51161d3161c804e26f3e}\label{cfg__wifi__module_8h_a16bab10d28af51161d3161c804e26f3e}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+M\+O\+D\+U\+L\+E\+\_\+\+D\+E\+T\+E\+C\+T\+\_\+\+T\+R\+Y\+\_\+\+M\+AX}~3
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a1329da203090f6dcde5cb0ad4948d7aa}\label{cfg__wifi__module_8h_a1329da203090f6dcde5cb0ad4948d7aa}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+M\+O\+D\+U\+L\+E\+\_\+\+E\+N\+T\+E\+R\+\_\+\+S\+U\+S\+P\+E\+N\+D\+\_\+\+MS}~0
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a143bb566697a8507e7e07775e7b9774d}\label{cfg__wifi__module_8h_a143bb566697a8507e7e07775e7b9774d}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+S\+P\+I\+\_\+\+W\+A\+I\+T\+\_\+\+T\+I\+M\+E\+\_\+\+MS}~10
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a76596b76f2325e8597264f80ee8a8905}\label{cfg__wifi__module_8h_a76596b76f2325e8597264f80ee8a8905}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+S\+P\+I\+\_\+\+W\+A\+I\+T\+\_\+\+T\+I\+M\+E\+\_\+\+O\+U\+T\+\_\+\+T\+I\+CK}~20
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a251a5ab033eac4c11ee8893fc6392a8c}\label{cfg__wifi__module_8h_a251a5ab033eac4c11ee8893fc6392a8c}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+S\+P\+I\+\_\+\+I\+S\+R\+\_\+\+C\+L\+E\+A\+R\+\_\+\+W\+A\+I\+T\+\_\+\+T\+I\+M\+E\+O\+U\+T\+\_\+\+T\+I\+CK}~3
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_aeabfee0a8800f9a0c9dec4e0dbfc1aba}\label{cfg__wifi__module_8h_aeabfee0a8800f9a0c9dec4e0dbfc1aba}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+S\+P\+I\+\_\+\+I\+N\+T\+E\+R\+R\+U\+P\+T\+\_\+\+C\+L\+E\+A\+R\+\_\+\+W\+A\+I\+T\+\_\+\+T\+I\+M\+E\+\_\+\+MS}~20
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a07f4a3554f6aed54c99e744b07ea1f65}\label{cfg__wifi__module_8h_a07f4a3554f6aed54c99e744b07ea1f65}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+S\+P\+I\+\_\+\+C\+M\+D\+\_\+\+R\+E\+S\+P\+\_\+\+T\+I\+M\+E\+\_\+\+O\+U\+T\+\_\+\+T\+I\+C\+K\+\_\+\+L\+O\+NG}~100
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a4dbd30880505b0cdb3e33d19897ecd54}\label{cfg__wifi__module_8h_a4dbd30880505b0cdb3e33d19897ecd54}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+S\+P\+I\+\_\+\+C\+M\+D\+\_\+\+R\+E\+S\+P\+\_\+\+W\+A\+I\+T\+\_\+\+T\+I\+M\+E\+\_\+\+M\+S\+\_\+\+L\+O\+NG}~100
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a37b6d0090717d82f9401549193632694}\label{cfg__wifi__module_8h_a37b6d0090717d82f9401549193632694}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+S\+P\+I\+\_\+\+C\+M\+D\+\_\+\+R\+E\+S\+P\+\_\+\+T\+I\+M\+E\+\_\+\+O\+U\+T\+\_\+\+T\+I\+CK}~10
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a8e65af5aaca7cd5ff74131ffea695df7}\label{cfg__wifi__module_8h_a8e65af5aaca7cd5ff74131ffea695df7}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+S\+P\+I\+\_\+\+C\+M\+D\+\_\+\+R\+E\+S\+P\+\_\+\+W\+A\+I\+T\+\_\+\+T\+I\+M\+E\+\_\+\+MS}~20
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_ae9647906a9b942cacc513430d33e8f34}\label{cfg__wifi__module_8h_ae9647906a9b942cacc513430d33e8f34}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+A\+T\+\_\+\+C\+M\+D\+\_\+\+R\+E\+T\+R\+Y\+\_\+\+T\+I\+M\+E\+\_\+\+MS}~2000
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a88cedd78f9d9cb8fe3ba8af228acfe32}\label{cfg__wifi__module_8h_a88cedd78f9d9cb8fe3ba8af228acfe32}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+B\+Y\+P\+A\+S\+S\+\_\+\+W\+A\+I\+T\+\_\+\+T\+I\+M\+E\+\_\+\+MS}~100
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a73115b6b0cf7e6ee0a88078b39daced9}\label{cfg__wifi__module_8h_a73115b6b0cf7e6ee0a88078b39daced9}} 
+void \hyperlink{cfg__wifi__module_8h_a73115b6b0cf7e6ee0a88078b39daced9}{c\+Wifi\+\_\+resource\+\_\+init} (void)
+\begin{DoxyCompactList}\small\item\em Function for initializing resource of wifi module. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_adde9071e480beab6fe9a84613d4e916c}\label{cfg__wifi__module_8h_adde9071e480beab6fe9a84613d4e916c}} 
+void \hyperlink{cfg__wifi__module_8h_adde9071e480beab6fe9a84613d4e916c}{c\+Wifi\+\_\+prepare\+\_\+start} (void)
+\begin{DoxyCompactList}\small\item\em Function for prepare wifi module. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_af559c6b66a6d942a1b68ebf3477ad550}\label{cfg__wifi__module_8h_af559c6b66a6d942a1b68ebf3477ad550}} 
+void \hyperlink{cfg__wifi__module_8h_af559c6b66a6d942a1b68ebf3477ad550}{c\+Wifi\+\_\+enter\+\_\+download\+\_\+mode} (void)
+\begin{DoxyCompactList}\small\item\em Function for entering wifi download mode. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_aa99b0af930f497ec47af74d5c0431e00}\label{cfg__wifi__module_8h_aa99b0af930f497ec47af74d5c0431e00}} 
+void \hyperlink{cfg__wifi__module_8h_aa99b0af930f497ec47af74d5c0431e00}{c\+Wifi\+\_\+power\+\_\+control} (bool on)
+\begin{DoxyCompactList}\small\item\em Function for power control wifi module. \end{DoxyCompactList}\item 
+int \hyperlink{cfg__wifi__module_8h_a0a54cf5f44f71de1f4d30e56e23e3db5}{c\+Wifi\+\_\+ap\+\_\+scan\+\_\+req} (void)
+\begin{DoxyCompactList}\small\item\em Function for request scan work. \end{DoxyCompactList}\item 
+int \hyperlink{cfg__wifi__module_8h_aa916b69d72500a378f4a4540809b022b}{c\+Wifi\+\_\+ap\+\_\+get\+\_\+available\+\_\+first\+\_\+\+B\+S\+S\+ID} (char $\ast$p\+\_\+\+S\+S\+I\+D\+\_\+header\+\_\+str)
+\begin{DoxyCompactList}\small\item\em Function for request scan work. \end{DoxyCompactList}\item 
+int \hyperlink{cfg__wifi__module_8h_a5aae2805c5b145c42515b8a0e5da9e24}{c\+Wifi\+\_\+bypass\+\_\+req} (void)
+\begin{DoxyCompactList}\small\item\em Function for bypass mode (for i2c slavle control). \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a6892fa9da23eedfaf52a4393efbcf368}\label{cfg__wifi__module_8h_a6892fa9da23eedfaf52a4393efbcf368}} 
+void \hyperlink{cfg__wifi__module_8h_a6892fa9da23eedfaf52a4393efbcf368}{c\+Wifi\+\_\+abort\+\_\+req} (void)
+\begin{DoxyCompactList}\small\item\em Function for aborting wifi module. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a9f77532f239c7b986b6e14e2071cf2e7}\label{cfg__wifi__module_8h_a9f77532f239c7b986b6e14e2071cf2e7}} 
+bool \hyperlink{cfg__wifi__module_8h_a9f77532f239c7b986b6e14e2071cf2e7}{c\+Wifi\+\_\+bus\+\_\+busy\+\_\+check} (void)
+\begin{DoxyCompactList}\small\item\em Function for status check (bus use check) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a6fcda0e743594f4c7ff2be79e3cd402d}\label{cfg__wifi__module_8h_a6fcda0e743594f4c7ff2be79e3cd402d}} 
+bool \hyperlink{cfg__wifi__module_8h_a6fcda0e743594f4c7ff2be79e3cd402d}{c\+Wifi\+\_\+is\+\_\+scan\+\_\+state} (void)
+\begin{DoxyCompactList}\small\item\em Function for status check (scaning state check) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a56f277add2719ccae5a52555ae335267}\label{cfg__wifi__module_8h_a56f277add2719ccae5a52555ae335267}} 
+bool \hyperlink{cfg__wifi__module_8h_a56f277add2719ccae5a52555ae335267}{c\+Wifi\+\_\+is\+\_\+bypass\+\_\+state} (void)
+\begin{DoxyCompactList}\small\item\em Function for status check (woring bypass mode) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_af9696f0c8736ff0f73b946c9e065adfd}\label{cfg__wifi__module_8h_af9696f0c8736ff0f73b946c9e065adfd}} 
+bool \hyperlink{cfg__wifi__module_8h_af9696f0c8736ff0f73b946c9e065adfd}{c\+Wifi\+\_\+is\+\_\+detected} (void)
+\begin{DoxyCompactList}\small\item\em Function for status check (available check) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__wifi__module_8h_a9d94209825d5787a3a61ad7c0cfa28e4}\label{cfg__wifi__module_8h_a9d94209825d5787a3a61ad7c0cfa28e4}} 
+bool {\bfseries c\+Wifi\+\_\+is\+\_\+busy} (void)
+\item 
+int \hyperlink{cfg__wifi__module_8h_a40cc7dfbcda5972d28c476b56e99f533}{c\+Wifi\+\_\+get\+\_\+\+B\+S\+S\+I\+Ds\+\_\+buf\+Ptr} (uint8\+\_\+t $\ast$$\ast$bssid)
+\begin{DoxyCompactList}\small\item\em Function for getting scan result. \end{DoxyCompactList}\item 
+bool \hyperlink{cfg__wifi__module_8h_a591fd31a826fe445ca19e7e9dc64d6a6}{c\+Wifi\+\_\+\+B\+S\+S\+I\+D\+\_\+null\+\_\+check} (void)
+\begin{DoxyCompactList}\small\item\em Function for getting scan result (empty check). \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+control wifi module. 
+
+This file contains the control wifi module. 
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{cfg__wifi__module_8h_aa916b69d72500a378f4a4540809b022b}\label{cfg__wifi__module_8h_aa916b69d72500a378f4a4540809b022b}} 
+\index{cfg\+\_\+wifi\+\_\+module.\+h@{cfg\+\_\+wifi\+\_\+module.\+h}!c\+Wifi\+\_\+ap\+\_\+get\+\_\+available\+\_\+first\+\_\+\+B\+S\+S\+ID@{c\+Wifi\+\_\+ap\+\_\+get\+\_\+available\+\_\+first\+\_\+\+B\+S\+S\+ID}}
+\index{c\+Wifi\+\_\+ap\+\_\+get\+\_\+available\+\_\+first\+\_\+\+B\+S\+S\+ID@{c\+Wifi\+\_\+ap\+\_\+get\+\_\+available\+\_\+first\+\_\+\+B\+S\+S\+ID}!cfg\+\_\+wifi\+\_\+module.\+h@{cfg\+\_\+wifi\+\_\+module.\+h}}
+\subsubsection{\texorpdfstring{c\+Wifi\+\_\+ap\+\_\+get\+\_\+available\+\_\+first\+\_\+\+B\+S\+S\+I\+D()}{cWifi\_ap\_get\_available\_first\_BSSID()}}
+{\footnotesize\ttfamily int c\+Wifi\+\_\+ap\+\_\+get\+\_\+available\+\_\+first\+\_\+\+B\+S\+S\+ID (\begin{DoxyParamCaption}\item[{char $\ast$}]{p\+\_\+\+S\+S\+I\+D\+\_\+header\+\_\+str }\end{DoxyParamCaption})}
+
+
+
+Function for request scan work. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em p\+\_\+\+S\+S\+I\+D\+\_\+header\+\_\+str} & pointer of S\+S\+ID Head String (for S\+S\+ID Filter) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+C\+W\+I\+F\+I\+\_\+\+Result\+\_\+\+OK on success. Otherwise an error code(eg.\+C\+W\+I\+F\+I\+\_\+\+Result\+\_\+\+Busy). 
+\end{DoxyReturn}
+\mbox{\Hypertarget{cfg__wifi__module_8h_a0a54cf5f44f71de1f4d30e56e23e3db5}\label{cfg__wifi__module_8h_a0a54cf5f44f71de1f4d30e56e23e3db5}} 
+\index{cfg\+\_\+wifi\+\_\+module.\+h@{cfg\+\_\+wifi\+\_\+module.\+h}!c\+Wifi\+\_\+ap\+\_\+scan\+\_\+req@{c\+Wifi\+\_\+ap\+\_\+scan\+\_\+req}}
+\index{c\+Wifi\+\_\+ap\+\_\+scan\+\_\+req@{c\+Wifi\+\_\+ap\+\_\+scan\+\_\+req}!cfg\+\_\+wifi\+\_\+module.\+h@{cfg\+\_\+wifi\+\_\+module.\+h}}
+\subsubsection{\texorpdfstring{c\+Wifi\+\_\+ap\+\_\+scan\+\_\+req()}{cWifi\_ap\_scan\_req()}}
+{\footnotesize\ttfamily int c\+Wifi\+\_\+ap\+\_\+scan\+\_\+req (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Function for request scan work. 
+
+\begin{DoxyReturn}{Returns}
+C\+W\+I\+F\+I\+\_\+\+Result\+\_\+\+OK on success. Otherwise an error code(eg.\+C\+W\+I\+F\+I\+\_\+\+Result\+\_\+\+Busy). 
+\end{DoxyReturn}
+\mbox{\Hypertarget{cfg__wifi__module_8h_a591fd31a826fe445ca19e7e9dc64d6a6}\label{cfg__wifi__module_8h_a591fd31a826fe445ca19e7e9dc64d6a6}} 
+\index{cfg\+\_\+wifi\+\_\+module.\+h@{cfg\+\_\+wifi\+\_\+module.\+h}!c\+Wifi\+\_\+\+B\+S\+S\+I\+D\+\_\+null\+\_\+check@{c\+Wifi\+\_\+\+B\+S\+S\+I\+D\+\_\+null\+\_\+check}}
+\index{c\+Wifi\+\_\+\+B\+S\+S\+I\+D\+\_\+null\+\_\+check@{c\+Wifi\+\_\+\+B\+S\+S\+I\+D\+\_\+null\+\_\+check}!cfg\+\_\+wifi\+\_\+module.\+h@{cfg\+\_\+wifi\+\_\+module.\+h}}
+\subsubsection{\texorpdfstring{c\+Wifi\+\_\+\+B\+S\+S\+I\+D\+\_\+null\+\_\+check()}{cWifi\_BSSID\_null\_check()}}
+{\footnotesize\ttfamily bool c\+Wifi\+\_\+\+B\+S\+S\+I\+D\+\_\+null\+\_\+check (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Function for getting scan result (empty check). 
+
+\begin{DoxyReturn}{Returns}
+true \+: scan result is empty. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{cfg__wifi__module_8h_a5aae2805c5b145c42515b8a0e5da9e24}\label{cfg__wifi__module_8h_a5aae2805c5b145c42515b8a0e5da9e24}} 
+\index{cfg\+\_\+wifi\+\_\+module.\+h@{cfg\+\_\+wifi\+\_\+module.\+h}!c\+Wifi\+\_\+bypass\+\_\+req@{c\+Wifi\+\_\+bypass\+\_\+req}}
+\index{c\+Wifi\+\_\+bypass\+\_\+req@{c\+Wifi\+\_\+bypass\+\_\+req}!cfg\+\_\+wifi\+\_\+module.\+h@{cfg\+\_\+wifi\+\_\+module.\+h}}
+\subsubsection{\texorpdfstring{c\+Wifi\+\_\+bypass\+\_\+req()}{cWifi\_bypass\_req()}}
+{\footnotesize\ttfamily int c\+Wifi\+\_\+bypass\+\_\+req (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Function for bypass mode (for i2c slavle control). 
+
+\begin{DoxyReturn}{Returns}
+C\+W\+I\+F\+I\+\_\+\+Result\+\_\+\+OK on success. Otherwise an error code(eg.\+C\+W\+I\+F\+I\+\_\+\+Result\+\_\+\+Busy). 
+\end{DoxyReturn}
+\mbox{\Hypertarget{cfg__wifi__module_8h_a40cc7dfbcda5972d28c476b56e99f533}\label{cfg__wifi__module_8h_a40cc7dfbcda5972d28c476b56e99f533}} 
+\index{cfg\+\_\+wifi\+\_\+module.\+h@{cfg\+\_\+wifi\+\_\+module.\+h}!c\+Wifi\+\_\+get\+\_\+\+B\+S\+S\+I\+Ds\+\_\+buf\+Ptr@{c\+Wifi\+\_\+get\+\_\+\+B\+S\+S\+I\+Ds\+\_\+buf\+Ptr}}
+\index{c\+Wifi\+\_\+get\+\_\+\+B\+S\+S\+I\+Ds\+\_\+buf\+Ptr@{c\+Wifi\+\_\+get\+\_\+\+B\+S\+S\+I\+Ds\+\_\+buf\+Ptr}!cfg\+\_\+wifi\+\_\+module.\+h@{cfg\+\_\+wifi\+\_\+module.\+h}}
+\subsubsection{\texorpdfstring{c\+Wifi\+\_\+get\+\_\+\+B\+S\+S\+I\+Ds\+\_\+buf\+Ptr()}{cWifi\_get\_BSSIDs\_bufPtr()}}
+{\footnotesize\ttfamily int c\+Wifi\+\_\+get\+\_\+\+B\+S\+S\+I\+Ds\+\_\+buf\+Ptr (\begin{DoxyParamCaption}\item[{uint8\+\_\+t $\ast$$\ast$}]{bssid }\end{DoxyParamCaption})}
+
+
+
+Function for getting scan result. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em bssid} & pointer of getting bssid\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+C\+W\+I\+F\+I\+\_\+\+Result\+\_\+\+OK on success. Otherwise an error code(eg.\+C\+W\+I\+F\+I\+\_\+\+Result\+\_\+\+No\+Data). 
+\end{DoxyReturn}

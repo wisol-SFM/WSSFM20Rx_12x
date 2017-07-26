@@ -1,0 +1,47 @@
+1. download
+  . download tool
+    development\sigfox_cfg2\tools\wifi_flash_download_tools_V3.4.5.zip
+      ESP8285 DownloadTool
+
+  . download binary
+    working bin:
+      development\sigfox_cfg2\tools\wifi_bin_SPI_AT.zip
+        esp_init_data_default.bin : 0xfc000
+        blank.bin : 0xfe000
+        boot_v1.6.bin : 0x0000
+        user1.1024.LED_GPIO4 : 0x1000 -> application binary
+    test bin (uart working, baudrate 115200) -> use m_module_parameter.wifi_testmode_enable true (ref #define TEST_FEATURE_CDEV_WIFI_TEST_MODE)
+      development\sigfox_cfg2\tools\wifi_bin_AT_Command.zip
+        esp_init_data_default.bin : 0xfc000
+        blank.bin : 0xfe000
+        boot_v1.6.bin : 0x0000
+        at\512+512\user1.1024.new.2.bin : 0x1000 -> application binary
+    rf test bin:
+      development\sigfox_cfg2\tools\wifi_bin_RF_TEST_EN.zip
+        ESP8266_RF_TEST_v2.0_26M_20160401.bin : 0x0000
+
+  . wifi download mode
+    wifi dl pin to low
+  
+  . wifi bypass mode
+    use host control interface(i2c slave. eg gui tool)
+
+  . wifi test mode
+    setting method
+      method 1
+        #define TEST_FEATURE_CDEV_WIFI_TEST_MODE -> enable and #define CDEV_FS_VER value up
+      method 2
+        config value stting by host control interface(i2c slave. eg gui tool)
+          send <SC>0C040B00000001 -> enable. (disable command : <SC>0C040B00000000)
+            * read value <SC>04050B
+          
+2. tools
+  . download tool
+    development\sigfox_cfg2\tools\wifi_flash_download_tools_V3.4.5.zip
+  . factory test tool
+    development\sigfox_cfg2\tools\wifi_ESP8266_FACTORY_TEST_TOOL_V5.2.4_NORMAL.zip
+
+3. binary
+  1. working bin : wifi_bin_SPI_AT.zip
+  2. RF Test bin : wifi_bin_RF_TEST_EN.zip
+  3. at command using uart : wifi_bin_AT_Command.zip

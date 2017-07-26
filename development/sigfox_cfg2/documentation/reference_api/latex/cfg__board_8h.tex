@@ -1,0 +1,356 @@
+\hypertarget{cfg__board_8h}{}\section{cfg\+\_\+board.\+h File Reference}
+\label{cfg__board_8h}\index{cfg\+\_\+board.\+h@{cfg\+\_\+board.\+h}}
+
+
+control board device control.  
+
+
+{\ttfamily \#include \char`\"{}cfg\+\_\+board\+\_\+def.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}nrf\+\_\+drv\+\_\+spi.\+h\char`\"{}}\newline
+\subsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structmodule__parameter__t}{module\+\_\+parameter\+\_\+t}
+\begin{DoxyCompactList}\small\item\em setting items \end{DoxyCompactList}\item 
+struct \hyperlink{structnus__service__parameter__t}{nus\+\_\+service\+\_\+parameter\+\_\+t}
+\item 
+struct \hyperlink{structmodule__peripheral__data__t}{module\+\_\+peripheral\+\_\+data\+\_\+t}
+\item 
+struct \hyperlink{structmodule__peripheral___i_d__t}{module\+\_\+peripheral\+\_\+\+I\+D\+\_\+t}
+\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a52878938258a25808d47c323646a35af}\label{cfg__board_8h_a52878938258a25808d47c323646a35af}} 
+\#define {\bfseries M\+O\+D\+U\+L\+E\+\_\+\+P\+A\+R\+A\+M\+E\+T\+E\+R\+\_\+\+M\+A\+G\+I\+C\+\_\+\+T\+OP}~(0x\+A55\+A0000 $\vert$ C\+D\+E\+V\+\_\+\+F\+S\+\_\+\+V\+E\+R)
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a55fd1485ea9a7b9acd34986c4458e5b6}\label{cfg__board_8h_a55fd1485ea9a7b9acd34986c4458e5b6}} 
+\#define {\bfseries M\+O\+D\+U\+L\+E\+\_\+\+P\+A\+R\+A\+M\+E\+T\+E\+R\+\_\+\+M\+A\+G\+I\+C\+\_\+\+B\+O\+T\+T\+OM}~(0x\+A55\+A\+A\+B\+C\+D)
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a6a35f7dc06304e68ba698e2d4d891914}\label{cfg__board_8h_a6a35f7dc06304e68ba698e2d4d891914}} 
+\#define {\bfseries M\+A\+I\+N\+\_\+\+I\+D\+L\+E\+\_\+\+T\+I\+M\+E\+\_\+\+D\+E\+F\+A\+U\+LT}~600
+\item 
+\mbox{\Hypertarget{cfg__board_8h_ae83a2d1d1910ea795f4b612a56743ce9}\label{cfg__board_8h_ae83a2d1d1910ea795f4b612a56743ce9}} 
+\#define {\bfseries B\+E\+A\+C\+O\+N\+\_\+\+I\+N\+T\+E\+R\+V\+A\+L\+\_\+\+T\+I\+M\+E\+\_\+\+D\+E\+F\+A\+U\+LT}~64
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a69269318129d561d4f2aa84383fb9cee}\label{cfg__board_8h_a69269318129d561d4f2aa84383fb9cee}} 
+\#define {\bfseries M\+A\+I\+N\+\_\+\+B\+O\+O\+T\+\_\+\+I\+D\+L\+E\+\_\+\+T\+I\+M\+E\+\_\+\+D\+E\+F\+A\+U\+LT}~30
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a425f2105f829b706759aaafa5910a60a}\label{cfg__board_8h_a425f2105f829b706759aaafa5910a60a}} 
+\#define {\bfseries N\+U\+S\+\_\+\+I\+N\+T\+E\+R\+V\+A\+L\+\_\+\+T\+I\+M\+E\+\_\+\+D\+E\+F\+A\+U\+LT}~5
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a8f10fcc5977cc9873de0fefac9a5ae57}\label{cfg__board_8h_a8f10fcc5977cc9873de0fefac9a5ae57}} 
+\#define {\bfseries S\+T\+A\+R\+T\+\_\+\+W\+A\+I\+T\+\_\+\+T\+I\+M\+E\+\_\+\+F\+O\+R\+\_\+\+B\+O\+A\+R\+D\+\_\+\+C\+O\+N\+T\+R\+O\+L\+\_\+\+A\+T\+T\+A\+C\+H\+\_\+\+S\+EC}~2
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a697e1e9586ceae5e3ffe7018f641c346}\label{cfg__board_8h_a697e1e9586ceae5e3ffe7018f641c346}} 
+\#define {\bfseries S\+T\+A\+R\+T\+\_\+\+W\+A\+I\+T\+\_\+\+T\+I\+M\+E\+\_\+\+F\+O\+R\+\_\+\+C\+T\+R\+L\+\_\+\+M\+O\+D\+E\+\_\+\+C\+H\+A\+N\+G\+E\+\_\+\+S\+EC}~10
+\item 
+\mbox{\Hypertarget{cfg__board_8h_ae5006e1385d701ea5e18d5f5b967e82d}\label{cfg__board_8h_ae5006e1385d701ea5e18d5f5b967e82d}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+S\+E\+C\+\_\+\+R\+E\+T\+R\+Y\+\_\+\+T\+I\+M\+E\+O\+U\+T\+\_\+\+S\+E\+C\+\_\+\+D\+E\+F\+A\+U\+LT}~10
+\item 
+\mbox{\Hypertarget{cfg__board_8h_af522895723fca0be0226ba70ba9c4059}\label{cfg__board_8h_af522895723fca0be0226ba70ba9c4059}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+S\+E\+C\+\_\+\+R\+E\+T\+R\+Y\+\_\+\+T\+I\+M\+E\+O\+U\+T\+\_\+\+S\+E\+C\+\_\+\+M\+IN}~1
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a693bd5ba4b2f8059a029b17c399cbc7f}\label{cfg__board_8h_a693bd5ba4b2f8059a029b17c399cbc7f}} 
+\#define {\bfseries C\+W\+I\+F\+I\+\_\+\+S\+E\+C\+\_\+\+R\+E\+T\+R\+Y\+\_\+\+T\+I\+M\+E\+O\+U\+T\+\_\+\+S\+E\+C\+\_\+\+M\+AX}~60
+\item 
+\mbox{\Hypertarget{cfg__board_8h_ab42d3997706cd9e393c40ec92aefe3c3}\label{cfg__board_8h_ab42d3997706cd9e393c40ec92aefe3c3}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+A\+C\+Q\+U\+I\+R\+E\+\_\+\+T\+R\+A\+C\+K\+I\+N\+G\+\_\+\+T\+I\+M\+E\+\_\+\+S\+EC}~90
+\item 
+\mbox{\Hypertarget{cfg__board_8h_ae23c12a969b5062989fbbf39fef82158}\label{cfg__board_8h_ae23c12a969b5062989fbbf39fef82158}} 
+\#define {\bfseries M\+A\+I\+N\+\_\+\+S\+C\+E\+N\+A\+R\+I\+O\+\_\+\+M\+O\+D\+E\+\_\+\+D\+E\+F\+A\+U\+LT}~M\+O\+D\+U\+L\+E\+\_\+\+D\+E\+F\+A\+U\+L\+T\+\_\+\+S\+C\+E\+N\+A\+R\+I\+O\+\_\+\+T\+Y\+PE
+\item 
+\mbox{\Hypertarget{cfg__board_8h_aca9d1fee7020ae7276cc41c451b8de7c}\label{cfg__board_8h_aca9d1fee7020ae7276cc41c451b8de7c}} 
+\#define {\bfseries M\+A\+I\+N\+\_\+\+B\+O\+O\+T\+\_\+\+N\+F\+C\+\_\+\+U\+N\+L\+O\+C\+K\+\_\+\+D\+E\+F\+A\+U\+LT}~true
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a64a8948cfddda973e4a49f2dfce0fc87}\label{cfg__board_8h_a64a8948cfddda973e4a49f2dfce0fc87}} 
+\#define {\bfseries M\+A\+I\+N\+\_\+\+F\+O\+T\+A\+\_\+\+E\+N\+A\+B\+L\+E\+\_\+\+D\+E\+F\+A\+U\+LT}~true
+\item 
+\mbox{\Hypertarget{cfg__board_8h_aa055376e4cb4ae6ad5af3335779a9dd2}\label{cfg__board_8h_aa055376e4cb4ae6ad5af3335779a9dd2}} 
+\#define {\bfseries M\+A\+I\+N\+\_\+\+M\+A\+G\+N\+E\+T\+I\+C\+\_\+\+G\+P\+I\+O\+\_\+\+E\+N\+A\+B\+L\+E\+\_\+\+D\+E\+F\+A\+U\+LT}~true
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a6d5c5c2e9259b9923c1bb60848e6e542}\label{cfg__board_8h_a6d5c5c2e9259b9923c1bb60848e6e542}} 
+\#define {\bfseries M\+A\+I\+N\+\_\+\+W\+K\+U\+P\+\_\+\+G\+P\+I\+O\+\_\+\+E\+N\+A\+B\+L\+E\+\_\+\+D\+E\+F\+A\+U\+LT}~2
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a45847efee14cb44453c8c22015fb2a8a}\label{cfg__board_8h_a45847efee14cb44453c8c22015fb2a8a}} 
+\#define {\bfseries M\+A\+I\+N\+\_\+\+W\+I\+F\+I\+\_\+\+T\+E\+S\+T\+M\+O\+D\+E\+\_\+\+E\+N\+A\+B\+L\+E\+\_\+\+D\+E\+F\+A\+U\+LT}~false
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a87250482d4fc51a70aa2472531693dff}\label{cfg__board_8h_a87250482d4fc51a70aa2472531693dff}} 
+\#define {\bfseries M\+A\+I\+N\+\_\+\+S\+I\+G\+F\+O\+X\+\_\+\+S\+N\+E\+K\+\_\+\+T\+E\+S\+T\+M\+O\+D\+E\+\_\+\+E\+N\+A\+B\+L\+E\+\_\+\+D\+E\+F\+A\+U\+LT}~false
+\item 
+\mbox{\Hypertarget{cfg__board_8h_aca9d1fee7020ae7276cc41c451b8de7c}\label{cfg__board_8h_aca9d1fee7020ae7276cc41c451b8de7c}} 
+\#define {\bfseries M\+A\+I\+N\+\_\+\+B\+O\+O\+T\+\_\+\+N\+F\+C\+\_\+\+U\+N\+L\+O\+C\+K\+\_\+\+D\+E\+F\+A\+U\+LT}~false
+\item 
+\mbox{\Hypertarget{cfg__board_8h_aa055376e4cb4ae6ad5af3335779a9dd2}\label{cfg__board_8h_aa055376e4cb4ae6ad5af3335779a9dd2}} 
+\#define {\bfseries M\+A\+I\+N\+\_\+\+M\+A\+G\+N\+E\+T\+I\+C\+\_\+\+G\+P\+I\+O\+\_\+\+E\+N\+A\+B\+L\+E\+\_\+\+D\+E\+F\+A\+U\+LT}~false
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a6d5c5c2e9259b9923c1bb60848e6e542}\label{cfg__board_8h_a6d5c5c2e9259b9923c1bb60848e6e542}} 
+\#define {\bfseries M\+A\+I\+N\+\_\+\+W\+K\+U\+P\+\_\+\+G\+P\+I\+O\+\_\+\+E\+N\+A\+B\+L\+E\+\_\+\+D\+E\+F\+A\+U\+LT}~false
+\item 
+\mbox{\Hypertarget{cfg__board_8h_ae83a2d1d1910ea795f4b612a56743ce9}\label{cfg__board_8h_ae83a2d1d1910ea795f4b612a56743ce9}} 
+\#define {\bfseries B\+E\+A\+C\+O\+N\+\_\+\+I\+N\+T\+E\+R\+V\+A\+L\+\_\+\+T\+I\+M\+E\+\_\+\+D\+E\+F\+A\+U\+LT}~1000
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a6a35f7dc06304e68ba698e2d4d891914}\label{cfg__board_8h_a6a35f7dc06304e68ba698e2d4d891914}} 
+\#define {\bfseries M\+A\+I\+N\+\_\+\+I\+D\+L\+E\+\_\+\+T\+I\+M\+E\+\_\+\+D\+E\+F\+A\+U\+LT}~10
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a87250482d4fc51a70aa2472531693dff}\label{cfg__board_8h_a87250482d4fc51a70aa2472531693dff}} 
+\#define {\bfseries M\+A\+I\+N\+\_\+\+S\+I\+G\+F\+O\+X\+\_\+\+S\+N\+E\+K\+\_\+\+T\+E\+S\+T\+M\+O\+D\+E\+\_\+\+E\+N\+A\+B\+L\+E\+\_\+\+D\+E\+F\+A\+U\+LT}~true
+\end{DoxyCompactItemize}
+\subsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{cfg__board_8h_aacb19461d771792a47715d7bab53780c}\label{cfg__board_8h_aacb19461d771792a47715d7bab53780c}} 
+enum \hyperlink{cfg__board_8h_aacb19461d771792a47715d7bab53780c}{module\+\_\+parameter\+\_\+item\+\_\+e} \{ \newline
+{\bfseries module\+\_\+parameter\+\_\+item\+\_\+idle\+\_\+time} = 0, 
+{\bfseries module\+\_\+parameter\+\_\+item\+\_\+beacon\+\_\+interval} = 1, 
+{\bfseries module\+\_\+parameter\+\_\+item\+\_\+wifi\+\_\+scan\+\_\+retry\+\_\+time\+\_\+sec} = 2, 
+{\bfseries module\+\_\+parameter\+\_\+item\+\_\+start\+\_\+wait\+\_\+time\+\_\+for\+\_\+board\+\_\+control\+\_\+attach\+\_\+sec} = 3, 
+\newline
+{\bfseries module\+\_\+parameter\+\_\+item\+\_\+start\+\_\+wait\+\_\+time\+\_\+for\+\_\+ctrl\+\_\+mode\+\_\+change\+\_\+sec} = 4, 
+{\bfseries module\+\_\+parameter\+\_\+item\+\_\+gps\+\_\+tracking\+\_\+time\+\_\+sec} = 5, 
+{\bfseries module\+\_\+parameter\+\_\+item\+\_\+boot\+\_\+nfc\+\_\+unlock} = 6, 
+{\bfseries module\+\_\+parameter\+\_\+item\+\_\+fota\+\_\+enable} = 7, 
+\newline
+{\bfseries module\+\_\+parameter\+\_\+item\+\_\+scenario\+\_\+mode} = 8, 
+{\bfseries module\+\_\+parameter\+\_\+item\+\_\+magnetic\+\_\+gpio\+\_\+enable} = 9, 
+{\bfseries module\+\_\+parameter\+\_\+item\+\_\+wkup\+\_\+gpio\+\_\+enable} = 10, 
+{\bfseries module\+\_\+parameter\+\_\+item\+\_\+wifi\+\_\+testmode\+\_\+enable} = 11, 
+\newline
+{\bfseries module\+\_\+parameter\+\_\+item\+\_\+snek\+\_\+testmode\+\_\+enable} = 12, 
+{\bfseries module\+\_\+parameter\+\_\+item\+\_\+max}
+ \}\begin{DoxyCompactList}\small\item\em Enumerator used for setting items. \end{DoxyCompactList}
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a3bc9de6426792782f21cbd058bdab105}\label{cfg__board_8h_a3bc9de6426792782f21cbd058bdab105}} 
+enum {\bfseries module\+\_\+comm\+\_\+pwr\+\_\+resource\+\_\+e} \{ \newline
+{\bfseries module\+\_\+comm\+\_\+pwr\+\_\+common}, 
+{\bfseries module\+\_\+comm\+\_\+pwr\+\_\+sigfox}, 
+{\bfseries module\+\_\+comm\+\_\+pwr\+\_\+gps}, 
+{\bfseries module\+\_\+comm\+\_\+pwr\+\_\+wifi}, 
+\newline
+{\bfseries module\+\_\+comm\+\_\+pwr\+\_\+max}
+ \}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{cfg__board_8h_a3166c24802ddbc01a34b36fc11bc5063}{cfg\+\_\+bin\+\_\+2\+\_\+hexadecimal} (const uint8\+\_\+t $\ast$p\+Bin, int bin\+Size, char $\ast$p\+Hexadecimal)
+\begin{DoxyCompactList}\small\item\em Function for binary to hexadecimal. \end{DoxyCompactList}\item 
+uint32\+\_\+t \hyperlink{cfg__board_8h_a14a6023187612e78a4257e1384332c84}{cfg\+\_\+hexadecimal\+\_\+2\+\_\+uint\+\_\+val\+\_\+big} (const char $\ast$p\+Hexadecimal, int len)
+\begin{DoxyCompactList}\small\item\em Function for hexadecimal (big endian) to integer. \end{DoxyCompactList}\item 
+void \hyperlink{cfg__board_8h_ac3508e2e09359548b7f161ae9ec41869}{cfg\+\_\+hexadecimal\+\_\+2\+\_\+bin} (const char $\ast$p\+Hexadecimal, int Hexadeccoimal\+Byte\+Cnt, uint8\+\_\+t $\ast$p\+Bin)
+\begin{DoxyCompactList}\small\item\em Function for binary to hexadecimal. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__board_8h_aabbd4937130e9b6191f306eecd01e164}\label{cfg__board_8h_aabbd4937130e9b6191f306eecd01e164}} 
+bool {\bfseries main\+\_\+work\+\_\+mode\+\_\+change\+\_\+request} (cfg\+\_\+board\+\_\+work\+\_\+mode\+\_\+e mode)
+\item 
+bool \hyperlink{cfg__board_8h_a0897e4605a1823983062a222041aa966}{main\+\_\+check\+\_\+ctrl\+\_\+mode\+\_\+allowed\+\_\+state} (void)
+\begin{DoxyCompactList}\small\item\em Function for checking for entering the scenario mode into the test mode. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__board_8h_a803c547e70b098e7bfaed2712545b7ec}\label{cfg__board_8h_a803c547e70b098e7bfaed2712545b7ec}} 
+cfg\+\_\+board\+\_\+work\+\_\+mode\+\_\+e {\bfseries main\+\_\+work\+\_\+mode\+\_\+get\+\_\+cur} (void)
+\item 
+unsigned int \hyperlink{cfg__board_8h_acd18bf3a2bd8be0dcacf39ce4c489e0b}{main\+\_\+get\+\_\+param\+\_\+val} (\hyperlink{cfg__board_8h_aacb19461d771792a47715d7bab53780c}{module\+\_\+parameter\+\_\+item\+\_\+e} item)
+\begin{DoxyCompactList}\small\item\em Function for handling the data from FS. \end{DoxyCompactList}\item 
+void \hyperlink{cfg__board_8h_ac21c934b589b88c4c2e0a574cdf13d7e}{main\+\_\+set\+\_\+param\+\_\+val} (\hyperlink{cfg__board_8h_aacb19461d771792a47715d7bab53780c}{module\+\_\+parameter\+\_\+item\+\_\+e} item, unsigned int val)
+\begin{DoxyCompactList}\small\item\em Function for handling the data from FS. \end{DoxyCompactList}\item 
+bool \hyperlink{cfg__board_8h_a6065fa51866839a008418f1147dddce1}{main\+\_\+schedule\+\_\+state\+\_\+is\+\_\+idle} (void)
+\begin{DoxyCompactList}\small\item\em Function for indicating whether the current state is idle or not. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__board_8h_a33d2443f89596ebc5d34577666999695}\label{cfg__board_8h_a33d2443f89596ebc5d34577666999695}} 
+void {\bfseries cfg\+\_\+board\+\_\+early\+\_\+init} (void)
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a577504a8ada9ea4462e9524c0b166253}\label{cfg__board_8h_a577504a8ada9ea4462e9524c0b166253}} 
+void {\bfseries cfg\+\_\+board\+\_\+init} (void)
+\item 
+\mbox{\Hypertarget{cfg__board_8h_af91f2827da328cd8cbc197bf6d74d9d3}\label{cfg__board_8h_af91f2827da328cd8cbc197bf6d74d9d3}} 
+void {\bfseries cfg\+\_\+board\+\_\+common\+\_\+power\+\_\+control} (module\+\_\+comm\+\_\+pwr\+\_\+resource\+\_\+e resource, bool b\+On)
+\item 
+\mbox{\Hypertarget{cfg__board_8h_ab2123643c0a55edd44727e5c4eb7fad7}\label{cfg__board_8h_ab2123643c0a55edd44727e5c4eb7fad7}} 
+bool {\bfseries cfg\+\_\+ble\+\_\+led\+\_\+control} (bool b\+On)
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a3851aa932fe0e4824f348c96ac408bc5}\label{cfg__board_8h_a3851aa932fe0e4824f348c96ac408bc5}} 
+bool {\bfseries cfg\+\_\+is\+\_\+3colorled\+\_\+contorl} (void)
+\item 
+\mbox{\Hypertarget{cfg__board_8h_ab229e36044cecdf4269ab13388c86c2a}\label{cfg__board_8h_ab229e36044cecdf4269ab13388c86c2a}} 
+void {\bfseries cfg\+\_\+wkup\+\_\+output\+\_\+control} (bool b\+On)
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a63de2d5b0cefb29f482d74f51203cd17}\label{cfg__board_8h_a63de2d5b0cefb29f482d74f51203cd17}} 
+void {\bfseries cfg\+\_\+board\+\_\+reset} (void)
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a44afed59feac148e05663e79b8b5f4f3}\label{cfg__board_8h_a44afed59feac148e05663e79b8b5f4f3}} 
+void {\bfseries cfg\+\_\+board\+\_\+check\+\_\+reset\+\_\+reason} (void)
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a8d5b487fc5065a75ed0d9509c9ca943f}\label{cfg__board_8h_a8d5b487fc5065a75ed0d9509c9ca943f}} 
+void {\bfseries cfg\+\_\+board\+\_\+gpio\+\_\+set\+\_\+default} (void)
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a3d681249c4d2c73227f63ac5b8620cd2}\label{cfg__board_8h_a3d681249c4d2c73227f63ac5b8620cd2}} 
+const nrf\+\_\+drv\+\_\+spi\+\_\+config\+\_\+t {\bfseries m\+\_\+spi\+\_\+config\+\_\+default}
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a9f2c00ec14ff83279746fb6caeca2724}\label{cfg__board_8h_a9f2c00ec14ff83279746fb6caeca2724}} 
+\hyperlink{structmodule__parameter__t}{module\+\_\+parameter\+\_\+t} {\bfseries m\+\_\+module\+\_\+parameter}
+\item 
+\mbox{\Hypertarget{cfg__board_8h_ad4e7c1382e6166437e8b144bd40161ce}\label{cfg__board_8h_ad4e7c1382e6166437e8b144bd40161ce}} 
+bool {\bfseries m\+\_\+module\+\_\+parameter\+\_\+update\+\_\+req}
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a2e55bc85a587f944dc59165889e08441}\label{cfg__board_8h_a2e55bc85a587f944dc59165889e08441}} 
+const char {\bfseries m\+\_\+cfg\+\_\+sw\+\_\+ver} \mbox{[}4\mbox{]}
+\item 
+\mbox{\Hypertarget{cfg__board_8h_ad7cfc22ab13bd93995b2790dd3725a3b}\label{cfg__board_8h_ad7cfc22ab13bd93995b2790dd3725a3b}} 
+const char {\bfseries m\+\_\+cfg\+\_\+model\+\_\+name} \mbox{[}$\,$\mbox{]}
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a70e0f1bd0fc0a8387c599b4e19c700d4}\label{cfg__board_8h_a70e0f1bd0fc0a8387c599b4e19c700d4}} 
+volatile bool {\bfseries main\+\_\+wakeup\+\_\+interrupt}
+\item 
+\mbox{\Hypertarget{cfg__board_8h_ae61ca51695d6dee571ee88a8fa9060da}\label{cfg__board_8h_ae61ca51695d6dee571ee88a8fa9060da}} 
+bool {\bfseries m\+\_\+cfg\+\_\+sw\+\_\+reset\+\_\+detected}
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a8555a09d5337155521be658f1670fb13}\label{cfg__board_8h_a8555a09d5337155521be658f1670fb13}} 
+bool {\bfseries m\+\_\+cfg\+\_\+debug\+\_\+interface\+\_\+wake\+\_\+up\+\_\+detected}
+\item 
+\mbox{\Hypertarget{cfg__board_8h_acc4217e169644ec2eadd2545974d7bd4}\label{cfg__board_8h_acc4217e169644ec2eadd2545974d7bd4}} 
+bool {\bfseries m\+\_\+cfg\+\_\+available\+\_\+bootloader\+\_\+detected}
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a9a3494b860160fac5cec1edb914c44f5}\label{cfg__board_8h_a9a3494b860160fac5cec1edb914c44f5}} 
+bool {\bfseries m\+\_\+cfg\+\_\+\+N\+F\+C\+\_\+wake\+\_\+up\+\_\+detected}
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a6e63c6a678c8d460200ebf2044fb0bc0}\label{cfg__board_8h_a6e63c6a678c8d460200ebf2044fb0bc0}} 
+bool {\bfseries m\+\_\+cfg\+\_\+\+G\+P\+I\+O\+\_\+wake\+\_\+up\+\_\+detected}
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a2480e900f602508143994b334c0bec78}\label{cfg__board_8h_a2480e900f602508143994b334c0bec78}} 
+\hyperlink{structmodule__peripheral__data__t}{module\+\_\+peripheral\+\_\+data\+\_\+t} {\bfseries m\+\_\+module\+\_\+peripheral\+\_\+data}
+\item 
+\mbox{\Hypertarget{cfg__board_8h_a82e6edfeff80bb5fee1645cbbe79b62d}\label{cfg__board_8h_a82e6edfeff80bb5fee1645cbbe79b62d}} 
+\hyperlink{structmodule__peripheral___i_d__t}{module\+\_\+peripheral\+\_\+\+I\+D\+\_\+t} {\bfseries m\+\_\+module\+\_\+peripheral\+\_\+\+ID}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+control board device control. 
+
+This file contains the control wifi modle. 
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{cfg__board_8h_a3166c24802ddbc01a34b36fc11bc5063}\label{cfg__board_8h_a3166c24802ddbc01a34b36fc11bc5063}} 
+\index{cfg\+\_\+board.\+h@{cfg\+\_\+board.\+h}!cfg\+\_\+bin\+\_\+2\+\_\+hexadecimal@{cfg\+\_\+bin\+\_\+2\+\_\+hexadecimal}}
+\index{cfg\+\_\+bin\+\_\+2\+\_\+hexadecimal@{cfg\+\_\+bin\+\_\+2\+\_\+hexadecimal}!cfg\+\_\+board.\+h@{cfg\+\_\+board.\+h}}
+\subsubsection{\texorpdfstring{cfg\+\_\+bin\+\_\+2\+\_\+hexadecimal()}{cfg\_bin\_2\_hexadecimal()}}
+{\footnotesize\ttfamily void cfg\+\_\+bin\+\_\+2\+\_\+hexadecimal (\begin{DoxyParamCaption}\item[{const uint8\+\_\+t $\ast$}]{p\+Bin,  }\item[{int}]{bin\+Size,  }\item[{char $\ast$}]{p\+Hexadecimal }\end{DoxyParamCaption})}
+
+
+
+Function for binary to hexadecimal. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em input} & binary data \\
+\hline
+\mbox{\tt in}  & {\em input} & binary data size \\
+\hline
+\mbox{\tt out}  & {\em hexadecimal} & data\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\mbox{\Hypertarget{cfg__board_8h_ac3508e2e09359548b7f161ae9ec41869}\label{cfg__board_8h_ac3508e2e09359548b7f161ae9ec41869}} 
+\index{cfg\+\_\+board.\+h@{cfg\+\_\+board.\+h}!cfg\+\_\+hexadecimal\+\_\+2\+\_\+bin@{cfg\+\_\+hexadecimal\+\_\+2\+\_\+bin}}
+\index{cfg\+\_\+hexadecimal\+\_\+2\+\_\+bin@{cfg\+\_\+hexadecimal\+\_\+2\+\_\+bin}!cfg\+\_\+board.\+h@{cfg\+\_\+board.\+h}}
+\subsubsection{\texorpdfstring{cfg\+\_\+hexadecimal\+\_\+2\+\_\+bin()}{cfg\_hexadecimal\_2\_bin()}}
+{\footnotesize\ttfamily void cfg\+\_\+hexadecimal\+\_\+2\+\_\+bin (\begin{DoxyParamCaption}\item[{const char $\ast$}]{p\+Hexadecimal,  }\item[{int}]{Hexadeccoimal\+Byte\+Cnt,  }\item[{uint8\+\_\+t $\ast$}]{p\+Bin }\end{DoxyParamCaption})}
+
+
+
+Function for binary to hexadecimal. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em input} & p\+Hexadecimal data \\
+\hline
+\mbox{\tt in}  & {\em input} & Hexadeccoimal\+Byte\+Cnt data size (byte count) \\
+\hline
+\mbox{\tt out}  & {\em binary} & data\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\mbox{\Hypertarget{cfg__board_8h_a14a6023187612e78a4257e1384332c84}\label{cfg__board_8h_a14a6023187612e78a4257e1384332c84}} 
+\index{cfg\+\_\+board.\+h@{cfg\+\_\+board.\+h}!cfg\+\_\+hexadecimal\+\_\+2\+\_\+uint\+\_\+val\+\_\+big@{cfg\+\_\+hexadecimal\+\_\+2\+\_\+uint\+\_\+val\+\_\+big}}
+\index{cfg\+\_\+hexadecimal\+\_\+2\+\_\+uint\+\_\+val\+\_\+big@{cfg\+\_\+hexadecimal\+\_\+2\+\_\+uint\+\_\+val\+\_\+big}!cfg\+\_\+board.\+h@{cfg\+\_\+board.\+h}}
+\subsubsection{\texorpdfstring{cfg\+\_\+hexadecimal\+\_\+2\+\_\+uint\+\_\+val\+\_\+big()}{cfg\_hexadecimal\_2\_uint\_val\_big()}}
+{\footnotesize\ttfamily uint32\+\_\+t cfg\+\_\+hexadecimal\+\_\+2\+\_\+uint\+\_\+val\+\_\+big (\begin{DoxyParamCaption}\item[{const char $\ast$}]{p\+Hexadecimal,  }\item[{int}]{len }\end{DoxyParamCaption})}
+
+
+
+Function for hexadecimal (big endian) to integer. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em input} & hexadecimal data \\
+\hline
+\mbox{\tt in}  & {\em input} & hexadecimal size (max 8)\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+integer value 
+\end{DoxyReturn}
+\mbox{\Hypertarget{cfg__board_8h_a0897e4605a1823983062a222041aa966}\label{cfg__board_8h_a0897e4605a1823983062a222041aa966}} 
+\index{cfg\+\_\+board.\+h@{cfg\+\_\+board.\+h}!main\+\_\+check\+\_\+ctrl\+\_\+mode\+\_\+allowed\+\_\+state@{main\+\_\+check\+\_\+ctrl\+\_\+mode\+\_\+allowed\+\_\+state}}
+\index{main\+\_\+check\+\_\+ctrl\+\_\+mode\+\_\+allowed\+\_\+state@{main\+\_\+check\+\_\+ctrl\+\_\+mode\+\_\+allowed\+\_\+state}!cfg\+\_\+board.\+h@{cfg\+\_\+board.\+h}}
+\subsubsection{\texorpdfstring{main\+\_\+check\+\_\+ctrl\+\_\+mode\+\_\+allowed\+\_\+state()}{main\_check\_ctrl\_mode\_allowed\_state()}}
+{\footnotesize\ttfamily bool main\+\_\+check\+\_\+ctrl\+\_\+mode\+\_\+allowed\+\_\+state (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Function for checking for entering the scenario mode into the test mode. 
+
+\begin{DoxyReturn}{Returns}
+true if possible, nor false 
+\end{DoxyReturn}
+\mbox{\Hypertarget{cfg__board_8h_acd18bf3a2bd8be0dcacf39ce4c489e0b}\label{cfg__board_8h_acd18bf3a2bd8be0dcacf39ce4c489e0b}} 
+\index{cfg\+\_\+board.\+h@{cfg\+\_\+board.\+h}!main\+\_\+get\+\_\+param\+\_\+val@{main\+\_\+get\+\_\+param\+\_\+val}}
+\index{main\+\_\+get\+\_\+param\+\_\+val@{main\+\_\+get\+\_\+param\+\_\+val}!cfg\+\_\+board.\+h@{cfg\+\_\+board.\+h}}
+\subsubsection{\texorpdfstring{main\+\_\+get\+\_\+param\+\_\+val()}{main\_get\_param\_val()}}
+{\footnotesize\ttfamily unsigned int main\+\_\+get\+\_\+param\+\_\+val (\begin{DoxyParamCaption}\item[{\hyperlink{cfg__board_8h_aacb19461d771792a47715d7bab53780c}{module\+\_\+parameter\+\_\+item\+\_\+e}}]{item }\end{DoxyParamCaption})}
+
+
+
+Function for handling the data from FS. 
+
+This function will set the data received from FS
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em item} & configuration item \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{cfg__board_8h_a6065fa51866839a008418f1147dddce1}\label{cfg__board_8h_a6065fa51866839a008418f1147dddce1}} 
+\index{cfg\+\_\+board.\+h@{cfg\+\_\+board.\+h}!main\+\_\+schedule\+\_\+state\+\_\+is\+\_\+idle@{main\+\_\+schedule\+\_\+state\+\_\+is\+\_\+idle}}
+\index{main\+\_\+schedule\+\_\+state\+\_\+is\+\_\+idle@{main\+\_\+schedule\+\_\+state\+\_\+is\+\_\+idle}!cfg\+\_\+board.\+h@{cfg\+\_\+board.\+h}}
+\subsubsection{\texorpdfstring{main\+\_\+schedule\+\_\+state\+\_\+is\+\_\+idle()}{main\_schedule\_state\_is\_idle()}}
+{\footnotesize\ttfamily bool main\+\_\+schedule\+\_\+state\+\_\+is\+\_\+idle (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Function for indicating whether the current state is idle or not. 
+
+\begin{DoxyReturn}{Returns}
+true if it is idle, nor false 
+\end{DoxyReturn}
+\mbox{\Hypertarget{cfg__board_8h_ac21c934b589b88c4c2e0a574cdf13d7e}\label{cfg__board_8h_ac21c934b589b88c4c2e0a574cdf13d7e}} 
+\index{cfg\+\_\+board.\+h@{cfg\+\_\+board.\+h}!main\+\_\+set\+\_\+param\+\_\+val@{main\+\_\+set\+\_\+param\+\_\+val}}
+\index{main\+\_\+set\+\_\+param\+\_\+val@{main\+\_\+set\+\_\+param\+\_\+val}!cfg\+\_\+board.\+h@{cfg\+\_\+board.\+h}}
+\subsubsection{\texorpdfstring{main\+\_\+set\+\_\+param\+\_\+val()}{main\_set\_param\_val()}}
+{\footnotesize\ttfamily void main\+\_\+set\+\_\+param\+\_\+val (\begin{DoxyParamCaption}\item[{\hyperlink{cfg__board_8h_aacb19461d771792a47715d7bab53780c}{module\+\_\+parameter\+\_\+item\+\_\+e}}]{item,  }\item[{unsigned int}]{val }\end{DoxyParamCaption})}
+
+
+
+Function for handling the data from FS. 
+
+This function will get the data received from FS
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em item} & configuration item \\
+\hline
+\end{DoxyParams}

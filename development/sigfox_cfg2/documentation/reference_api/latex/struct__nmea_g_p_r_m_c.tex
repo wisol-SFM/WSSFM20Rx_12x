@@ -1,0 +1,108 @@
+\hypertarget{struct__nmea_g_p_r_m_c}{}\section{\+\_\+nmea\+G\+P\+R\+MC Struct Reference}
+\label{struct__nmea_g_p_r_m_c}\index{\+\_\+nmea\+G\+P\+R\+MC@{\+\_\+nmea\+G\+P\+R\+MC}}
+
+
+{\ttfamily \#include $<$cfg\+\_\+gps\+\_\+module.\+h$>$}
+
+\subsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{cfg__gps__module_8h_a02bf9ae5b3df2ced0b3406a214735cb2}{nmea\+T\+I\+ME} \hyperlink{struct__nmea_g_p_r_m_c_a3ddf15855460a4cadc548d695ca841dd}{utc}
+\item 
+char \hyperlink{struct__nmea_g_p_r_m_c_a051c9e198ee930358372c407a17e8b78}{status}
+\item 
+double \hyperlink{struct__nmea_g_p_r_m_c_a7972334534f68166121a6e51b0aac2d6}{lat}
+\item 
+char \hyperlink{struct__nmea_g_p_r_m_c_affa71e2abbbf0ff7b001d574d93dd8ca}{ns}
+\item 
+double \hyperlink{struct__nmea_g_p_r_m_c_aa96391e04b5977c50b96d77bea86a01d}{lon}
+\item 
+char \hyperlink{struct__nmea_g_p_r_m_c_ad902b5b8ca288e6bf6b0e5a0321a0847}{ew}
+\item 
+double \hyperlink{struct__nmea_g_p_r_m_c_a6dc6e6f3c75c509ce943163afb5dade7}{speed}
+\item 
+double \hyperlink{struct__nmea_g_p_r_m_c_a8da9718bd3d0396135453cbb12751a5b}{direction}
+\item 
+double \hyperlink{struct__nmea_g_p_r_m_c_a97780ae452ef3641542664e9f353a505}{declination}
+\item 
+char \hyperlink{struct__nmea_g_p_r_m_c_a697ecb96f499e3b99c6a460615284323}{declin\+\_\+ew}
+\item 
+char \hyperlink{struct__nmea_g_p_r_m_c_a000e34997df38c2005a83d63e67d9282}{mode}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+R\+MC packet information structure (Recommended Minimum sentence C) 
+
+\subsection{Field Documentation}
+\mbox{\Hypertarget{struct__nmea_g_p_r_m_c_a697ecb96f499e3b99c6a460615284323}\label{struct__nmea_g_p_r_m_c_a697ecb96f499e3b99c6a460615284323}} 
+\index{\+\_\+nmea\+G\+P\+R\+MC@{\+\_\+nmea\+G\+P\+R\+MC}!declin\+\_\+ew@{declin\+\_\+ew}}
+\index{declin\+\_\+ew@{declin\+\_\+ew}!\+\_\+nmea\+G\+P\+R\+MC@{\+\_\+nmea\+G\+P\+R\+MC}}
+\subsubsection{\texorpdfstring{declin\+\_\+ew}{declin\_ew}}
+{\footnotesize\ttfamily char declin\+\_\+ew}
+
+\mbox{[}E\mbox{]}ast or \mbox{[}W\mbox{]}est \mbox{\Hypertarget{struct__nmea_g_p_r_m_c_a97780ae452ef3641542664e9f353a505}\label{struct__nmea_g_p_r_m_c_a97780ae452ef3641542664e9f353a505}} 
+\index{\+\_\+nmea\+G\+P\+R\+MC@{\+\_\+nmea\+G\+P\+R\+MC}!declination@{declination}}
+\index{declination@{declination}!\+\_\+nmea\+G\+P\+R\+MC@{\+\_\+nmea\+G\+P\+R\+MC}}
+\subsubsection{\texorpdfstring{declination}{declination}}
+{\footnotesize\ttfamily double declination}
+
+Magnetic variation degrees (Easterly var. subtracts from true course) \mbox{\Hypertarget{struct__nmea_g_p_r_m_c_a8da9718bd3d0396135453cbb12751a5b}\label{struct__nmea_g_p_r_m_c_a8da9718bd3d0396135453cbb12751a5b}} 
+\index{\+\_\+nmea\+G\+P\+R\+MC@{\+\_\+nmea\+G\+P\+R\+MC}!direction@{direction}}
+\index{direction@{direction}!\+\_\+nmea\+G\+P\+R\+MC@{\+\_\+nmea\+G\+P\+R\+MC}}
+\subsubsection{\texorpdfstring{direction}{direction}}
+{\footnotesize\ttfamily double direction}
+
+Track angle in degrees True \mbox{\Hypertarget{struct__nmea_g_p_r_m_c_ad902b5b8ca288e6bf6b0e5a0321a0847}\label{struct__nmea_g_p_r_m_c_ad902b5b8ca288e6bf6b0e5a0321a0847}} 
+\index{\+\_\+nmea\+G\+P\+R\+MC@{\+\_\+nmea\+G\+P\+R\+MC}!ew@{ew}}
+\index{ew@{ew}!\+\_\+nmea\+G\+P\+R\+MC@{\+\_\+nmea\+G\+P\+R\+MC}}
+\subsubsection{\texorpdfstring{ew}{ew}}
+{\footnotesize\ttfamily char ew}
+
+\mbox{[}E\mbox{]}ast or \mbox{[}W\mbox{]}est \mbox{\Hypertarget{struct__nmea_g_p_r_m_c_a7972334534f68166121a6e51b0aac2d6}\label{struct__nmea_g_p_r_m_c_a7972334534f68166121a6e51b0aac2d6}} 
+\index{\+\_\+nmea\+G\+P\+R\+MC@{\+\_\+nmea\+G\+P\+R\+MC}!lat@{lat}}
+\index{lat@{lat}!\+\_\+nmea\+G\+P\+R\+MC@{\+\_\+nmea\+G\+P\+R\+MC}}
+\subsubsection{\texorpdfstring{lat}{lat}}
+{\footnotesize\ttfamily double lat}
+
+Latitude in N\+D\+EG -\/ \mbox{[}degree\mbox{]}\mbox{[}min\mbox{]}.\mbox{[}sec/60\mbox{]} \mbox{\Hypertarget{struct__nmea_g_p_r_m_c_aa96391e04b5977c50b96d77bea86a01d}\label{struct__nmea_g_p_r_m_c_aa96391e04b5977c50b96d77bea86a01d}} 
+\index{\+\_\+nmea\+G\+P\+R\+MC@{\+\_\+nmea\+G\+P\+R\+MC}!lon@{lon}}
+\index{lon@{lon}!\+\_\+nmea\+G\+P\+R\+MC@{\+\_\+nmea\+G\+P\+R\+MC}}
+\subsubsection{\texorpdfstring{lon}{lon}}
+{\footnotesize\ttfamily double lon}
+
+Longitude in N\+D\+EG -\/ \mbox{[}degree\mbox{]}\mbox{[}min\mbox{]}.\mbox{[}sec/60\mbox{]} \mbox{\Hypertarget{struct__nmea_g_p_r_m_c_a000e34997df38c2005a83d63e67d9282}\label{struct__nmea_g_p_r_m_c_a000e34997df38c2005a83d63e67d9282}} 
+\index{\+\_\+nmea\+G\+P\+R\+MC@{\+\_\+nmea\+G\+P\+R\+MC}!mode@{mode}}
+\index{mode@{mode}!\+\_\+nmea\+G\+P\+R\+MC@{\+\_\+nmea\+G\+P\+R\+MC}}
+\subsubsection{\texorpdfstring{mode}{mode}}
+{\footnotesize\ttfamily char mode}
+
+Mode indicator of fix type (A = autonomous, D = differential, E = estimated, N = not valid, S = simulator) \mbox{\Hypertarget{struct__nmea_g_p_r_m_c_affa71e2abbbf0ff7b001d574d93dd8ca}\label{struct__nmea_g_p_r_m_c_affa71e2abbbf0ff7b001d574d93dd8ca}} 
+\index{\+\_\+nmea\+G\+P\+R\+MC@{\+\_\+nmea\+G\+P\+R\+MC}!ns@{ns}}
+\index{ns@{ns}!\+\_\+nmea\+G\+P\+R\+MC@{\+\_\+nmea\+G\+P\+R\+MC}}
+\subsubsection{\texorpdfstring{ns}{ns}}
+{\footnotesize\ttfamily char ns}
+
+\mbox{[}N\mbox{]}orth or \mbox{[}S\mbox{]}outh \mbox{\Hypertarget{struct__nmea_g_p_r_m_c_a6dc6e6f3c75c509ce943163afb5dade7}\label{struct__nmea_g_p_r_m_c_a6dc6e6f3c75c509ce943163afb5dade7}} 
+\index{\+\_\+nmea\+G\+P\+R\+MC@{\+\_\+nmea\+G\+P\+R\+MC}!speed@{speed}}
+\index{speed@{speed}!\+\_\+nmea\+G\+P\+R\+MC@{\+\_\+nmea\+G\+P\+R\+MC}}
+\subsubsection{\texorpdfstring{speed}{speed}}
+{\footnotesize\ttfamily double speed}
+
+Speed over the ground in knots \mbox{\Hypertarget{struct__nmea_g_p_r_m_c_a051c9e198ee930358372c407a17e8b78}\label{struct__nmea_g_p_r_m_c_a051c9e198ee930358372c407a17e8b78}} 
+\index{\+\_\+nmea\+G\+P\+R\+MC@{\+\_\+nmea\+G\+P\+R\+MC}!status@{status}}
+\index{status@{status}!\+\_\+nmea\+G\+P\+R\+MC@{\+\_\+nmea\+G\+P\+R\+MC}}
+\subsubsection{\texorpdfstring{status}{status}}
+{\footnotesize\ttfamily char status}
+
+Status (A = active or V = void) \mbox{\Hypertarget{struct__nmea_g_p_r_m_c_a3ddf15855460a4cadc548d695ca841dd}\label{struct__nmea_g_p_r_m_c_a3ddf15855460a4cadc548d695ca841dd}} 
+\index{\+\_\+nmea\+G\+P\+R\+MC@{\+\_\+nmea\+G\+P\+R\+MC}!utc@{utc}}
+\index{utc@{utc}!\+\_\+nmea\+G\+P\+R\+MC@{\+\_\+nmea\+G\+P\+R\+MC}}
+\subsubsection{\texorpdfstring{utc}{utc}}
+{\footnotesize\ttfamily \hyperlink{cfg__gps__module_8h_a02bf9ae5b3df2ced0b3406a214735cb2}{nmea\+T\+I\+ME} utc}
+
+U\+TC of position 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{cfg__gps__module_8h}{cfg\+\_\+gps\+\_\+module.\+h}\end{DoxyCompactItemize}

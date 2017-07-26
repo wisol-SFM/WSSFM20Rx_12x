@@ -1,0 +1,134 @@
+version 1.8
+
+overview
+1. module interface : I2c slave
+2. Host can connect before 2 minutes (Unable to connect after)
+  * Mode change time out is 10 seconds.
+3. Data must be case-sensitive
+4. I2C device ID IS 0x4A
+
+work flow
+1. The host periodically reads 64 bytes.
+2. 64 bytes are encoded as a string and may not have a NULL value. (End of string in case of NULL)
+3. The basic data is composed of log data and can include a response to the command.
+4. Host -> Module : 
+  Request data starts with <SR> and consists of size (4 bytes), command (2 bytes) and data (variable).
+  Data Layout can be changed according to command.
+5. Module -> Host :
+  Response data consists of size (4 bytes), command (2 bytes), result (2 bytes) Data (variable)
+  Data Layout can be changed according to command.
+
+Data conversion reference
+http://www.rapidtables.com/convert/number/hex-to-ascii.htm  //hex to string
+http://www.rapidtables.com/convert/number/ascii-to-hex.htm  //string to hex
+
+////////////////////////////////////////////////////////////////////////////////
+request
+        |       | ....
+----------------...... 
+<SC>NNCCDDDDDDD... 
+
+layout
+  .NN : length (hexadecimal : %02x)
+  .CC : cmd (hexadecimal : %02x)
+  .DD : data (hexadecimal : variable)
+
+////////////////////////////////////////////////////////////////////////////////
+response
+        |       | ....
+----------------...... <SR>NNCCRRDDDDDDD... 
+
+layout
+  .NN : length  (hexadecimal : %02x)
+  .CC : cmd (hexadecimal : %02x)
+  .RR : Result ("OK" or "NG")
+  .DD : data
+////////////////////////////////////////////////////////////////////////////////
+common msg
+* "<SR>0400NG" : COMMON ERROR
+* "<SR>0D00OKConnected" : Host CONNECT NOTI (for reboot detect!)
+* "<SR>0c00OKManualMode" : Noti FOR GOTO MANUAL MODE (Setting tab)
+* "<SR>1000OKScenarioMode" : Noti FOR GOTO SCENARIO MODE (not support mode change)
+* "<SR>0f00OKSettingMode" : Noti FOR GOTO SETTING (Setting tab, not support mode change)
+* "<SR>NN00OKSNOTI_..." : Noti for statue change
+
+////////////////////////////////////////////////////////////////////////////////
+command
+  0x01 : <SC>0A01NNNNNNNN : set log filter (DATA : old val)
+       eg) <SC>0A0100000000
+           ....<SR>0C02OKNNNNNNNN......
+  0x02 : <SC>0402XX mode change (such as bypass mode) (<SC>0402FF : get current mode)
+      mode : cfg_board_work_normal               = 0x00,  //scenario mode
+             cfg_board_work_sigfox_bypass        = 0x01,
+             cfg_board_work_wifi_bypass          = 0x02,
+             cfg_board_work_manual               = 0x03,
+             cfg_board_work_gps_bypass           = 0x04,
+             cfg_board_work_ble_crtl             = 0x05,
+
+       eg) <SC>040201 : sigfox bytepass mode
+           ....<SR>0402OK......
+           <SC>0402FF : read current mode
+           ....<SR>0602OK00......
+           <SC>040202 : wifi bytepass mode
+           <SC>040204 : gps bypass
+           <SC>040205 : ble control mode
+           ....
+
+  0x03 : <SC>NN03DDDDDD... : bypass command
+       eg) <SC>0603AT\r\n or 3c53433e3036303341540d0a
+       
+       sigfox
+           <SC>2203AT$SF=000000000000000000000000\r\n or 3c53433e3232303341542453463d3030303030303030303030303030303030303030303030300d0a
+       wifi
+           <SC>0C03AT+CWLAP
+
+  /*setting parameta*/
+    module_parameter_item_idle_time                                     =  0,  //MAIN_IDLE_TIME_DEFAULT                          60 ~ 604800(sec)
+    module_parameter_item_beacon_interval                               =  1,  //BEACON_INTERVAL_TIME_DEFAULT                    20 ~ 10240(ms) 
+    module_parameter_item_wifi_scan_retry_time_sec                      =  2,  //CWIFI_SEC_RETRY_TIMEOUT_SEC_DEFAULT             1 ~ 60(sec)
+    module_parameter_item_start_wait_time_for_board_control_attach_sec  =  3,  //START_WAIT_TIME_FOR_BOARD_CONTROL_ATTACH_SEC    1 ~ 10(sec)
+    module_parameter_item_start_wait_time_for_ctrl_mode_change_sec      =  4,  //START_WAIT_TIME_FOR_CTRL_MODE_CHANGE_SEC        1 ~ 30(sec)
+    module_parameter_item_gps_tracking_time_sec                         =  5,  //CGPS_ACQUIRE_TRACKING_TIME_SEC                  30 ~ 300(sec)
+    module_parameter_item_boot_nfc_unlock                               =  6,  //MAIN_BOOT_NFC_UNLOCK_DEFAULT                    0 ~ 1
+    module_parameter_item_fota_enable                                   =  7,  //MAIN_FOTA_ENABLE_DEFAULT                        0 ~ 1
+    module_parameter_item_scenario_mode                                 =  8,  //MAIN_SCENARIO_MODE_DEFAULT                      0 ~ 1
+    module_parameter_item_magnetic_gpio_enable                          =  9,  //MAIN_MAGNETIC_GPIO_ENABLE_DEFAULT               0 ~ 1
+    module_parameter_item_wkup_gpio_enable                              = 10,  //MAIN_WKUP_GPIO_ENABLE_DEFAULT                   0 ~ 2
+    module_parameter_item_wifi_testmode_enable                          = 11,  //MAIN_WIFI_TESTMODE_ENABLE_DEFAULT               0 ~ 1
+    module_parameter_item_snek_testmode_enable                          = 12,  //MAIN_SIGFOX_SNEK_TESTMODE_ENABLE_DEFAULT        0 ~ 1
+    module_parameter_item_gps_cn0_current_savetime_enable               = 13,  //CGPS_CN0_CURRENT_SAVETIME_ENABLE                0 ~ 1
+    
+  0x04 : <SC>NN04NNDDDDDDDD (DATA hexadecimal) : set parameter
+      eg)
+      <SC>0C04000000003C  :  set idle_time to 60
+      <SC>0C040100000064  :  set beacon_interval to 100
+      <SC>0C04020000000A  :  set wifi_scan_retry_time_sec to 10
+      ....<SR>0404OK......
+      
+  0x05 : <SC>NN05NN... : get parameter
+      eg)
+      <SC>040500  :  get idle_time 
+          ....<SR>0C05OK0000003c....  : idle_time is 60 (default)
+      <SC>040501  :  get beacon_interval to 100
+          ....<SR>0C05OK0064....  : beacon_interval is 100 (default)
+      <SC>040502  :  get wifi_scan_retry_time_sec to 10
+          ....<SR>0C05OK0000000a....  : wifi_scan_retry_time_sec is 10 (default)
+      ....<SR>0805OKNNNNNNNN....  (DATA hexadecimal)
+      
+  0x06 : <SC>NN06... : get log filter
+     eg) <SC>0206
+         ....<SR>0C06OK168B6DB7......
+  0x07 : <SC>0207 : get ID information
+       response payload layout: |ble mac(12)|UUID(32)|wifi max(12)|sigfox device ID(8)|sigfox pac code(16)|
+     eg) <SC>0207
+         ....<SR>5407OK..........
+
+  0x08 : <SC>0208 : software reset  //CTBC_CMD_SW_RESET
+
+  0x09 : <SC>0209 : factory reset  //CTBC_CMD_FACTORY_RESET
+
+  0x0A : <SC>020A : get software version  //CTBC_CMD_GET_SW_VERSION
+
+     eg) <SC>020A
+         ....<SR>3A0AOKSFM20R1_V201_01,build_Apr 26 2017 16:00:28,wifi_000000
+  

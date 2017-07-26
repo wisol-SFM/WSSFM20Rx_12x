@@ -1,0 +1,522 @@
+\hypertarget{cfg__gps__module_8h}{}\section{cfg\+\_\+gps\+\_\+module.\+h File Reference}
+\label{cfg__gps__module_8h}\index{cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}}
+
+
+control gps module.  
+
+
+{\ttfamily \#include \char`\"{}cfg\+\_\+board\+\_\+def.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}time.\+h\char`\"{}}\newline
+\subsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{struct_c_g_p_s___a_t__str_info__t}{C\+G\+P\+S\+\_\+\+A\+T\+\_\+str\+Info\+\_\+t}
+\item 
+struct \hyperlink{struct__nmea_p_r_o_p_e_r_t_y}{\+\_\+nmea\+P\+R\+O\+P\+E\+R\+TY}
+\item 
+struct \hyperlink{struct__nmea_p_a_r_s_e_r}{\+\_\+nmea\+P\+A\+R\+S\+ER}
+\item 
+struct \hyperlink{struct__nmea_p_o_s}{\+\_\+nmea\+P\+OS}
+\item 
+struct \hyperlink{struct__nmea_s_a_t_e_l_l_i_t_e}{\+\_\+nmea\+S\+A\+T\+E\+L\+L\+I\+TE}
+\item 
+struct \hyperlink{struct__nmea_s_a_t_i_n_f_o}{\+\_\+nmea\+S\+A\+T\+I\+N\+FO}
+\item 
+struct \hyperlink{struct__nmea_parser_n_o_d_e}{\+\_\+nmea\+Parser\+N\+O\+DE}
+\item 
+struct \hyperlink{struct__nmea_t_i_m_e}{\+\_\+nmea\+T\+I\+ME}
+\item 
+struct \hyperlink{struct__nmea_i_n_f_o}{\+\_\+nmea\+I\+N\+FO}
+\item 
+struct \hyperlink{struct__nmea_g_p_r_m_c}{\+\_\+nmea\+G\+P\+R\+MC}
+\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a2999b774deb7e7dc40c9e7682daefc9d}\label{cfg__gps__module_8h_a2999b774deb7e7dc40c9e7682daefc9d}} 
+\#define {\bfseries G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+C\+H\+E\+C\+K\+\_\+\+C\+H\+E\+C\+K\+S\+UM}
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a52fa329a343989d20e50a96e87d9a10a}\label{cfg__gps__module_8h_a52fa329a343989d20e50a96e87d9a10a}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+Result\+\_\+\+OK}~(0)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a06743db6c36a1c74d575423ba8e9c6b1}\label{cfg__gps__module_8h_a06743db6c36a1c74d575423ba8e9c6b1}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+Result\+\_\+\+Busy}~(-\/1)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a79c80bceedcf30f90906ea9ee50904bb}\label{cfg__gps__module_8h_a79c80bceedcf30f90906ea9ee50904bb}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+Result\+\_\+\+No\+Device}~(-\/2)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_aa0a3d044666356316ee7588a8085022e}\label{cfg__gps__module_8h_aa0a3d044666356316ee7588a8085022e}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+Result\+\_\+\+Not\+Ready}~(-\/3)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a21742092845da58f1a7b0b8f0207df09}\label{cfg__gps__module_8h_a21742092845da58f1a7b0b8f0207df09}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+Result\+\_\+\+No\+Data}~(-\/4)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_acb7ab42d716490cd27453ed2dbbdef6b}\label{cfg__gps__module_8h_acb7ab42d716490cd27453ed2dbbdef6b}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+Result\+\_\+\+Not\+Started}~(-\/5)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a1a297cc1aef331594d515ac1f2d6f387}\label{cfg__gps__module_8h_a1a297cc1aef331594d515ac1f2d6f387}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+Result\+\_\+\+Not\+Supported}~(-\/6)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_af614a5fb7164f6a997eeb8e7f73214cb}\label{cfg__gps__module_8h_af614a5fb7164f6a997eeb8e7f73214cb}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+S\+P\+I\+\_\+\+B\+U\+F\+\_\+\+S\+I\+ZE}~128
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_aa11712b3c011868ed9b5098bec7c23ba}\label{cfg__gps__module_8h_aa11712b3c011868ed9b5098bec7c23ba}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+C\+NT}~2
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a16d97e509d0725a11c6c871763bbbaef}\label{cfg__gps__module_8h_a16d97e509d0725a11c6c871763bbbaef}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+S\+I\+ZE}~12
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_abe7626f58b9c6a355c5d8cd243e382e3}\label{cfg__gps__module_8h_abe7626f58b9c6a355c5d8cd243e382e3}} 
+\#define {\bfseries G\+P\+S\+\_\+\+S\+E\+N\+D\+\_\+\+P\+A\+Y\+L\+O\+A\+D\+\_\+\+S\+I\+ZE}~12
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_ad18431dc81cc9902d9f7d3248ecc4b48}\label{cfg__gps__module_8h_ad18431dc81cc9902d9f7d3248ecc4b48}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+P\+R\+O\+C\+\_\+\+B\+O\+O\+T\+\_\+\+T\+I\+M\+E\+\_\+\+MS}~500
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a8201c19e38dc42c80f0e5b11c66b4bdb}\label{cfg__gps__module_8h_a8201c19e38dc42c80f0e5b11c66b4bdb}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+A\+C\+Q\+U\+I\+R\+E\+\_\+\+R\+E\+Q\+\_\+\+T\+I\+M\+E\+\_\+\+MS}~250
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a9f5c08082d8e6c59870e1282e3df040b}\label{cfg__gps__module_8h_a9f5c08082d8e6c59870e1282e3df040b}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+A\+C\+Q\+U\+I\+R\+E\+\_\+\+O\+K\+\_\+\+T\+I\+M\+E\+\_\+\+MS}~100
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a4bb123c36f6e0ad95df8deab45104687}\label{cfg__gps__module_8h_a4bb123c36f6e0ad95df8deab45104687}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+M\+O\+D\+U\+L\+E\+\_\+\+D\+E\+T\+E\+C\+T\+\_\+\+T\+I\+M\+E\+\_\+\+MS}~100
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a76c906c4e52c7b906e8a1a2a36ac4fc1}\label{cfg__gps__module_8h_a76c906c4e52c7b906e8a1a2a36ac4fc1}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+M\+O\+D\+U\+L\+E\+\_\+\+D\+E\+T\+E\+C\+T\+\_\+\+T\+I\+M\+E\+\_\+\+O\+U\+T\+\_\+\+T\+I\+CK}~60
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_ad9eb3e5a43f42d2c54f97b3d8bd7524c}\label{cfg__gps__module_8h_ad9eb3e5a43f42d2c54f97b3d8bd7524c}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+M\+O\+D\+U\+L\+E\+\_\+\+D\+E\+T\+E\+C\+T\+\_\+\+T\+R\+Y\+\_\+\+M\+AX}~20
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_af91e68be6b25dc0d4233d322e2bf3422}\label{cfg__gps__module_8h_af91e68be6b25dc0d4233d322e2bf3422}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+M\+O\+D\+U\+L\+E\+\_\+\+E\+N\+T\+E\+R\+\_\+\+S\+U\+S\+P\+E\+N\+D\+\_\+\+MS}~5000
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a60da47087c0be0706e7abbeb0eddefc9}\label{cfg__gps__module_8h_a60da47087c0be0706e7abbeb0eddefc9}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+S\+P\+I\+\_\+\+W\+A\+I\+T\+\_\+\+T\+I\+M\+E\+\_\+\+MS}~10
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a7912bdb1cad36c87758ccba1063fdd8d}\label{cfg__gps__module_8h_a7912bdb1cad36c87758ccba1063fdd8d}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+S\+P\+I\+\_\+\+W\+A\+I\+T\+\_\+\+T\+I\+M\+E\+\_\+\+O\+U\+T\+\_\+\+T\+I\+CK}~20
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_ab12efe904a03229e870477714e842afd}\label{cfg__gps__module_8h_ab12efe904a03229e870477714e842afd}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+S\+P\+I\+\_\+\+I\+S\+R\+\_\+\+C\+L\+E\+A\+R\+\_\+\+W\+A\+I\+T\+\_\+\+T\+I\+M\+E\+O\+U\+T\+\_\+\+T\+I\+CK}~5
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a02ed0f1e3c65596a7f144a88993a4918}\label{cfg__gps__module_8h_a02ed0f1e3c65596a7f144a88993a4918}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+S\+P\+I\+\_\+\+I\+N\+T\+E\+R\+R\+U\+P\+T\+\_\+\+C\+L\+E\+A\+R\+\_\+\+W\+A\+I\+T\+\_\+\+T\+I\+ME}~100
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a43e587a496739aea6f3d419d77a409dd}\label{cfg__gps__module_8h_a43e587a496739aea6f3d419d77a409dd}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+S\+P\+I\+\_\+\+C\+M\+D\+\_\+\+R\+E\+S\+P\+\_\+\+T\+I\+M\+E\+\_\+\+O\+U\+T\+\_\+\+T\+I\+CK}~60
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a636fcfe23d7ec0bd6220e792a284e748}\label{cfg__gps__module_8h_a636fcfe23d7ec0bd6220e792a284e748}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+S\+P\+I\+\_\+\+C\+M\+D\+\_\+\+R\+E\+S\+P\+\_\+\+W\+A\+I\+T\+\_\+\+T\+I\+ME}~100
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a14b676cf0a75fcab2cead82478757ccd}\label{cfg__gps__module_8h_a14b676cf0a75fcab2cead82478757ccd}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+I\+N\+I\+T\+\_\+\+T\+R\+A\+C\+K\+I\+N\+G\+\_\+\+T\+I\+ME}~90
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a62f610016f7babb2dc824ffb7f46885d}\label{cfg__gps__module_8h_a62f610016f7babb2dc824ffb7f46885d}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+C\+No\+\_\+\+V\+A\+L\+UE}~20
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a16be6ab6cd46cd5673e6bae330109843}\label{cfg__gps__module_8h_a16be6ab6cd46cd5673e6bae330109843}} 
+\#define {\bfseries C\+G\+P\+S\+\_\+\+B\+Y\+P\+A\+S\+S\+\_\+\+C\+No\+\_\+\+V\+A\+L\+UE}~30
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_ad3744b09d46a23c3f4bd52ff297b3783}\label{cfg__gps__module_8h_ad3744b09d46a23c3f4bd52ff297b3783}} 
+\#define {\bfseries N\+M\+E\+A\+\_\+\+T\+O\+K\+S\+\_\+\+C\+O\+M\+P\+A\+RE}~(1)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_abccd9bfe33ea758991d5a76075056b3e}\label{cfg__gps__module_8h_abccd9bfe33ea758991d5a76075056b3e}} 
+\#define {\bfseries N\+M\+E\+A\+\_\+\+T\+O\+K\+S\+\_\+\+P\+E\+R\+C\+E\+NT}~(2)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a8a89975767141bad5847eb6818b1bb01}\label{cfg__gps__module_8h_a8a89975767141bad5847eb6818b1bb01}} 
+\#define {\bfseries N\+M\+E\+A\+\_\+\+T\+O\+K\+S\+\_\+\+W\+I\+D\+TH}~(3)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a4f723dbdbc215d118bbe59ccf4549e34}\label{cfg__gps__module_8h_a4f723dbdbc215d118bbe59ccf4549e34}} 
+\#define {\bfseries N\+M\+E\+A\+\_\+\+T\+O\+K\+S\+\_\+\+T\+Y\+PE}~(4)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_aead675008ad6819531cd1e31c6f96423}\label{cfg__gps__module_8h_aead675008ad6819531cd1e31c6f96423}} 
+\#define {\bfseries N\+M\+E\+A\+\_\+\+C\+O\+N\+V\+S\+T\+R\+\_\+\+B\+UF}~(256)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a68565a97e6373117ab4504f90b933524}\label{cfg__gps__module_8h_a68565a97e6373117ab4504f90b933524}} 
+\#define {\bfseries N\+M\+E\+A\+\_\+\+T\+I\+M\+E\+P\+A\+R\+S\+E\+\_\+\+B\+UF}~(256)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a78b8abf1ac3ff0f2594e940fd6f76513}\label{cfg__gps__module_8h_a78b8abf1ac3ff0f2594e940fd6f76513}} 
+\#define {\bfseries N\+M\+E\+A\+\_\+\+D\+E\+F\+\_\+\+P\+A\+R\+S\+E\+B\+U\+FF}~(1024)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a79f906d9809192a5437c04f7aa5f8075}\label{cfg__gps__module_8h_a79f906d9809192a5437c04f7aa5f8075}} 
+\#define {\bfseries N\+M\+E\+A\+\_\+\+P\+O\+S\+IX}(x)~x
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_af95a22c4c6e5bf0373402e183eb92265}\label{cfg__gps__module_8h_af95a22c4c6e5bf0373402e183eb92265}} 
+\#define {\bfseries N\+M\+E\+A\+\_\+\+I\+N\+L\+I\+NE}~inline
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a472d67fd568fe912a66cab296815f9c3}\label{cfg__gps__module_8h_a472d67fd568fe912a66cab296815f9c3}} 
+\#define {\bfseries N\+M\+E\+A\+\_\+\+S\+I\+G\+\_\+\+B\+AD}~(0)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a5e01b938d470a802f30192170dbc99fe}\label{cfg__gps__module_8h_a5e01b938d470a802f30192170dbc99fe}} 
+\#define {\bfseries N\+M\+E\+A\+\_\+\+S\+I\+G\+\_\+\+L\+OW}~(1)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_ae081b38027a046dccbf5482db5f4a062}\label{cfg__gps__module_8h_ae081b38027a046dccbf5482db5f4a062}} 
+\#define {\bfseries N\+M\+E\+A\+\_\+\+S\+I\+G\+\_\+\+M\+ID}~(2)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a1afa8d72ad7f530ce1afbb9b8c8b61b5}\label{cfg__gps__module_8h_a1afa8d72ad7f530ce1afbb9b8c8b61b5}} 
+\#define {\bfseries N\+M\+E\+A\+\_\+\+S\+I\+G\+\_\+\+H\+I\+GH}~(3)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a119c386d3b14253ac16047ddb0928b00}\label{cfg__gps__module_8h_a119c386d3b14253ac16047ddb0928b00}} 
+\#define {\bfseries N\+M\+E\+A\+\_\+\+F\+I\+X\+\_\+\+B\+AD}~(1)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a9dcdfda83c2381e9508f600087d87a2a}\label{cfg__gps__module_8h_a9dcdfda83c2381e9508f600087d87a2a}} 
+\#define {\bfseries N\+M\+E\+A\+\_\+\+F\+I\+X\+\_\+2D}~(2)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a136eebc7d69755cadbc3fba14ab7dbfa}\label{cfg__gps__module_8h_a136eebc7d69755cadbc3fba14ab7dbfa}} 
+\#define {\bfseries N\+M\+E\+A\+\_\+\+F\+I\+X\+\_\+3D}~(3)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a03a1ec08411d0b41bc1e2688251e661b}\label{cfg__gps__module_8h_a03a1ec08411d0b41bc1e2688251e661b}} 
+\#define {\bfseries N\+M\+E\+A\+\_\+\+M\+A\+X\+S\+AT}~(12)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a45d7e6987b1c01b55722046e8698002a}\label{cfg__gps__module_8h_a45d7e6987b1c01b55722046e8698002a}} 
+\#define {\bfseries N\+M\+E\+A\+\_\+\+S\+A\+T\+I\+N\+P\+A\+CK}~(4)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a19cdf42e453be7c168062933d2e8ccf3}\label{cfg__gps__module_8h_a19cdf42e453be7c168062933d2e8ccf3}} 
+\#define {\bfseries N\+M\+E\+A\+\_\+\+N\+S\+A\+T\+P\+A\+C\+KS}~(N\+M\+E\+A\+\_\+\+M\+A\+X\+S\+AT / N\+M\+E\+A\+\_\+\+S\+A\+T\+I\+N\+P\+A\+CK)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a9e5969a8800fa00e4d5ae7f519b96333}\label{cfg__gps__module_8h_a9e5969a8800fa00e4d5ae7f519b96333}} 
+\#define {\bfseries N\+M\+E\+A\+\_\+\+D\+E\+F\+\_\+\+L\+AT}~(5001.\+2621)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_ab50b235f88b1c3cc0ff082b464dea7b0}\label{cfg__gps__module_8h_ab50b235f88b1c3cc0ff082b464dea7b0}} 
+\#define {\bfseries N\+M\+E\+A\+\_\+\+D\+E\+F\+\_\+\+L\+ON}~(3613.\+0595)
+\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_adb5d73d6c31d0e9db0ee51ca3943a9f1}\label{cfg__gps__module_8h_adb5d73d6c31d0e9db0ee51ca3943a9f1}} 
+typedef void($\ast$ {\bfseries nmea\+Trace\+Func}) (const char $\ast$str, int str\+\_\+size)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a7f682ea9c093823f010dfba65eebb621}\label{cfg__gps__module_8h_a7f682ea9c093823f010dfba65eebb621}} 
+typedef void($\ast$ {\bfseries nmea\+Error\+Func}) (const char $\ast$str, int str\+\_\+size)
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a97ff7e844d3e6516af08e08b1faae1b7}\label{cfg__gps__module_8h_a97ff7e844d3e6516af08e08b1faae1b7}} 
+typedef struct \hyperlink{struct__nmea_p_r_o_p_e_r_t_y}{\+\_\+nmea\+P\+R\+O\+P\+E\+R\+TY} {\bfseries nmea\+P\+R\+O\+P\+E\+R\+TY}
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a21cca5d67b8d848d35d941b816416301}\label{cfg__gps__module_8h_a21cca5d67b8d848d35d941b816416301}} 
+typedef struct \hyperlink{struct__nmea_p_a_r_s_e_r}{\+\_\+nmea\+P\+A\+R\+S\+ER} {\bfseries nmea\+P\+A\+R\+S\+ER}
+\item 
+typedef struct \hyperlink{struct__nmea_p_o_s}{\+\_\+nmea\+P\+OS} \hyperlink{cfg__gps__module_8h_ac39e2b3c5daba45df490d279614cae24}{nmea\+P\+OS}
+\item 
+typedef struct \hyperlink{struct__nmea_s_a_t_e_l_l_i_t_e}{\+\_\+nmea\+S\+A\+T\+E\+L\+L\+I\+TE} \hyperlink{cfg__gps__module_8h_a7b2a7e4c7be4ebe7a590ce9239bf1e1f}{nmea\+S\+A\+T\+E\+L\+L\+I\+TE}
+\item 
+typedef struct \hyperlink{struct__nmea_s_a_t_i_n_f_o}{\+\_\+nmea\+S\+A\+T\+I\+N\+FO} \hyperlink{cfg__gps__module_8h_ae8abd5b6dfff0282bd633dbaac1343ec}{nmea\+S\+A\+T\+I\+N\+FO}
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a8f6b596344b5ee93df0c987ccd52ff74}\label{cfg__gps__module_8h_a8f6b596344b5ee93df0c987ccd52ff74}} 
+typedef struct \hyperlink{struct__nmea_parser_n_o_d_e}{\+\_\+nmea\+Parser\+N\+O\+DE} {\bfseries nmea\+Parser\+N\+O\+DE}
+\item 
+typedef struct \hyperlink{struct__nmea_t_i_m_e}{\+\_\+nmea\+T\+I\+ME} \hyperlink{cfg__gps__module_8h_a02bf9ae5b3df2ced0b3406a214735cb2}{nmea\+T\+I\+ME}
+\item 
+typedef struct \hyperlink{struct__nmea_i_n_f_o}{\+\_\+nmea\+I\+N\+FO} \hyperlink{cfg__gps__module_8h_a301ec5a2f9b3d475f65c39e167978791}{nmea\+I\+N\+FO}
+\item 
+typedef struct \hyperlink{struct__nmea_g_p_r_m_c}{\+\_\+nmea\+G\+P\+R\+MC} \hyperlink{cfg__gps__module_8h_a2bfc81cef2fe1747c01217f0c8d0e74f}{nmea\+G\+P\+R\+MC}
+\end{DoxyCompactItemize}
+\subsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_aa4113e12e2f5c67ea94324ba3e847864}\label{cfg__gps__module_8h_aa4113e12e2f5c67ea94324ba3e847864}} 
+enum {\bfseries C\+G\+P\+S\+\_\+\+State\+\_\+e} \{ \newline
+{\bfseries C\+G\+P\+S\+\_\+\+State\+\_\+none\+\_\+S} = 0, 
+{\bfseries C\+G\+P\+S\+\_\+\+State\+\_\+idle\+\_\+S} = 10, 
+{\bfseries C\+G\+P\+S\+\_\+\+State\+\_\+operation\+\_\+fail\+\_\+S}, 
+{\bfseries C\+G\+P\+S\+\_\+\+State\+\_\+not\+Available\+\_\+S}, 
+\newline
+{\bfseries C\+G\+P\+S\+\_\+\+State\+\_\+suspend\+\_\+S}, 
+{\bfseries C\+G\+P\+S\+\_\+\+State\+\_\+resume\+\_\+S}, 
+{\bfseries C\+G\+P\+S\+\_\+\+State\+\_\+sleep\+\_\+S}, 
+{\bfseries C\+G\+P\+S\+\_\+\+State\+\_\+wakeup\+\_\+S}, 
+\newline
+{\bfseries C\+G\+P\+S\+\_\+\+State\+\_\+poweroff\+\_\+S}, 
+{\bfseries C\+G\+P\+S\+\_\+\+State\+\_\+ubx\+\_\+setting\+\_\+S} = 100, 
+{\bfseries C\+G\+P\+S\+\_\+\+State\+\_\+ubx\+\_\+setting\+\_\+end\+\_\+S}, 
+{\bfseries C\+G\+P\+S\+\_\+\+State\+\_\+nmea\+\_\+request\+\_\+S}, 
+\newline
+{\bfseries C\+G\+P\+S\+\_\+\+State\+\_\+nmea\+\_\+tracking\+\_\+S}, 
+{\bfseries C\+G\+P\+S\+\_\+\+State\+\_\+nmea\+\_\+position\+\_\+fix\+\_\+S}, 
+{\bfseries C\+G\+P\+S\+\_\+\+State\+\_\+nmea\+\_\+position\+\_\+not\+\_\+fix\+\_\+S}, 
+{\bfseries C\+G\+P\+S\+\_\+\+State\+\_\+nmea\+\_\+data\+\_\+send\+\_\+S}, 
+\newline
+{\bfseries C\+G\+P\+S\+\_\+\+State\+\_\+bypass\+\_\+start\+\_\+S} = 200, 
+{\bfseries C\+G\+P\+S\+\_\+\+State\+\_\+bypass\+\_\+request\+\_\+S}, 
+{\bfseries C\+G\+P\+S\+\_\+\+State\+\_\+bypass\+\_\+response\+\_\+S}, 
+{\bfseries C\+G\+P\+S\+\_\+\+State\+\_\+bypass\+\_\+abort\+\_\+S}, 
+\newline
+{\bfseries C\+G\+P\+S\+\_\+\+State\+\_\+bypass\+\_\+suspend\+\_\+S}, 
+{\bfseries C\+G\+P\+S\+\_\+\+State\+\_\+bypass\+\_\+resume\+\_\+S}, 
+{\bfseries C\+G\+P\+S\+\_\+\+State\+\_\+e\+\_\+max}
+ \}
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a303b35093178ef7e67a5919157bfa55e}\label{cfg__gps__module_8h_a303b35093178ef7e67a5919157bfa55e}} 
+enum {\bfseries C\+G\+P\+S\+\_\+\+S\+P\+I\+\_\+\+S\+T\+E\+P\+\_\+e} \{ \newline
+{\bfseries C\+G\+P\+S\+\_\+\+S\+P\+I\+\_\+\+S\+T\+E\+P\+\_\+\+I\+S\+R\+\_\+\+C\+L\+E\+A\+R\+\_\+\+W\+A\+IT}, 
+{\bfseries C\+G\+P\+S\+\_\+\+S\+P\+I\+\_\+\+S\+T\+E\+P\+\_\+\+W\+R\+I\+T\+E\+\_\+\+D\+A\+T\+A\+\_\+\+L\+EN}, 
+{\bfseries C\+G\+P\+S\+\_\+\+S\+P\+I\+\_\+\+S\+T\+E\+P\+\_\+\+W\+R\+I\+T\+E\+\_\+\+D\+A\+TA}, 
+{\bfseries C\+G\+P\+S\+\_\+\+S\+P\+I\+\_\+\+S\+T\+E\+P\+\_\+\+R\+E\+A\+D\+\_\+\+D\+A\+T\+A\+\_\+\+L\+EN}, 
+\newline
+{\bfseries C\+G\+P\+S\+\_\+\+S\+P\+I\+\_\+\+S\+T\+E\+P\+\_\+\+R\+E\+A\+D\+\_\+\+D\+A\+TA}, 
+{\bfseries C\+G\+P\+S\+\_\+\+S\+P\+I\+\_\+\+S\+T\+E\+P\+\_\+max}
+ \}
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_af004603cf5c3cba5dbc84eb18de03f13}\label{cfg__gps__module_8h_af004603cf5c3cba5dbc84eb18de03f13}} 
+enum {\bfseries C\+G\+P\+S\+\_\+\+A\+T\+\_\+\+C\+M\+D\+\_\+type\+\_\+e} \{ \newline
+{\bfseries C\+G\+P\+S\+\_\+\+I\+N\+I\+T\+\_\+\+C\+M\+D\+\_\+\+E\+C\+H\+O\+\_\+\+O\+FF}, 
+{\bfseries C\+G\+P\+S\+\_\+\+I\+N\+I\+T\+\_\+\+C\+M\+D\+\_\+\+G\+P\+S\+\_\+\+M\+O\+D\+E\+\_\+\+R\+E\+AD}, 
+{\bfseries C\+G\+P\+S\+\_\+\+I\+N\+I\+T\+\_\+\+C\+M\+D\+\_\+\+G\+P\+S\+\_\+\+M\+O\+D\+E\+\_\+\+C\+HK}, 
+{\bfseries C\+G\+P\+S\+\_\+\+I\+N\+I\+T\+\_\+\+C\+M\+D\+\_\+\+G\+P\+S\+\_\+\+M\+O\+D\+E\+\_\+\+S\+ET}, 
+\newline
+{\bfseries C\+G\+P\+S\+\_\+\+I\+N\+I\+T\+\_\+\+C\+M\+D\+\_\+\+C\+W\+L\+A\+P\+O\+P\+T\+\_\+\+S\+ET}, 
+{\bfseries C\+G\+P\+S\+\_\+\+I\+N\+I\+T\+\_\+\+C\+M\+D\+\_\+type\+\_\+max}
+ \}
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_abd6ff1b1baf5ce6422fee33980d67397}\label{cfg__gps__module_8h_abd6ff1b1baf5ce6422fee33980d67397}} 
+enum {\bfseries C\+G\+P\+S\+\_\+\+S\+C\+A\+N\+\_\+\+R\+E\+S\+P\+\_\+e} \{ \newline
+{\bfseries C\+G\+P\+S\+\_\+\+S\+C\+A\+N\+\_\+\+R\+E\+S\+P\+\_\+\+P\+A\+R\+S\+E\+\_\+1\+S\+T\+\_\+\+C\+H\+AR}, 
+{\bfseries C\+G\+P\+S\+\_\+\+S\+C\+A\+N\+\_\+\+R\+E\+S\+P\+\_\+\+P\+A\+R\+S\+E\+\_\+\+S\+TR}, 
+{\bfseries C\+G\+P\+S\+\_\+\+S\+C\+A\+N\+\_\+\+R\+E\+S\+P\+\_\+\+P\+A\+R\+A\+M\+\_\+\+S\+K\+IP}, 
+{\bfseries C\+G\+P\+S\+\_\+\+S\+C\+A\+N\+\_\+\+R\+E\+S\+P\+\_\+\+P\+A\+R\+A\+M\+\_\+\+R\+S\+S\+ID}, 
+\newline
+{\bfseries C\+G\+P\+S\+\_\+\+S\+C\+A\+N\+\_\+\+R\+E\+S\+P\+\_\+\+M\+AX}
+ \}
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a6b981ccbd308a1638d6aba398dd5deae}\label{cfg__gps__module_8h_a6b981ccbd308a1638d6aba398dd5deae}} 
+enum {\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+Type\+\_\+e} \{ \newline
+{\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+N\+O\+NE} = 0, 
+{\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+G\+GA}, 
+{\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+R\+MC}, 
+{\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+G\+SV}, 
+\newline
+{\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+G\+SA}, 
+{\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+V\+TG}, 
+{\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+P\+Q\+X\+FI}, 
+{\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+G\+P\+G\+GA} = 10, 
+\newline
+{\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+G\+P\+R\+MC}, 
+{\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+G\+P\+G\+SV}, 
+{\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+G\+P\+G\+SA}, 
+{\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+G\+P\+V\+TG}, 
+\newline
+{\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+G\+L\+G\+SV}, 
+{\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+G\+N\+G\+SA}, 
+{\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+G\+N\+G\+NS}, 
+{\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+G\+A\+R\+MC}, 
+\newline
+{\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+G\+A\+G\+SV}, 
+{\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+G\+A\+G\+SA}, 
+{\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+G\+A\+V\+TG}, 
+{\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+P\+S\+T\+IS}, 
+\newline
+{\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+G\+S\+V\+\_\+\+E\+X\+T\+E\+N\+D\+ED}, 
+{\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+G\+A\+G\+GA}, 
+{\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+P\+Q\+G\+SA}, 
+{\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+P\+Q\+G\+SV}, 
+\newline
+{\bfseries C\+G\+P\+S\+\_\+\+N\+M\+E\+A\+\_\+\+G\+N\+R\+MC}
+ \}
+\item 
+enum \hyperlink{cfg__gps__module_8h_ac1e92675d5432f785d5302b3046c23da}{nmea\+P\+A\+C\+K\+T\+Y\+PE} \{ \newline
+\hyperlink{cfg__gps__module_8h_ac1e92675d5432f785d5302b3046c23daa8bc672e0f07331fcae93d8ed68f50db7}{G\+P\+N\+ON} = 0x0000, 
+\hyperlink{cfg__gps__module_8h_ac1e92675d5432f785d5302b3046c23daa7ce569034cd13427e4e6c3db6130017d}{G\+P\+G\+GA} = 0x0001, 
+\hyperlink{cfg__gps__module_8h_ac1e92675d5432f785d5302b3046c23daa13962a43e3a2639f1cdc34c69e49102a}{G\+P\+G\+SA} = 0x0002, 
+\hyperlink{cfg__gps__module_8h_ac1e92675d5432f785d5302b3046c23daa261c9fc87414b4426986d6a6e8d9bf24}{G\+P\+G\+SV} = 0x0004, 
+\newline
+\hyperlink{cfg__gps__module_8h_ac1e92675d5432f785d5302b3046c23daa4e46c2c907610e3cae94447c3d4c43f4}{G\+P\+R\+MC} = 0x0008, 
+\hyperlink{cfg__gps__module_8h_ac1e92675d5432f785d5302b3046c23daabe049feacfc7943a654b4c35e2a08c18}{G\+P\+V\+TG} = 0x0010
+ \}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_af02780867baa9e6310c9c42b997cb593}\label{cfg__gps__module_8h_af02780867baa9e6310c9c42b997cb593}} 
+void \hyperlink{cfg__gps__module_8h_af02780867baa9e6310c9c42b997cb593}{c\+Gps\+\_\+resource\+\_\+init} (void)
+\begin{DoxyCompactList}\small\item\em Function for initializing resource of gps module. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a0848a525b61a681cc128469aa4264ebe}\label{cfg__gps__module_8h_a0848a525b61a681cc128469aa4264ebe}} 
+void \hyperlink{cfg__gps__module_8h_a0848a525b61a681cc128469aa4264ebe}{c\+Gps\+\_\+prepare\+\_\+start} (void)
+\begin{DoxyCompactList}\small\item\em Function for prepare gps module. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_add53a2f1f13220f86dc631a2e4449671}\label{cfg__gps__module_8h_add53a2f1f13220f86dc631a2e4449671}} 
+int \hyperlink{cfg__gps__module_8h_add53a2f1f13220f86dc631a2e4449671}{c\+Gps\+\_\+acquire\+\_\+tracking\+\_\+check} (void)
+\begin{DoxyCompactList}\small\item\em Function for acquire tracking available check. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a105672ac64c7e6f75abee79db480b959}\label{cfg__gps__module_8h_a105672ac64c7e6f75abee79db480b959}} 
+void \hyperlink{cfg__gps__module_8h_a105672ac64c7e6f75abee79db480b959}{c\+Gps\+\_\+gpio\+\_\+init} (void)
+\begin{DoxyCompactList}\small\item\em Function for initializing gpio of gps. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_af83ddb85e61b8de5fc21776e31062103}\label{cfg__gps__module_8h_af83ddb85e61b8de5fc21776e31062103}} 
+void \hyperlink{cfg__gps__module_8h_af83ddb85e61b8de5fc21776e31062103}{c\+Gps\+\_\+power\+\_\+control} (bool on, bool first)
+\begin{DoxyCompactList}\small\item\em Function for entering gps power control. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_ac3e0bb0922fc93f6658c1decc49022f0}\label{cfg__gps__module_8h_ac3e0bb0922fc93f6658c1decc49022f0}} 
+void \hyperlink{cfg__gps__module_8h_ac3e0bb0922fc93f6658c1decc49022f0}{c\+Gps\+\_\+bus\+\_\+enable} (bool enable)
+\begin{DoxyCompactList}\small\item\em Function for data bus enable/disable control. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a667cc7d8d461aee7e44ca6520c5807ae}\label{cfg__gps__module_8h_a667cc7d8d461aee7e44ca6520c5807ae}} 
+bool \hyperlink{cfg__gps__module_8h_a667cc7d8d461aee7e44ca6520c5807ae}{c\+Gps\+\_\+bus\+\_\+busy\+\_\+check} (void)
+\begin{DoxyCompactList}\small\item\em Function for status check (bus use check) \end{DoxyCompactList}\item 
+int \hyperlink{cfg__gps__module_8h_a3af374e76329eb09fa578f995a197a24}{c\+Gps\+\_\+nmea\+\_\+get\+\_\+buf\+Ptr} (uint8\+\_\+t $\ast$$\ast$nmea\+\_\+gprmc)
+\begin{DoxyCompactList}\small\item\em Function for getting gps data result. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_ac90a3d72c52a7c74cdd1b274d17a2fea}\label{cfg__gps__module_8h_ac90a3d72c52a7c74cdd1b274d17a2fea}} 
+int \hyperlink{cfg__gps__module_8h_ac90a3d72c52a7c74cdd1b274d17a2fea}{c\+Gps\+\_\+status\+\_\+available} (void)
+\begin{DoxyCompactList}\small\item\em Function for status check (G\+PS available check) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_ae0fceee88e01e034a23b236fd593b2e5}\label{cfg__gps__module_8h_ae0fceee88e01e034a23b236fd593b2e5}} 
+void \hyperlink{cfg__gps__module_8h_ae0fceee88e01e034a23b236fd593b2e5}{c\+Gps\+\_\+nmea\+\_\+acquire\+\_\+request} (void)
+\begin{DoxyCompactList}\small\item\em Function for gps nmea data acquire request. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_aede358520f3657365282f7cb26995258}\label{cfg__gps__module_8h_aede358520f3657365282f7cb26995258}} 
+int \hyperlink{cfg__gps__module_8h_aede358520f3657365282f7cb26995258}{c\+Gps\+\_\+nmea\+\_\+position\+\_\+fix\+\_\+check} (void)
+\begin{DoxyCompactList}\small\item\em Function for gps pposition fixed check(complete of get gps data) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a9aed5d780f5368fdda057fa560709136}\label{cfg__gps__module_8h_a9aed5d780f5368fdda057fa560709136}} 
+int \hyperlink{cfg__gps__module_8h_a9aed5d780f5368fdda057fa560709136}{c\+Gps\+\_\+state\+\_\+get} (void)
+\begin{DoxyCompactList}\small\item\em Function for gps state. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a00a2602aa142fa44ec8b272e3ae723bc}\label{cfg__gps__module_8h_a00a2602aa142fa44ec8b272e3ae723bc}} 
+void \hyperlink{cfg__gps__module_8h_a00a2602aa142fa44ec8b272e3ae723bc}{c\+Gps\+\_\+only\+\_\+power\+\_\+control} (bool on)
+\begin{DoxyCompactList}\small\item\em Function for gps just power control(\+Not control data interface) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_ae543dbeef0755a87014cb92f14ae4f94}\label{cfg__gps__module_8h_ae543dbeef0755a87014cb92f14ae4f94}} 
+int \hyperlink{cfg__gps__module_8h_ae543dbeef0755a87014cb92f14ae4f94}{c\+Gps\+\_\+bypass\+\_\+get\+\_\+mode\+\_\+change} (void)
+\begin{DoxyCompactList}\small\item\em Function for bypass state get mode change. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_af8a174133308478e73924fc19a79aa5f}\label{cfg__gps__module_8h_af8a174133308478e73924fc19a79aa5f}} 
+void \hyperlink{cfg__gps__module_8h_af8a174133308478e73924fc19a79aa5f}{c\+Gps\+\_\+bypass\+\_\+abort\+\_\+request} (void)
+\begin{DoxyCompactList}\small\item\em Function for bypass abort request. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a87285e7c520d99274c93f3e930d750f5}\label{cfg__gps__module_8h_a87285e7c520d99274c93f3e930d750f5}} 
+int \hyperlink{cfg__gps__module_8h_a87285e7c520d99274c93f3e930d750f5}{c\+Gps\+\_\+bypass\+\_\+available\+\_\+check} (void)
+\begin{DoxyCompactList}\small\item\em Function for bypass available check. \end{DoxyCompactList}\item 
+int \hyperlink{cfg__gps__module_8h_a89c6c20b0a68551d13a36e91d7f77c4e}{c\+Gps\+\_\+bypass\+\_\+request} (void)
+\begin{DoxyCompactList}\small\item\em Function for bypass mode (for i2c slavle control). \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_aafe614d10d5261da0071f7368a7aca26}\label{cfg__gps__module_8h_aafe614d10d5261da0071f7368a7aca26}} 
+int \hyperlink{cfg__gps__module_8h_aafe614d10d5261da0071f7368a7aca26}{c\+Gps\+\_\+bypass\+\_\+mode} (void)
+\begin{DoxyCompactList}\small\item\em Function for bypass status check. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a31cce8a4d4e37f84b15ee5afacf52175}\label{cfg__gps__module_8h_a31cce8a4d4e37f84b15ee5afacf52175}} 
+bool \hyperlink{cfg__gps__module_8h_a31cce8a4d4e37f84b15ee5afacf52175}{c\+Gps\+\_\+is\+\_\+bypass\+\_\+mode} (void)
+\begin{DoxyCompactList}\small\item\em Function for bypass status check. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a4568641b04e9babd95247015f1cd53c6}\label{cfg__gps__module_8h_a4568641b04e9babd95247015f1cd53c6}} 
+void \hyperlink{cfg__gps__module_8h_a4568641b04e9babd95247015f1cd53c6}{c\+Gps\+State\+\_\+bypass\+\_\+response} (const char $\ast$p\+Data, unsigned int data\+Size)
+\begin{DoxyCompactList}\small\item\em Function for bypass response data. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_aec9d8ad9edc663763862ba5ae3dcab22}\label{cfg__gps__module_8h_aec9d8ad9edc663763862ba5ae3dcab22}} 
+void \hyperlink{cfg__gps__module_8h_aec9d8ad9edc663763862ba5ae3dcab22}{c\+Gps\+\_\+download\+\_\+power\+\_\+control} (void)
+\begin{DoxyCompactList}\small\item\em Function for entering gps download mode power control. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__gps__module_8h_a730a6d421bdffcc5700bb55526375d73}\label{cfg__gps__module_8h_a730a6d421bdffcc5700bb55526375d73}} 
+bool {\bfseries c\+Gps\+\_\+bypass\+\_\+cmd\+\_\+request} (const char $\ast$p\+Data, unsigned int data\+Size)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+control gps module. 
+
+This file contains the control gps module. 
+
+\subsection{Typedef Documentation}
+\mbox{\Hypertarget{cfg__gps__module_8h_a2bfc81cef2fe1747c01217f0c8d0e74f}\label{cfg__gps__module_8h_a2bfc81cef2fe1747c01217f0c8d0e74f}} 
+\index{cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}!nmea\+G\+P\+R\+MC@{nmea\+G\+P\+R\+MC}}
+\index{nmea\+G\+P\+R\+MC@{nmea\+G\+P\+R\+MC}!cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}}
+\subsubsection{\texorpdfstring{nmea\+G\+P\+R\+MC}{nmeaGPRMC}}
+{\footnotesize\ttfamily typedef struct \hyperlink{struct__nmea_g_p_r_m_c}{\+\_\+nmea\+G\+P\+R\+MC}  \hyperlink{cfg__gps__module_8h_a2bfc81cef2fe1747c01217f0c8d0e74f}{nmea\+G\+P\+R\+MC}}
+
+R\+MC packet information structure (Recommended Minimum sentence C) \mbox{\Hypertarget{cfg__gps__module_8h_a301ec5a2f9b3d475f65c39e167978791}\label{cfg__gps__module_8h_a301ec5a2f9b3d475f65c39e167978791}} 
+\index{cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}!nmea\+I\+N\+FO@{nmea\+I\+N\+FO}}
+\index{nmea\+I\+N\+FO@{nmea\+I\+N\+FO}!cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}}
+\subsubsection{\texorpdfstring{nmea\+I\+N\+FO}{nmeaINFO}}
+{\footnotesize\ttfamily typedef struct \hyperlink{struct__nmea_i_n_f_o}{\+\_\+nmea\+I\+N\+FO}  \hyperlink{cfg__gps__module_8h_a301ec5a2f9b3d475f65c39e167978791}{nmea\+I\+N\+FO}}
+
+Summary G\+PS information from all parsed packets, used also for generating N\+M\+EA stream \begin{DoxySeeAlso}{See also}
+nmea\+\_\+parse 
+
+nmea\+\_\+\+G\+P\+G\+G\+A2info, nmea\+\_\+...2info 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{cfg__gps__module_8h_ac39e2b3c5daba45df490d279614cae24}\label{cfg__gps__module_8h_ac39e2b3c5daba45df490d279614cae24}} 
+\index{cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}!nmea\+P\+OS@{nmea\+P\+OS}}
+\index{nmea\+P\+OS@{nmea\+P\+OS}!cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}}
+\subsubsection{\texorpdfstring{nmea\+P\+OS}{nmeaPOS}}
+{\footnotesize\ttfamily typedef struct \hyperlink{struct__nmea_p_o_s}{\+\_\+nmea\+P\+OS}  \hyperlink{cfg__gps__module_8h_ac39e2b3c5daba45df490d279614cae24}{nmea\+P\+OS}}
+
+Position data in fractional degrees or radians \mbox{\Hypertarget{cfg__gps__module_8h_a7b2a7e4c7be4ebe7a590ce9239bf1e1f}\label{cfg__gps__module_8h_a7b2a7e4c7be4ebe7a590ce9239bf1e1f}} 
+\index{cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}!nmea\+S\+A\+T\+E\+L\+L\+I\+TE@{nmea\+S\+A\+T\+E\+L\+L\+I\+TE}}
+\index{nmea\+S\+A\+T\+E\+L\+L\+I\+TE@{nmea\+S\+A\+T\+E\+L\+L\+I\+TE}!cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}}
+\subsubsection{\texorpdfstring{nmea\+S\+A\+T\+E\+L\+L\+I\+TE}{nmeaSATELLITE}}
+{\footnotesize\ttfamily typedef struct \hyperlink{struct__nmea_s_a_t_e_l_l_i_t_e}{\+\_\+nmea\+S\+A\+T\+E\+L\+L\+I\+TE}  \hyperlink{cfg__gps__module_8h_a7b2a7e4c7be4ebe7a590ce9239bf1e1f}{nmea\+S\+A\+T\+E\+L\+L\+I\+TE}}
+
+Information about satellite \begin{DoxySeeAlso}{See also}
+\hyperlink{cfg__gps__module_8h_ae8abd5b6dfff0282bd633dbaac1343ec}{nmea\+S\+A\+T\+I\+N\+FO} 
+
+nmea\+G\+P\+G\+SV 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{cfg__gps__module_8h_ae8abd5b6dfff0282bd633dbaac1343ec}\label{cfg__gps__module_8h_ae8abd5b6dfff0282bd633dbaac1343ec}} 
+\index{cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}!nmea\+S\+A\+T\+I\+N\+FO@{nmea\+S\+A\+T\+I\+N\+FO}}
+\index{nmea\+S\+A\+T\+I\+N\+FO@{nmea\+S\+A\+T\+I\+N\+FO}!cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}}
+\subsubsection{\texorpdfstring{nmea\+S\+A\+T\+I\+N\+FO}{nmeaSATINFO}}
+{\footnotesize\ttfamily typedef struct \hyperlink{struct__nmea_s_a_t_i_n_f_o}{\+\_\+nmea\+S\+A\+T\+I\+N\+FO}  \hyperlink{cfg__gps__module_8h_ae8abd5b6dfff0282bd633dbaac1343ec}{nmea\+S\+A\+T\+I\+N\+FO}}
+
+Information about all satellites in view \begin{DoxySeeAlso}{See also}
+\hyperlink{cfg__gps__module_8h_a301ec5a2f9b3d475f65c39e167978791}{nmea\+I\+N\+FO} 
+
+nmea\+G\+P\+G\+SV 
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{cfg__gps__module_8h_a02bf9ae5b3df2ced0b3406a214735cb2}\label{cfg__gps__module_8h_a02bf9ae5b3df2ced0b3406a214735cb2}} 
+\index{cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}!nmea\+T\+I\+ME@{nmea\+T\+I\+ME}}
+\index{nmea\+T\+I\+ME@{nmea\+T\+I\+ME}!cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}}
+\subsubsection{\texorpdfstring{nmea\+T\+I\+ME}{nmeaTIME}}
+{\footnotesize\ttfamily typedef struct \hyperlink{struct__nmea_t_i_m_e}{\+\_\+nmea\+T\+I\+ME}  \hyperlink{cfg__gps__module_8h_a02bf9ae5b3df2ced0b3406a214735cb2}{nmea\+T\+I\+ME}}
+
+Date and time data \begin{DoxySeeAlso}{See also}
+nmea\+\_\+time\+\_\+now 
+\end{DoxySeeAlso}
+
+
+\subsection{Enumeration Type Documentation}
+\mbox{\Hypertarget{cfg__gps__module_8h_ac1e92675d5432f785d5302b3046c23da}\label{cfg__gps__module_8h_ac1e92675d5432f785d5302b3046c23da}} 
+\index{cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}!nmea\+P\+A\+C\+K\+T\+Y\+PE@{nmea\+P\+A\+C\+K\+T\+Y\+PE}}
+\index{nmea\+P\+A\+C\+K\+T\+Y\+PE@{nmea\+P\+A\+C\+K\+T\+Y\+PE}!cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}}
+\subsubsection{\texorpdfstring{nmea\+P\+A\+C\+K\+T\+Y\+PE}{nmeaPACKTYPE}}
+{\footnotesize\ttfamily enum \hyperlink{cfg__gps__module_8h_ac1e92675d5432f785d5302b3046c23da}{nmea\+P\+A\+C\+K\+T\+Y\+PE}}
+
+N\+M\+EA packets type which parsed and generated by library \begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{G\+P\+N\+ON@{G\+P\+N\+ON}!cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}}\index{cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}!G\+P\+N\+ON@{G\+P\+N\+ON}}}\mbox{\Hypertarget{cfg__gps__module_8h_ac1e92675d5432f785d5302b3046c23daa8bc672e0f07331fcae93d8ed68f50db7}\label{cfg__gps__module_8h_ac1e92675d5432f785d5302b3046c23daa8bc672e0f07331fcae93d8ed68f50db7}} 
+G\+P\+N\+ON&Unknown packet type. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{G\+P\+G\+GA@{G\+P\+G\+GA}!cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}}\index{cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}!G\+P\+G\+GA@{G\+P\+G\+GA}}}\mbox{\Hypertarget{cfg__gps__module_8h_ac1e92675d5432f785d5302b3046c23daa7ce569034cd13427e4e6c3db6130017d}\label{cfg__gps__module_8h_ac1e92675d5432f785d5302b3046c23daa7ce569034cd13427e4e6c3db6130017d}} 
+G\+P\+G\+GA&G\+GA -\/ Essential fix data which provide 3D location and accuracy data. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{G\+P\+G\+SA@{G\+P\+G\+SA}!cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}}\index{cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}!G\+P\+G\+SA@{G\+P\+G\+SA}}}\mbox{\Hypertarget{cfg__gps__module_8h_ac1e92675d5432f785d5302b3046c23daa13962a43e3a2639f1cdc34c69e49102a}\label{cfg__gps__module_8h_ac1e92675d5432f785d5302b3046c23daa13962a43e3a2639f1cdc34c69e49102a}} 
+G\+P\+G\+SA&G\+SA -\/ G\+PS receiver operating mode, S\+Vs used for navigation, and D\+OP values. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{G\+P\+G\+SV@{G\+P\+G\+SV}!cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}}\index{cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}!G\+P\+G\+SV@{G\+P\+G\+SV}}}\mbox{\Hypertarget{cfg__gps__module_8h_ac1e92675d5432f785d5302b3046c23daa261c9fc87414b4426986d6a6e8d9bf24}\label{cfg__gps__module_8h_ac1e92675d5432f785d5302b3046c23daa261c9fc87414b4426986d6a6e8d9bf24}} 
+G\+P\+G\+SV&G\+SV -\/ Number of S\+Vs in view, P\+RN numbers, elevation, azimuth \& S\+NR values. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{G\+P\+R\+MC@{G\+P\+R\+MC}!cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}}\index{cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}!G\+P\+R\+MC@{G\+P\+R\+MC}}}\mbox{\Hypertarget{cfg__gps__module_8h_ac1e92675d5432f785d5302b3046c23daa4e46c2c907610e3cae94447c3d4c43f4}\label{cfg__gps__module_8h_ac1e92675d5432f785d5302b3046c23daa4e46c2c907610e3cae94447c3d4c43f4}} 
+G\+P\+R\+MC&R\+MC -\/ Recommended Minimum Specific G\+P\+S/\+T\+R\+A\+N\+S\+IT Data. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{G\+P\+V\+TG@{G\+P\+V\+TG}!cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}}\index{cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}!G\+P\+V\+TG@{G\+P\+V\+TG}}}\mbox{\Hypertarget{cfg__gps__module_8h_ac1e92675d5432f785d5302b3046c23daabe049feacfc7943a654b4c35e2a08c18}\label{cfg__gps__module_8h_ac1e92675d5432f785d5302b3046c23daabe049feacfc7943a654b4c35e2a08c18}} 
+G\+P\+V\+TG&V\+TG -\/ Actual track made good and speed over ground. \\
+\hline
+
+\end{DoxyEnumFields}
+
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{cfg__gps__module_8h_a89c6c20b0a68551d13a36e91d7f77c4e}\label{cfg__gps__module_8h_a89c6c20b0a68551d13a36e91d7f77c4e}} 
+\index{cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}!c\+Gps\+\_\+bypass\+\_\+request@{c\+Gps\+\_\+bypass\+\_\+request}}
+\index{c\+Gps\+\_\+bypass\+\_\+request@{c\+Gps\+\_\+bypass\+\_\+request}!cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}}
+\subsubsection{\texorpdfstring{c\+Gps\+\_\+bypass\+\_\+request()}{cGps\_bypass\_request()}}
+{\footnotesize\ttfamily int c\+Gps\+\_\+bypass\+\_\+request (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Function for bypass mode (for i2c slavle control). 
+
+\begin{DoxyReturn}{Returns}
+C\+W\+I\+F\+I\+\_\+\+Result\+\_\+\+OK on success. Otherwise an error code(eg.\+C\+W\+I\+F\+I\+\_\+\+Result\+\_\+\+Busy). 
+\end{DoxyReturn}
+\mbox{\Hypertarget{cfg__gps__module_8h_a3af374e76329eb09fa578f995a197a24}\label{cfg__gps__module_8h_a3af374e76329eb09fa578f995a197a24}} 
+\index{cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}!c\+Gps\+\_\+nmea\+\_\+get\+\_\+buf\+Ptr@{c\+Gps\+\_\+nmea\+\_\+get\+\_\+buf\+Ptr}}
+\index{c\+Gps\+\_\+nmea\+\_\+get\+\_\+buf\+Ptr@{c\+Gps\+\_\+nmea\+\_\+get\+\_\+buf\+Ptr}!cfg\+\_\+gps\+\_\+module.\+h@{cfg\+\_\+gps\+\_\+module.\+h}}
+\subsubsection{\texorpdfstring{c\+Gps\+\_\+nmea\+\_\+get\+\_\+buf\+Ptr()}{cGps\_nmea\_get\_bufPtr()}}
+{\footnotesize\ttfamily int c\+Gps\+\_\+nmea\+\_\+get\+\_\+buf\+Ptr (\begin{DoxyParamCaption}\item[{uint8\+\_\+t $\ast$$\ast$}]{nmea\+\_\+gprmc }\end{DoxyParamCaption})}
+
+
+
+Function for getting gps data result. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em pointer} & of getting gps data\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+C\+G\+P\+S\+\_\+\+Result\+\_\+\+OK on success. Otherwise an error code(eg.\+C\+G\+P\+S\+\_\+\+Result\+\_\+\+No\+Data). 
+\end{DoxyReturn}

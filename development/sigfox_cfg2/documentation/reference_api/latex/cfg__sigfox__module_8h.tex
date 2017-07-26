@@ -1,0 +1,204 @@
+\hypertarget{cfg__sigfox__module_8h}{}\section{cfg\+\_\+sigfox\+\_\+module.\+h File Reference}
+\label{cfg__sigfox__module_8h}\index{cfg\+\_\+sigfox\+\_\+module.\+h@{cfg\+\_\+sigfox\+\_\+module.\+h}}
+
+
+control sigfox module.  
+
+
+{\ttfamily \#include \char`\"{}cfg\+\_\+board\+\_\+def.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}nordic\+\_\+common.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}nrf.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ble\+\_\+hci.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ble\+\_\+advdata.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ble\+\_\+advertising.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ble\+\_\+conn\+\_\+params.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}softdevice\+\_\+handler.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}app\+\_\+timer.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}app\+\_\+button.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}ble\+\_\+nus.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}app\+\_\+uart.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}app\+\_\+util\+\_\+platform.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}bsp.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}bsp\+\_\+btn\+\_\+ble.\+h\char`\"{}}\newline
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{cfg__sigfox__module_8h_a003ad908be37b1b47a217597b7033918}\label{cfg__sigfox__module_8h_a003ad908be37b1b47a217597b7033918}} 
+\#define {\bfseries S\+I\+G\+F\+O\+X\+\_\+\+S\+E\+N\+D\+\_\+\+P\+A\+Y\+L\+O\+A\+D\+\_\+\+S\+I\+ZE}~(12)
+\item 
+\mbox{\Hypertarget{cfg__sigfox__module_8h_a353460eafb4caf99bfea95d6101489d2}\label{cfg__sigfox__module_8h_a353460eafb4caf99bfea95d6101489d2}} 
+\#define {\bfseries S\+I\+G\+F\+O\+X\+\_\+\+B\+O\+O\+T\+\_\+\+W\+A\+I\+T\+\_\+\+T\+I\+CK}~(10)
+\end{DoxyCompactItemize}
+\subsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{cfg__sigfox__module_8h_aca4b69ffa4aa6bb0282806f5df05fb7c}\label{cfg__sigfox__module_8h_aca4b69ffa4aa6bb0282806f5df05fb7c}} 
+enum {\bfseries sigfox\+\_\+cmd\+\_\+c} \{ \newline
+{\bfseries S\+I\+G\+F\+O\+X\+\_\+\+D\+U\+M\+M\+Y\+\_\+\+C\+MD}, 
+{\bfseries S\+I\+G\+F\+O\+X\+\_\+\+S\+F\+\_\+\+C\+MD}, 
+{\bfseries S\+I\+G\+F\+O\+X\+\_\+\+S\+F\+\_\+\+R\+\_\+\+C\+MD}, 
+{\bfseries S\+I\+G\+F\+O\+X\+\_\+\+O\+O\+B\+\_\+\+C\+MD}, 
+\newline
+{\bfseries S\+I\+G\+F\+O\+X\+\_\+\+P\+O\+W\+E\+R\+M\+O\+D\+E\+\_\+\+C\+MD}, 
+{\bfseries S\+I\+G\+F\+O\+X\+\_\+\+B\+R\+E\+A\+K\+\_\+\+C\+MD}, 
+{\bfseries S\+I\+G\+F\+O\+X\+\_\+\+I\+D\+\_\+\+C\+MD}, 
+{\bfseries S\+I\+G\+F\+O\+X\+\_\+\+P\+A\+C\+C\+O\+D\+E\+\_\+\+C\+MD}, 
+\newline
+{\bfseries S\+I\+G\+F\+O\+X\+\_\+\+S\+N\+E\+K\+\_\+\+C\+MD}
+ \}
+\item 
+\mbox{\Hypertarget{cfg__sigfox__module_8h_ab95837f1de3a91518a56cce26da4a401}\label{cfg__sigfox__module_8h_ab95837f1de3a91518a56cce26da4a401}} 
+enum \hyperlink{cfg__sigfox__module_8h_ab95837f1de3a91518a56cce26da4a401}{sigfox\+\_\+state\+\_\+s} \{ \newline
+{\bfseries N\+O\+N\+E\+\_\+S}, 
+{\bfseries S\+E\+T\+U\+P\+\_\+S}, 
+{\bfseries I\+N\+I\+T\+\_\+S}, 
+{\bfseries I\+N\+I\+T\+\_\+R}, 
+\newline
+{\bfseries T\+R\+A\+N\+S\+M\+I\+T\+\_\+\+F\+R\+A\+M\+E\+\_\+S}, 
+{\bfseries T\+R\+A\+N\+S\+M\+I\+T\+\_\+\+F\+R\+A\+M\+E\+\_\+R}, 
+{\bfseries T\+R\+A\+N\+S\+M\+I\+T\+\_\+\+F\+R\+A\+M\+E\+\_\+\+D\+O\+W\+N\+L\+I\+N\+K\+\_\+S}, 
+{\bfseries T\+R\+A\+N\+S\+M\+I\+T\+\_\+\+F\+R\+A\+M\+E\+\_\+\+D\+O\+W\+N\+L\+I\+N\+K\+\_\+R}, 
+\newline
+{\bfseries T\+R\+A\+N\+S\+M\+I\+T\+\_\+\+O\+O\+B\+\_\+S}, 
+{\bfseries T\+R\+A\+N\+S\+M\+I\+T\+\_\+\+O\+O\+B\+\_\+R}, 
+{\bfseries I\+D\+L\+E\+\_\+S}, 
+{\bfseries I\+D\+L\+E\+\_\+R}, 
+\newline
+{\bfseries B\+Y\+P\+A\+S\+S\+\_\+\+I\+N\+IT}, 
+{\bfseries B\+Y\+P\+A\+S\+S\+\_\+\+W\+O\+RK}, 
+{\bfseries G\+E\+T\+\_\+\+I\+D\+\_\+S}, 
+{\bfseries G\+E\+T\+\_\+\+I\+D\+\_\+R}, 
+\newline
+{\bfseries G\+E\+T\+\_\+\+P\+A\+C\+C\+O\+D\+E\+\_\+S}, 
+{\bfseries G\+E\+T\+\_\+\+P\+A\+C\+C\+O\+D\+E\+\_\+R}, 
+{\bfseries E\+X\+IT}
+ \}\begin{DoxyCompactList}\small\item\em Structure for sigfox state machine. \end{DoxyCompactList}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{cfg__sigfox__module_8h_aa8a05770114fa15b61c320f977169b42}\label{cfg__sigfox__module_8h_aa8a05770114fa15b61c320f977169b42}} 
+void \hyperlink{cfg__sigfox__module_8h_aa8a05770114fa15b61c320f977169b42}{sigfox\+\_\+power\+\_\+on} (bool on\+\_\+off)
+\begin{DoxyCompactList}\small\item\em function for powering on sigfox module \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__sigfox__module_8h_a60f8a8522c20b4f112728d3995b76ee3}\label{cfg__sigfox__module_8h_a60f8a8522c20b4f112728d3995b76ee3}} 
+void \hyperlink{cfg__sigfox__module_8h_a60f8a8522c20b4f112728d3995b76ee3}{cfg\+\_\+sigfox\+\_\+uart\+\_\+init} (void)
+\begin{DoxyCompactList}\small\item\em function for intializing U\+A\+RT in sigfox module. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__sigfox__module_8h_a0a764c91cc6b52260c4f0f9e1823540d}\label{cfg__sigfox__module_8h_a0a764c91cc6b52260c4f0f9e1823540d}} 
+void \hyperlink{cfg__sigfox__module_8h_a0a764c91cc6b52260c4f0f9e1823540d}{cfg\+\_\+sigfox\+\_\+timer\+\_\+create} (void)
+\begin{DoxyCompactList}\small\item\em function for creating sigfox module timer. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__sigfox__module_8h_ab7327c2b8ed70bfaa086455fec5d9120}\label{cfg__sigfox__module_8h_ab7327c2b8ed70bfaa086455fec5d9120}} 
+void \hyperlink{cfg__sigfox__module_8h_ab7327c2b8ed70bfaa086455fec5d9120}{cfg\+\_\+sigfox\+\_\+timers\+\_\+start} (void)
+\begin{DoxyCompactList}\small\item\em function for starting sigfox module timer. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__sigfox__module_8h_aa02edf487c928628c173f08765b64c11}\label{cfg__sigfox__module_8h_aa02edf487c928628c173f08765b64c11}} 
+void \hyperlink{cfg__sigfox__module_8h_aa02edf487c928628c173f08765b64c11}{cfg\+\_\+sigfox\+\_\+timers\+\_\+stop} (void)
+\begin{DoxyCompactList}\small\item\em function for stoping sigfox module timer. \end{DoxyCompactList}\item 
+\hyperlink{cfg__sigfox__module_8h_ab95837f1de3a91518a56cce26da4a401}{sigfox\+\_\+state\+\_\+s} \hyperlink{cfg__sigfox__module_8h_a7d4cab01e93af884235422ec20ff5636}{sigfox\+\_\+get\+\_\+state} (void)
+\begin{DoxyCompactList}\small\item\em function for getting the current state from sigfox module. \end{DoxyCompactList}\item 
+bool \hyperlink{cfg__sigfox__module_8h_aac7ddc2af6adf117a659662d757528d9}{sigfox\+\_\+check\+\_\+exit\+\_\+excute} (void)
+\begin{DoxyCompactList}\small\item\em function for indication whether exit state in sigfox module is or not. \end{DoxyCompactList}\item 
+void \hyperlink{cfg__sigfox__module_8h_a5d8527b7e1222b582491a0586e320470}{sigfox\+\_\+set\+\_\+state} (\hyperlink{cfg__sigfox__module_8h_ab95837f1de3a91518a56cce26da4a401}{sigfox\+\_\+state\+\_\+s} m\+\_\+state)
+\begin{DoxyCompactList}\small\item\em Function for setting sigfox state in sigfox scheduler. \end{DoxyCompactList}\item 
+uint8\+\_\+t $\ast$ \hyperlink{cfg__sigfox__module_8h_a3bdb1b9292109bf8ac52e280034e0d67}{cfg\+\_\+sigfox\+\_\+get\+\_\+downlink\+\_\+ptr} (uint32\+\_\+t $\ast$p\+\_\+get\+\_\+size)
+\begin{DoxyCompactList}\small\item\em Function for sending the data received from PC app to sigfox module. \end{DoxyCompactList}\item 
+bool \hyperlink{cfg__sigfox__module_8h_a862418017f2e939a98c06e64ff46f0da}{cfg\+\_\+sigfox\+\_\+downlink\+\_\+on\+\_\+off} (bool on\+\_\+off)
+\begin{DoxyCompactList}\small\item\em Function for downlink on off. \end{DoxyCompactList}\item 
+void \hyperlink{cfg__sigfox__module_8h_a0c8abcdd1e62457e2b569e3f0f260f13}{sigfox\+\_\+abort\+\_\+request} (void)
+\begin{DoxyCompactList}\small\item\em Function for setting flag to change scenario mode to test mode. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{cfg__sigfox__module_8h_a2fedf5294636f1207a2110de7755d6dd}\label{cfg__sigfox__module_8h_a2fedf5294636f1207a2110de7755d6dd}} 
+void {\bfseries cfg\+\_\+sigfox\+\_\+prepare\+\_\+start} (void)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+control sigfox module. 
+
+This file contains the control sigfox module. 
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{cfg__sigfox__module_8h_a862418017f2e939a98c06e64ff46f0da}\label{cfg__sigfox__module_8h_a862418017f2e939a98c06e64ff46f0da}} 
+\index{cfg\+\_\+sigfox\+\_\+module.\+h@{cfg\+\_\+sigfox\+\_\+module.\+h}!cfg\+\_\+sigfox\+\_\+downlink\+\_\+on\+\_\+off@{cfg\+\_\+sigfox\+\_\+downlink\+\_\+on\+\_\+off}}
+\index{cfg\+\_\+sigfox\+\_\+downlink\+\_\+on\+\_\+off@{cfg\+\_\+sigfox\+\_\+downlink\+\_\+on\+\_\+off}!cfg\+\_\+sigfox\+\_\+module.\+h@{cfg\+\_\+sigfox\+\_\+module.\+h}}
+\subsubsection{\texorpdfstring{cfg\+\_\+sigfox\+\_\+downlink\+\_\+on\+\_\+off()}{cfg\_sigfox\_downlink\_on\_off()}}
+{\footnotesize\ttfamily bool cfg\+\_\+sigfox\+\_\+downlink\+\_\+on\+\_\+off (\begin{DoxyParamCaption}\item[{bool}]{on\+\_\+off }\end{DoxyParamCaption})}
+
+
+
+Function for downlink on off. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em on} & off flag \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+old setting value 
+\end{DoxyReturn}
+\mbox{\Hypertarget{cfg__sigfox__module_8h_a3bdb1b9292109bf8ac52e280034e0d67}\label{cfg__sigfox__module_8h_a3bdb1b9292109bf8ac52e280034e0d67}} 
+\index{cfg\+\_\+sigfox\+\_\+module.\+h@{cfg\+\_\+sigfox\+\_\+module.\+h}!cfg\+\_\+sigfox\+\_\+get\+\_\+downlink\+\_\+ptr@{cfg\+\_\+sigfox\+\_\+get\+\_\+downlink\+\_\+ptr}}
+\index{cfg\+\_\+sigfox\+\_\+get\+\_\+downlink\+\_\+ptr@{cfg\+\_\+sigfox\+\_\+get\+\_\+downlink\+\_\+ptr}!cfg\+\_\+sigfox\+\_\+module.\+h@{cfg\+\_\+sigfox\+\_\+module.\+h}}
+\subsubsection{\texorpdfstring{cfg\+\_\+sigfox\+\_\+get\+\_\+downlink\+\_\+ptr()}{cfg\_sigfox\_get\_downlink\_ptr()}}
+{\footnotesize\ttfamily uint8\+\_\+t$\ast$ cfg\+\_\+sigfox\+\_\+get\+\_\+downlink\+\_\+ptr (\begin{DoxyParamCaption}\item[{uint32\+\_\+t $\ast$}]{p\+\_\+get\+\_\+size }\end{DoxyParamCaption})}
+
+
+
+Function for sending the data received from PC app to sigfox module. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em byte} & sending one byte \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+ponter of lownlink data 
+\end{DoxyReturn}
+\mbox{\Hypertarget{cfg__sigfox__module_8h_a0c8abcdd1e62457e2b569e3f0f260f13}\label{cfg__sigfox__module_8h_a0c8abcdd1e62457e2b569e3f0f260f13}} 
+\index{cfg\+\_\+sigfox\+\_\+module.\+h@{cfg\+\_\+sigfox\+\_\+module.\+h}!sigfox\+\_\+abort\+\_\+request@{sigfox\+\_\+abort\+\_\+request}}
+\index{sigfox\+\_\+abort\+\_\+request@{sigfox\+\_\+abort\+\_\+request}!cfg\+\_\+sigfox\+\_\+module.\+h@{cfg\+\_\+sigfox\+\_\+module.\+h}}
+\subsubsection{\texorpdfstring{sigfox\+\_\+abort\+\_\+request()}{sigfox\_abort\_request()}}
+{\footnotesize\ttfamily void sigfox\+\_\+abort\+\_\+request (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Function for setting flag to change scenario mode to test mode. 
+
+\mbox{\Hypertarget{cfg__sigfox__module_8h_aac7ddc2af6adf117a659662d757528d9}\label{cfg__sigfox__module_8h_aac7ddc2af6adf117a659662d757528d9}} 
+\index{cfg\+\_\+sigfox\+\_\+module.\+h@{cfg\+\_\+sigfox\+\_\+module.\+h}!sigfox\+\_\+check\+\_\+exit\+\_\+excute@{sigfox\+\_\+check\+\_\+exit\+\_\+excute}}
+\index{sigfox\+\_\+check\+\_\+exit\+\_\+excute@{sigfox\+\_\+check\+\_\+exit\+\_\+excute}!cfg\+\_\+sigfox\+\_\+module.\+h@{cfg\+\_\+sigfox\+\_\+module.\+h}}
+\subsubsection{\texorpdfstring{sigfox\+\_\+check\+\_\+exit\+\_\+excute()}{sigfox\_check\_exit\_excute()}}
+{\footnotesize\ttfamily bool sigfox\+\_\+check\+\_\+exit\+\_\+excute (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+function for indication whether exit state in sigfox module is or not. 
+
+\begin{DoxyReturn}{Returns}
+true if the current state is exit state, nor false 
+\end{DoxyReturn}
+\mbox{\Hypertarget{cfg__sigfox__module_8h_a7d4cab01e93af884235422ec20ff5636}\label{cfg__sigfox__module_8h_a7d4cab01e93af884235422ec20ff5636}} 
+\index{cfg\+\_\+sigfox\+\_\+module.\+h@{cfg\+\_\+sigfox\+\_\+module.\+h}!sigfox\+\_\+get\+\_\+state@{sigfox\+\_\+get\+\_\+state}}
+\index{sigfox\+\_\+get\+\_\+state@{sigfox\+\_\+get\+\_\+state}!cfg\+\_\+sigfox\+\_\+module.\+h@{cfg\+\_\+sigfox\+\_\+module.\+h}}
+\subsubsection{\texorpdfstring{sigfox\+\_\+get\+\_\+state()}{sigfox\_get\_state()}}
+{\footnotesize\ttfamily \hyperlink{cfg__sigfox__module_8h_ab95837f1de3a91518a56cce26da4a401}{sigfox\+\_\+state\+\_\+s} sigfox\+\_\+get\+\_\+state (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+function for getting the current state from sigfox module. 
+
+\begin{DoxyReturn}{Returns}
+current state from sigfox module 
+\end{DoxyReturn}
+\mbox{\Hypertarget{cfg__sigfox__module_8h_a5d8527b7e1222b582491a0586e320470}\label{cfg__sigfox__module_8h_a5d8527b7e1222b582491a0586e320470}} 
+\index{cfg\+\_\+sigfox\+\_\+module.\+h@{cfg\+\_\+sigfox\+\_\+module.\+h}!sigfox\+\_\+set\+\_\+state@{sigfox\+\_\+set\+\_\+state}}
+\index{sigfox\+\_\+set\+\_\+state@{sigfox\+\_\+set\+\_\+state}!cfg\+\_\+sigfox\+\_\+module.\+h@{cfg\+\_\+sigfox\+\_\+module.\+h}}
+\subsubsection{\texorpdfstring{sigfox\+\_\+set\+\_\+state()}{sigfox\_set\_state()}}
+{\footnotesize\ttfamily void sigfox\+\_\+set\+\_\+state (\begin{DoxyParamCaption}\item[{\hyperlink{cfg__sigfox__module_8h_ab95837f1de3a91518a56cce26da4a401}{sigfox\+\_\+state\+\_\+s}}]{m\+\_\+state }\end{DoxyParamCaption})}
+
+
+
+Function for setting sigfox state in sigfox scheduler. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em state} & set the next state in sigfox scheduler. \\
+\hline
+\end{DoxyParams}

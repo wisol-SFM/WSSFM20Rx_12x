@@ -1,0 +1,51 @@
+--------------
+EVBSFM20R_V200       
+--------------
+Release Date : April 11 2017
+
+
+HighLight:
+- Release 1st officially 
+- separate EVBSFM20R SDK and Nordic SDK
+- make EVBSFM20R SDK based on nRF5_SDK_12.1.0
+ 
+
+documentation ----------- application_note : example of module (SIGFOX, GPS, WIFI)
+                 |
+                  ------- manual : SFM20R_Architecture_of_SW_V200.pdf => architecture of SW
+                 |
+                 |                 SFM20RCommandList_V200.pdf => at command of sigfox and wifi
+                 |
+                 |                 Development_Environment_Setup_Guide_V200.pdf => compiler, tools, and so on
+                 |
+                 |                 testmode_config_V200.pdf => pin configuration in test mode
+                 |
+                 |                 UserManual_EVBSFM20R_V200.pdf => the explanation of EVB and using Test program
+                 |
+                  ------- reference_api------- html : index.html => the description of API              
+                 |
+                  ------- Host_FT20_Protocal.txt => the protocl of test mode
+                 |
+                  ------- SDK_Deliver_Guide.txt => how to deliver SDK
+                 |
+                  ------- Sigfox_Data_LayOut.txt =>  the data structure of Up link in Sigfox
+                 |
+                  ------- wifi_dev_document.txt => how to download wifi binary 
+
+--------------
+EVBSFM20R_V203
+--------------
+Release Date : May 13 2017
+HighLight:
+- ADD version check command : ref to development\sigfox_cfg2\documentation\Host_FT20_Protocal.txt
+- Update wifi binary for wifi version check
+- Add low battery check
+
+--------------
+EVBSFM20R_V204       
+--------------
+Release Date : June 02 2017
+
+HighLight:	  
+- GPS SPI mode change (spi0 mode)
+- ADD to GPS example code(NMEA data)

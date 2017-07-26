@@ -1,0 +1,137 @@
+\hypertarget{struct__nmea_i_n_f_o}{}\section{\+\_\+nmea\+I\+N\+FO Struct Reference}
+\label{struct__nmea_i_n_f_o}\index{\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}}
+
+
+{\ttfamily \#include $<$cfg\+\_\+gps\+\_\+module.\+h$>$}
+
+\subsection*{Data Fields}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{struct__nmea_i_n_f_o_a0b5d7bca329dcc3636c4e041c341ac24}{smask}
+\item 
+\hyperlink{cfg__gps__module_8h_a02bf9ae5b3df2ced0b3406a214735cb2}{nmea\+T\+I\+ME} \hyperlink{struct__nmea_i_n_f_o_a3ddf15855460a4cadc548d695ca841dd}{utc}
+\item 
+int \hyperlink{struct__nmea_i_n_f_o_a68be1f65e6d1f2949835d9b6b44bcf8e}{sig}
+\item 
+int \hyperlink{struct__nmea_i_n_f_o_a0e4ac2c68887146d35b9d396ec9e051c}{fix}
+\item 
+double \hyperlink{struct__nmea_i_n_f_o_afe428212308e86342448d8a749f9c479}{P\+D\+OP}
+\item 
+double \hyperlink{struct__nmea_i_n_f_o_a249042a406ff0ce3224c19ce667e5be6}{H\+D\+OP}
+\item 
+double \hyperlink{struct__nmea_i_n_f_o_aa63791741ca31a6f80069a2e8a718dd4}{V\+D\+OP}
+\item 
+double \hyperlink{struct__nmea_i_n_f_o_a7972334534f68166121a6e51b0aac2d6}{lat}
+\item 
+double \hyperlink{struct__nmea_i_n_f_o_aa96391e04b5977c50b96d77bea86a01d}{lon}
+\item 
+double \hyperlink{struct__nmea_i_n_f_o_a0084f233551c00d3b369b7df69524e4f}{elv}
+\item 
+double \hyperlink{struct__nmea_i_n_f_o_a6dc6e6f3c75c509ce943163afb5dade7}{speed}
+\item 
+double \hyperlink{struct__nmea_i_n_f_o_a8da9718bd3d0396135453cbb12751a5b}{direction}
+\item 
+double \hyperlink{struct__nmea_i_n_f_o_a97780ae452ef3641542664e9f353a505}{declination}
+\item 
+\hyperlink{cfg__gps__module_8h_ae8abd5b6dfff0282bd633dbaac1343ec}{nmea\+S\+A\+T\+I\+N\+FO} \hyperlink{struct__nmea_i_n_f_o_a8a968bcc8b9f6e6cc691a1f593c86792}{satinfo}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Summary G\+PS information from all parsed packets, used also for generating N\+M\+EA stream \begin{DoxySeeAlso}{See also}
+nmea\+\_\+parse 
+
+nmea\+\_\+\+G\+P\+G\+G\+A2info, nmea\+\_\+...2info 
+\end{DoxySeeAlso}
+
+
+\subsection{Field Documentation}
+\mbox{\Hypertarget{struct__nmea_i_n_f_o_a97780ae452ef3641542664e9f353a505}\label{struct__nmea_i_n_f_o_a97780ae452ef3641542664e9f353a505}} 
+\index{\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}!declination@{declination}}
+\index{declination@{declination}!\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}}
+\subsubsection{\texorpdfstring{declination}{declination}}
+{\footnotesize\ttfamily double declination}
+
+Magnetic variation degrees (Easterly var. subtracts from true course) \mbox{\Hypertarget{struct__nmea_i_n_f_o_a8da9718bd3d0396135453cbb12751a5b}\label{struct__nmea_i_n_f_o_a8da9718bd3d0396135453cbb12751a5b}} 
+\index{\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}!direction@{direction}}
+\index{direction@{direction}!\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}}
+\subsubsection{\texorpdfstring{direction}{direction}}
+{\footnotesize\ttfamily double direction}
+
+Track angle in degrees True \mbox{\Hypertarget{struct__nmea_i_n_f_o_a0084f233551c00d3b369b7df69524e4f}\label{struct__nmea_i_n_f_o_a0084f233551c00d3b369b7df69524e4f}} 
+\index{\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}!elv@{elv}}
+\index{elv@{elv}!\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}}
+\subsubsection{\texorpdfstring{elv}{elv}}
+{\footnotesize\ttfamily double elv}
+
+Antenna altitude above/below mean sea level (geoid) in meters \mbox{\Hypertarget{struct__nmea_i_n_f_o_a0e4ac2c68887146d35b9d396ec9e051c}\label{struct__nmea_i_n_f_o_a0e4ac2c68887146d35b9d396ec9e051c}} 
+\index{\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}!fix@{fix}}
+\index{fix@{fix}!\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}}
+\subsubsection{\texorpdfstring{fix}{fix}}
+{\footnotesize\ttfamily int fix}
+
+Operating mode, used for navigation (1 = Fix not available; 2 = 2D; 3 = 3D) \mbox{\Hypertarget{struct__nmea_i_n_f_o_a249042a406ff0ce3224c19ce667e5be6}\label{struct__nmea_i_n_f_o_a249042a406ff0ce3224c19ce667e5be6}} 
+\index{\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}!H\+D\+OP@{H\+D\+OP}}
+\index{H\+D\+OP@{H\+D\+OP}!\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}}
+\subsubsection{\texorpdfstring{H\+D\+OP}{HDOP}}
+{\footnotesize\ttfamily double H\+D\+OP}
+
+Horizontal Dilution Of Precision \mbox{\Hypertarget{struct__nmea_i_n_f_o_a7972334534f68166121a6e51b0aac2d6}\label{struct__nmea_i_n_f_o_a7972334534f68166121a6e51b0aac2d6}} 
+\index{\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}!lat@{lat}}
+\index{lat@{lat}!\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}}
+\subsubsection{\texorpdfstring{lat}{lat}}
+{\footnotesize\ttfamily double lat}
+
+Latitude in N\+D\+EG -\/ +/-\/\mbox{[}degree\mbox{]}\mbox{[}min\mbox{]}.\mbox{[}sec/60\mbox{]} \mbox{\Hypertarget{struct__nmea_i_n_f_o_aa96391e04b5977c50b96d77bea86a01d}\label{struct__nmea_i_n_f_o_aa96391e04b5977c50b96d77bea86a01d}} 
+\index{\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}!lon@{lon}}
+\index{lon@{lon}!\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}}
+\subsubsection{\texorpdfstring{lon}{lon}}
+{\footnotesize\ttfamily double lon}
+
+Longitude in N\+D\+EG -\/ +/-\/\mbox{[}degree\mbox{]}\mbox{[}min\mbox{]}.\mbox{[}sec/60\mbox{]} \mbox{\Hypertarget{struct__nmea_i_n_f_o_afe428212308e86342448d8a749f9c479}\label{struct__nmea_i_n_f_o_afe428212308e86342448d8a749f9c479}} 
+\index{\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}!P\+D\+OP@{P\+D\+OP}}
+\index{P\+D\+OP@{P\+D\+OP}!\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}}
+\subsubsection{\texorpdfstring{P\+D\+OP}{PDOP}}
+{\footnotesize\ttfamily double P\+D\+OP}
+
+Position Dilution Of Precision \mbox{\Hypertarget{struct__nmea_i_n_f_o_a8a968bcc8b9f6e6cc691a1f593c86792}\label{struct__nmea_i_n_f_o_a8a968bcc8b9f6e6cc691a1f593c86792}} 
+\index{\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}!satinfo@{satinfo}}
+\index{satinfo@{satinfo}!\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}}
+\subsubsection{\texorpdfstring{satinfo}{satinfo}}
+{\footnotesize\ttfamily \hyperlink{cfg__gps__module_8h_ae8abd5b6dfff0282bd633dbaac1343ec}{nmea\+S\+A\+T\+I\+N\+FO} satinfo}
+
+Satellites information \mbox{\Hypertarget{struct__nmea_i_n_f_o_a68be1f65e6d1f2949835d9b6b44bcf8e}\label{struct__nmea_i_n_f_o_a68be1f65e6d1f2949835d9b6b44bcf8e}} 
+\index{\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}!sig@{sig}}
+\index{sig@{sig}!\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}}
+\subsubsection{\texorpdfstring{sig}{sig}}
+{\footnotesize\ttfamily int sig}
+
+G\+PS quality indicator (0 = Invalid; 1 = Fix; 2 = Differential, 3 = Sensitive) \mbox{\Hypertarget{struct__nmea_i_n_f_o_a0b5d7bca329dcc3636c4e041c341ac24}\label{struct__nmea_i_n_f_o_a0b5d7bca329dcc3636c4e041c341ac24}} 
+\index{\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}!smask@{smask}}
+\index{smask@{smask}!\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}}
+\subsubsection{\texorpdfstring{smask}{smask}}
+{\footnotesize\ttfamily int smask}
+
+Mask specifying types of packages from which data have been obtained \mbox{\Hypertarget{struct__nmea_i_n_f_o_a6dc6e6f3c75c509ce943163afb5dade7}\label{struct__nmea_i_n_f_o_a6dc6e6f3c75c509ce943163afb5dade7}} 
+\index{\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}!speed@{speed}}
+\index{speed@{speed}!\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}}
+\subsubsection{\texorpdfstring{speed}{speed}}
+{\footnotesize\ttfamily double speed}
+
+Speed over the ground in kilometers/hour \mbox{\Hypertarget{struct__nmea_i_n_f_o_a3ddf15855460a4cadc548d695ca841dd}\label{struct__nmea_i_n_f_o_a3ddf15855460a4cadc548d695ca841dd}} 
+\index{\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}!utc@{utc}}
+\index{utc@{utc}!\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}}
+\subsubsection{\texorpdfstring{utc}{utc}}
+{\footnotesize\ttfamily \hyperlink{cfg__gps__module_8h_a02bf9ae5b3df2ced0b3406a214735cb2}{nmea\+T\+I\+ME} utc}
+
+U\+TC of position \mbox{\Hypertarget{struct__nmea_i_n_f_o_aa63791741ca31a6f80069a2e8a718dd4}\label{struct__nmea_i_n_f_o_aa63791741ca31a6f80069a2e8a718dd4}} 
+\index{\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}!V\+D\+OP@{V\+D\+OP}}
+\index{V\+D\+OP@{V\+D\+OP}!\+\_\+nmea\+I\+N\+FO@{\+\_\+nmea\+I\+N\+FO}}
+\subsubsection{\texorpdfstring{V\+D\+OP}{VDOP}}
+{\footnotesize\ttfamily double V\+D\+OP}
+
+Vertical Dilution Of Precision 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{cfg__gps__module_8h}{cfg\+\_\+gps\+\_\+module.\+h}\end{DoxyCompactItemize}
