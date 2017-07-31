@@ -1,0 +1,22 @@
+UNAME_S := $(shell uname -s)
+
+ifeq ($(UNAME_S),Linux)
+GNU_INSTALL_ROOT = $(SFX_BASE)/tools/sfxtools_embedded/gcc-arm-none-eabi-5_4-2016q3/
+GNU_VERSION = 5.4.1
+GNU_PREFIX = arm-none-eabi
+
+NRFJPROG := $(SFX_BASE)/tools/sfxtools_embedded/nRF5x-Command-Line-Tools_9_4_0_Linux-x86_64/nrfjprog/nrfjprog
+MERGEHEX := $(SFX_BASE)/tools/sfxtools_embedded/nRF5x-Command-Line-Tools_9_4_0_Linux-x86_64/mergehex/mergehex
+NRFUTIL  := nrfutil
+endif
+
+ifeq ($(UNAME_S),Darwin)
+GNU_INSTALL_ROOT = $(SFX_BASE)/tools/sfxtools_embedded/gcc-arm-none-eabi-5_4-2016q3-mac/
+GNU_VERSION = 5.4.1
+GNU_PREFIX = arm-none-eabi
+
+NRFJPROG := $(SFX_BASE)/tools/sfxtools_embedded/nRF5x-Command-Line-Tools_9_5_0_OSX/nrfjprog/nrfjprog
+MERGEHEX := $(SFX_BASE)/tools/sfxtools_embedded/nRF5x-Command-Line-Tools_9_5_0_OSX/mergehex/mergehex
+NRFUTIL  := nrfutil
+endif
+

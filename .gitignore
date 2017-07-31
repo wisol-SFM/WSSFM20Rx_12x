@@ -80,3 +80,4 @@ development/sigfox_cfg2/source_simplework_example/pca10040/s132/arm5_no_packs/_b
 development/sigfox_cfg2/source_simplework_example/pca10040/s132/arm5_no_packs/_build_gcc/
 development/sigfox_cfg2/source_simplework_example/pca10040/s132/arm5_no_packs/*.uvguix.*
 development/sigfox_cfg2/source_simplework_example/pca10040/s132/arm5_no_packs/EventRecorderStub.scvd
+_build
