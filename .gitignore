@@ -9,6 +9,7 @@
 *.WK3
 *.IMB
 *.PR
+*.DS_Store
 development/sigfox_cfg2/binary/*_app_*.hex
 development/sigfox_cfg2/binary/*_app_*.zip
 development/sigfox_cfg2/binary/*_bl_setting_*.hex
