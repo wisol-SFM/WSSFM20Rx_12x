@@ -7,7 +7,7 @@ MEMORY
 {
   FLASH (rx) : ORIGIN = 0x0001F000, LENGTH = 0x59000
   RAM (rwx) :  ORIGIN = 0x20003000, LENGTH = 0x0D000
-  
+
   /** Location of bootloader setting in flash. */
   BOOTLOADER_SETTINGS (rw) : ORIGIN = 0x0007F000, LENGTH = 0x1000
 
@@ -59,4 +59,4 @@ SECTIONS
   } > RAM
 } INSERT AFTER .data;
 
-INCLUDE "..\..\..\..\..\..\components\toolchain\gcc\nrf52_common.ld"
+INCLUDE "nrf52_common.ld"
