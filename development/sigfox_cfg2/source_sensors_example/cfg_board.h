@@ -179,6 +179,9 @@ typedef struct
     uint8_t     magnet_event;
     uint8_t     accellometer_event;
     uint8_t     ap_key[8];
+	uint8_t     report_count[1];
+	uint8_t     wifi_scan_time[1];
+	uint8_t     gps_tracking_time[1];
 }nus_service_parameter_t;
 
 typedef struct

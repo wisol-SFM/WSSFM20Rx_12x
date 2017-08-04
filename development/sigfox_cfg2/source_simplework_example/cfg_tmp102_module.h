@@ -35,7 +35,7 @@
 #include "bsp.h"
 #include "bsp_btn_ble.h"
 #include <stdint.h>
-#include "Cfg_bma250_module.h"
+#include "cfg_bma250_module.h"
 
 #define APP_TIMER_PRESCALER             0                                 /**< Value of the RTC1 PRESCALER register. */
 #define APP_TIMER_OP_QUEUE_SIZE         12                                 /**< Size of timer operation queues. */

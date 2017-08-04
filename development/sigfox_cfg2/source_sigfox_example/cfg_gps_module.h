@@ -144,8 +144,10 @@ typedef enum
  CGPS_NMEA_GAGGA,        /* GAL Fix data */
  CGPS_NMEA_PQGSA,        /* QZSS Enable PQGSA */
  CGPS_NMEA_PQGSV,        /* QZSS Enable PQGSV */
- CGPS_NMEA_GNRMC         /* recommended minimum data */ 
- 
+
+ CGPS_NMEA_GNRMC,        /* Time, date, position, course and speed data */ 
+ CGPS_NMEA_GNGSV,        /* Number of GPS satellites in view, satellite ID numbers, elevation, azimuth and SNR values */ 
+ CGPS_NMEA_GNGGA         /* Time, position and fix type data for GPS constellations */ 
 }CGPS_NMEA_Type_e;
 
 typedef enum
@@ -155,6 +157,7 @@ typedef enum
     CGPS_CNO_CHECK_max
 }CGPS_CN0_CHECK_e;
 
+#ifdef NOT_USED
 #define NMEA_TOKS_COMPARE   (1)
 #define NMEA_TOKS_PERCENT   (2)
 #define NMEA_TOKS_WIDTH     (3)
@@ -349,6 +352,7 @@ typedef struct _nmeaGPRMC
     char    mode;       /**< Mode indicator of fix type (A = autonomous, D = differential, E = estimated, N = not valid, S = simulator) */
 
 } nmeaGPRMC;
+#endif /* NOT_USED */
 
 /**
  * @brief       Function for initializing resource of gps module 
@@ -492,13 +496,6 @@ int start_gps_tracking(void);
  */
 int start_gps_nmea_data_check(void);
 
-/**@brief Function for handling gps data.
- *
- * @details This function will get the data received of gps location
- *          
- */
-int get_lastLocation(char **ns, char **latitude, char **ew, char **longitude);
-
 /**@brief Function for handling set C/NO check.
  *
  * @details This function will set enable/disable of gps C/N0 check(save current consumption)
@@ -529,6 +526,54 @@ void gps_tracking_set_interval(module_parameter_item_e item, unsigned int val);
  * @return     The value returned is the set interval time.
  */
 unsigned int gps_tracking_get_interval(module_parameter_item_e item);
+
+/**
+ * @brief        gps driver Function for result of NMEA data
+ * @param[out]   latitude pointer of getting NMEA data
+ * @param[out]   longitude pointer of getting NMEA data
+ * @return       CGPS_Result_OK on success 
+ */
+int get_NMEA_Location(char **latitude, char **longitude);
+
+/**
+ * @brief        gps driver Function for result of NMEA data
+ * @param[out]   hour pointer of getting NMEA data
+ * @param[out]   minute pointer of getting NMEA data
+ * @param[out]   second pointer of getting NMEA data
+ * @return       CGPS_Result_OK on success 
+ */
+int get_NMEA_UTCTime(uint8_t *hour, uint8_t *minute, uint8_t *second);
+
+/**
+ * @brief        gps driver Function for result of NMEA data
+ * @param[out]   hdop pointer of getting NMEA data
+ * @return       CGPS_Result_OK on success 
+ */
+int get_NMEA_HDOP(char **hdop);
+
+/**
+ * @brief        gps driver Function for result of NMEA data
+ * @param[out]   speed(knote) pointer of getting NMEA data
+ * @return       CGPS_Result_OK on success 
+ */
+int get_NMEA_Speed_knot(char **speed);
+
+/**
+ * @brief        gps driver Function for result of NMEA data
+ * @param[out]   ns pointer of getting NMEA data
+ * @param[out]   ew pointer of getting NMEA data
+ * @return       CGPS_Result_OK on success 
+ */
+int get_NMEA_Direction(char **ns, char **ew);
+
+/**
+ * @brief        gps driver Function for result of NMEA data
+ * @param[out]   year pointer of getting NMEA data
+ * @param[out]   month pointer of getting NMEA data
+ * @param[out]   day pointer of getting NMEA data
+ * @return       CGPS_Result_OK on success 
+ */
+int get_NMEA_UTCDate(uint8_t *year, uint8_t *month, uint8_t *day);
 
 #ifdef __cplusplus
 }

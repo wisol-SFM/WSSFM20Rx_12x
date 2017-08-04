@@ -130,5 +130,5 @@ command
   0x0A : <SC>020A : get software version  //CTBC_CMD_GET_SW_VERSION
 
      eg) <SC>020A
-         ....<SR>3A0AOKSFM20R1_V201_01,build_Apr 26 2017 16:00:28,wifi_000000
+         ....<SR>000aOKSFM20R_V204_01,build-Jun 12 2017 13:55:52,wifi_020101
   

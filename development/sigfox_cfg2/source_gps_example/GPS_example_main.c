@@ -70,7 +70,8 @@ uint8_t   avg_report_volts;
 #define CENTRAL_LINK_COUNT              0                                           /**< Number of central links used by the application. When changing this number remember to adjust the RAM settings*/
 #define PERIPHERAL_LINK_COUNT           1                                           /**< Number of peripheral links used by the application. When changing this number remember to adjust the RAM settings*/
 
-#define FEATURE_GPS_NMEA_LOG_ONOFF
+/* If you want to check GPS NMEA data, you have to define this[FEATURE_GPS_NMEA_LOG_ONOFF] - default disable */
+//#define FEATURE_GPS_NMEA_LOG_ONOFF 
 
 static void ble_stack_init_minimal(void)
 {
@@ -139,38 +140,49 @@ int main(void)
     char *latitude;
     char *ew;
     char *longitude;
+    char *hdop;
+    char *speed;
+
+    uint8_t hour;
+    uint8_t minute;
+    uint8_t second;
+
+    uint8_t year;
+    uint8_t month;
+    uint8_t day;
+
 	
-//timer Initialize
+/* timer Initialize */
     APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, false);
     
-//sd init
+/* sd init */
     ble_stack_init_minimal();
 
-// Initalize for GPS module(initializing gpio of gps)
+/* Initalize for GPS module(initializing gpio of gps) */
     gps_init();
 
-//set gps tracking interval time
-    gps_sec = 60; // sec
+/* set gps tracking interval time */
+    gps_sec = 60*3; // sec
     gps_tracking_set_interval(module_parameter_item_gps_tracking_time_sec, gps_sec);
 
-//get gps tracking timeout
+/* get gps tracking timeout */ 
     tracking_time = gps_tracking_get_interval(module_parameter_item_gps_tracking_time_sec);
     cPrintLog(CDBG_MAIN_LOG, "GPS get Tracking time[%d] \n", tracking_time);
 
-// set enable/disable of gps C/N0 check(save current consumption)
+/* set enable/disable of gps C/N0 check(save current consumption) */
     set_cn0_current_savetime_enable(module_parameter_item_gps_cn0_current_savetime_enable, CGPS_CNO_CHECK_DISABLE);
     
-// nmea data request of gps tracking
+/* nmea data request of gps tracking */
     result = start_gps_tracking();
 
 #ifdef FEATURE_GPS_NMEA_LOG_ONOFF
     while(1)
     {
         nrf_delay_ms(200);
-        cPrintLog(CDBG_GPS_INFO, "LINE[%d]  ==================================================== --[[    \n",__LINE__);
+        cPrintLog(CDBG_MAIN_LOG, "LINE[%d]  ==================================================== --[[    \n",__LINE__);
         cDataDumpPrintOut(CDBG_MAIN_LOG, m_cGpsRxNMEA_Buf, CGPS_SPI_BUF_SIZE);
         cPrintLog(CDBG_MAIN_LOG, "[%d]  size[%d]  m_cGpsNMEABuf[%s]  \n",__LINE__, sizeof(m_cGpsRxNMEA_Buf), m_cGpsRxNMEA_Buf);
-        cPrintLog(CDBG_GPS_INFO, "LINE[%d]  ==================================================== --]]    \n",__LINE__);
+        cPrintLog(CDBG_MAIN_LOG, "LINE[%d]  ==================================================== --]]    \n",__LINE__);
 
         if (cGps_nmea_position_fix_check() == CGPS_Result_OK)
         {
@@ -182,40 +194,58 @@ int main(void)
     result = start_gps_nmea_data_check();
     if(result == CGPS_Result_OK)
     {
-// get last location (gps position fixed)
-        result = get_lastLocation(&ns, &latitude, &ew, &longitude);
+/* get last location (gps position fixed) */
+        cPrintLog(CDBG_MAIN_LOG, "---------------------------------------------------------\n");
+
+        result = get_NMEA_Location(&latitude, &longitude);
+
         if(result == CGPS_Result_OK)
         {
-// success of get gps data
-            cPrintLog(CDBG_MAIN_LOG, "GPS Position NS[%s]\n", ns);
-            cPrintLog(CDBG_MAIN_LOG, "GPS Position Latitude[%s]\n", latitude);
-            cPrintLog(CDBG_MAIN_LOG, "GPS Position EW[%s]\n", ew);
-            cPrintLog(CDBG_MAIN_LOG, "GPS Position Longitude[%s]\n", longitude);
+/* success of get gps data */
+            cPrintLog(CDBG_MAIN_LOG, "@ GPS Position Latitude[%s]\n", latitude);
+            cPrintLog(CDBG_MAIN_LOG, "@ GPS Position Longitude[%s]\n", longitude);
         }
         else
         {
-// no gps data
+/* no gps data */
             cPrintLog(CDBG_MAIN_LOG, "GPS Module NoData!\n");
         }
+        
+        get_NMEA_Direction(&ns, &ew);
+        cPrintLog(CDBG_MAIN_LOG, "@ N/S[%s] E/W[%s] \n", ns, ew);
+
+        get_NMEA_UTCDate(&year, &month, &day);
+        cPrintLog(CDBG_MAIN_LOG, "@ Year[%d]  Month[%d]  Day[%d]\n", year, month, day);
+
+        get_NMEA_UTCTime(&hour, &minute, &second);
+        cPrintLog(CDBG_MAIN_LOG, "@ Hour[%d]  Minute[%d]  Second[%d]\n", hour, minute, second);
+
+        get_NMEA_HDOP(&hdop);
+        cPrintLog(CDBG_MAIN_LOG, "@ HDOP[%s] \n", hdop);
+
+        get_NMEA_Speed_knot(&speed); /* knote */
+        cPrintLog(CDBG_MAIN_LOG, "@ Speed[%s]/knote \n", speed);
+        cPrintLog(CDBG_MAIN_LOG, "---------------------------------------------------------\n");
+
     }
     else if(result == CGPS_Result_NoData)
     {
-// no gps data
+/* no gps data */
         cPrintLog(CDBG_MAIN_LOG, "GPS Module NoData!\n");
     }
     else if(result == CGPS_Result_NotStarted)
     {
-// gps C/N0 dB-Hz check
+/* gps C/N0 dB-Hz check */
         cPrintLog(CDBG_MAIN_LOG, "GPS C/N0 dB-Hz Low!\n");
     }
     else if(result == CGPS_Result_Fix_Fail)
     {
-// position fix fail
+/* position fix fail */
         cPrintLog(CDBG_MAIN_LOG, "GPS Tracking Fail!\n");
     }
     else
     {
-// not available GPS
+/* not available GPS */
         cPrintLog(CDBG_MAIN_LOG, "Not Available GPS Module!\n");
     }
 

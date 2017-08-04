@@ -111,7 +111,7 @@ static uint16_t m_conn_handle = BLE_CONN_HANDLE_INVALID;                        
 
 static ble_dfu_t m_dfus;                                                            /**< Structure used to identify the DFU service. */
 
-
+#define ONE_DAY_SEC (60*60*24)
 #ifdef CDEV_NUS_MODULE
 static ble_nus_t                        m_nus;                                      /**< Structure to identify the Nordic UART Service. */
 //static ble_uuid_t m_adv_uuids[] = {{BLE_UUID_NUS_SERVICE, NUS_SERVICE_UUID_TYPE}};  /**< Universally unique service identifier. */
@@ -178,6 +178,8 @@ module_mode_t m_exception_mode;
 bool m_init_excute;
 module_parameter_t m_module_parameter;
 bool m_module_parameter_update_req;
+bool m_module_parameter_save_N_reset_req;
+
 int m_module_ready_wait_timeout_tick = 0;
 
 volatile bool main_wakeup_interrupt;
@@ -191,6 +193,8 @@ nus_service_parameter_t m_nus_service_parameter;
 #endif
 module_peripheral_data_t m_module_peripheral_data;
 module_peripheral_ID_t m_module_peripheral_ID;
+
+volatile bool nus_parameter_update = false;
 
 #define MAX_REC_COUNT      3     /**< Maximum records count. */
 
@@ -466,6 +470,12 @@ void adc_configure(void)
 
 #endif
 #ifdef CDEV_NUS_MODULE
+void nus_module_parameter_get(void)
+{
+	m_nus_service_parameter.report_count[0]= (ONE_DAY_SEC / m_module_parameter.idle_time)&0x000000FF;
+	m_nus_service_parameter.wifi_scan_time[0] = (uint8_t)m_module_parameter.wifi_scan_retry_time_sec&0x000000FF;
+	m_nus_service_parameter.gps_tracking_time[0] = (uint8_t)m_module_parameter.gps_acquire_tracking_time_sec&0x000000FF;
+}
 
 static void nus_data_init()
 {
@@ -530,12 +540,23 @@ void nus_send_data(char module)
                 nus_send_buffer[0]='V';
                 strLen = sprintf((char *)&nus_send_buffer[1], "%s_V%s_%02x", (const char *)m_cfg_model_name, (const char *)m_cfg_sw_ver, m_cfg_board_type);
                 err_code = ble_nus_string_send(&m_nus, (uint8_t*)&nus_send_buffer, (strLen+1));
-                strLen = sprintf((char *)&nus_send_buffer[1], "D %s", (const char *)m_cfg_build_date);
-                err_code = ble_nus_string_send(&m_nus, (uint8_t*)&nus_send_buffer, (strLen+1));
-                strLen = sprintf((char *)&nus_send_buffer[1], "T %s", (const char *)m_cfg_build_time);
-                err_code = ble_nus_string_send(&m_nus, (uint8_t*)&nus_send_buffer, (strLen+1));
+ //               strLen = sprintf((char *)&nus_send_buffer[1], "D %s", (const char *)m_cfg_build_date);
+ //               err_code = ble_nus_string_send(&m_nus, (uint8_t*)&nus_send_buffer, (strLen+1));
+ //               strLen = sprintf((char *)&nus_send_buffer[1], "T %s", (const char *)m_cfg_build_time);
+ //               err_code = ble_nus_string_send(&m_nus, (uint8_t*)&nus_send_buffer, (strLen+1));
                 break;
-
+			case 'O':
+				nus_module_parameter_get();
+                nus_send_buffer[0]='O';
+                nus_send_buffer[1]=m_nus_service_parameter.report_count[0];
+                nus_send_buffer[2]=m_nus_service_parameter.wifi_scan_time[0];
+                nus_send_buffer[3]=m_nus_service_parameter.gps_tracking_time[0];
+                err_code = ble_nus_string_send(&m_nus, (uint8_t*)&nus_send_buffer, 4);
+                break;	
+            case 'Z':
+                nus_send_buffer[0]='Z';
+                err_code = ble_nus_string_send(&m_nus, (uint8_t*)&nus_send_buffer, 1);
+                break;				
             default:
                 break;
         }
@@ -689,6 +710,15 @@ static void on_nus_evt(ble_nus_t * p_nus, ble_evt_t * p_ble_evt)
                 ihere_mini_fast_schedule_start();
                 nus_service = false;
             }
+			if(nus_parameter_update)
+			{
+			    nus_parameter_update = false;
+				m_module_parameter_update_req = true;
+				module_parameter_check_update();
+
+				nrf_delay_ms(1000);
+				NVIC_SystemReset();
+			}
             break;
         case BLE_GATTS_EVT_WRITE:
             break;
@@ -717,7 +747,8 @@ static void nus_data_handler(ble_nus_t * p_nus, uint8_t * p_data, uint16_t lengt
 {
 //    volatile uint32_t err_code;
 //    uint8_t respose[4]="OK";
-    if(length == 1)
+
+    if(length > 0)
     {
         switch(p_data[0])
         {
@@ -755,7 +786,16 @@ static void nus_data_handler(ble_nus_t * p_nus, uint8_t * p_data, uint16_t lengt
 
             case 'V':  //read version
                 nus_send_data('V');
+//                break;
+//			case 'O': 
+				nus_send_data('O');
                 break;
+			case 'Z':
+			 	m_module_parameter.idle_time=(ONE_DAY_SEC/p_data[1]);
+				m_module_parameter.wifi_scan_retry_time_sec = p_data[2];
+				m_module_parameter.gps_acquire_tracking_time_sec = p_data[3];
+				m_module_parameter_save_N_reset_req = true;
+				break;
 
             default:
                 break;
@@ -3765,6 +3805,15 @@ int main(void)
             while(1);
         }
 
+        if(m_module_parameter_save_N_reset_req)
+        {
+            m_module_parameter_save_N_reset_req = false;
+            m_module_parameter_update_req = true;
+            module_parameter_check_update();
+			
+            nrf_delay_ms(1000);
+            NVIC_SystemReset(); 
+        }
         power_manage();
     }
 }
