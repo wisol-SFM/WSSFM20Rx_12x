@@ -76,13 +76,13 @@ make flashall
 To debug messages via SWD link, J-Link software must be installed first.
 For Windows, starts the program J-Link RTT Viewer with following parameters
 
-![Alt](development/sigfox_cfg2/documentation/pics/RTTViewerSetup.png "RTT Viewer Setup")
+![Alt](development/sigfox_cfg2/documentation/pics/RTTViewerSetup.PNG "RTT Viewer Setup")
 
 Once connected, debug messages will be displayed in the terminal window.
 
 The debug messages are printed with the function ```cPrintLog()```
 
-![Alt](development/sigfox_cfg2/documentation/pics/RTTViewer.png "RTT Viewer")
+![Alt](development/sigfox_cfg2/documentation/pics/RTTViewer.PNG "RTT Viewer")
 
 For Linux/macOS users, a shell script can directly be launched:
 ```
