@@ -69,7 +69,7 @@ make flashall
 
 ### How to flash the application via DFU
 
-![DFU:development/sigfox_cfg2/experimental/ihere_android_app/how_to_download_over_FOTA.mp4](https://youtu.be/YftrZyONju8)
+[![how to download over FOTA](development/sigfox_cfg2/documentation/pics/how_to_download_over_FOTA.png)](https://youtu.be/YftrZyONju8)
 
 ### Debugging via JLink/SWD
 
