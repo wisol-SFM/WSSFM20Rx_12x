@@ -41,7 +41,7 @@ extern "C" {
 #define CWIFI_SEC_RETRY_TIMEOUT_SEC_MAX 60
 #define CGPS_ACQUIRE_TRACKING_TIME_SEC 60 // 60 sec
 
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
 #define CGPS_CN0_CURRENT_SAVETIME_ENABLE true
 #else
 #define CGPS_CN0_CURRENT_SAVETIME_ENABLE false
@@ -51,7 +51,7 @@ extern "C" {
 #define MAIN_BOOT_NFC_UNLOCK_DEFAULT true
 #define MAIN_FOTA_ENABLE_DEFAULT true
 #define MAIN_MAGNETIC_GPIO_ENABLE_DEFAULT true
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
 
 #define MAIN_WKUP_GPIO_ENABLE_DEFAULT 2   //LED CONTROL
 #undef CWIFI_SEC_RETRY_TIMEOUT_SEC_DEFAULT
@@ -205,6 +205,19 @@ typedef struct
     uint8_t     sigfox_pac_code[8];
 }module_peripheral_ID_t;
 
+#ifdef CDEV_RTC2_DATE_TIME_CLOCK
+typedef struct
+{
+    uint16_t year;
+    uint8_t  month;  //first month is 1 : 1 to 12 (not 0 to 11)
+    uint8_t  day;
+    uint8_t  hours;
+    uint8_t  minutes;
+    uint8_t  seconds;
+    uint8_t  dayOfWeek;
+} cfg_date_time_t;
+#endif
+
 extern const nrf_drv_spi_config_t m_spi_config_default;
 extern module_parameter_t m_module_parameter;
 extern bool m_module_parameter_update_req;
@@ -270,6 +283,13 @@ void cfg_hexadecimal_2_bin(const char *pHexadecimal, int HexadeccoimalByteCnt, u
  */
 int cfg_atoi(const char *str);
 
+#ifdef CDEV_RTC2_DATE_TIME_CLOCK
+void RTC2_date_time_clock_init_N_start(void);  //date_time
+uint32_t date_time_get_timestamp(void);  //date_time
+void date_time_set_timestamp(uint32_t timestamp);
+void date_time_get_current_time(cfg_date_time_t *tm);
+#endif
+
 /**@brief Function for initialising I2C .
  *
  *                         
@@ -282,9 +302,6 @@ void cfg_i2c_master_init(void);
  */
 void cfg_i2c_master_uninit(void);
 /////////////////////////////////////////////////////////////////////////////////////////
-bool main_work_mode_change_request(cfg_board_work_mode_e mode);
-bool main_check_ctrl_mode_allowed_state(void);
-cfg_board_work_mode_e main_work_mode_get_cur(void);
 unsigned int main_get_param_val(module_parameter_item_e item);
 void main_set_param_val(module_parameter_item_e item, unsigned int val);
 bool main_schedule_state_is_idle(void);

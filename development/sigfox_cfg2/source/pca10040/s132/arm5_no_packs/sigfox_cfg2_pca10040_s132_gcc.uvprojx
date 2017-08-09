@@ -266,7 +266,7 @@
             <IncludeLibs>nfc_t2t_lib_gcc -lSFM20R1_gcc_lib</IncludeLibs>
             <IncludeDir>..\..\..\..\..\..\components\nfc\t2t_lib -L.\lib</IncludeDir>
             <Misc>-mabi=aapcs -mfloat-abi=hard -mfpu=fpv4-sp-d16  -Wl,--gc-sections --specs=nano.specs -lc -lnosys</Misc>
-            <ScatterFile>..\armgcc\sigfox_cfg2_app.ld  -L..\..\..\..\..\..\components\toolchain\gcc</ScatterFile>
+            <ScatterFile>..\armgcc\sigfox_cfg2_app.ld -L..\..\..\..\..\..\components\toolchain\gcc</ScatterFile>
           </LDarm>
         </TargetArm>
       </TargetOption>

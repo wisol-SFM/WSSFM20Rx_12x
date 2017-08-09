@@ -4,6 +4,13 @@
 module info
 *******************************************************/
 #define CDEV_MODEL_NAME "SFM20R"   //MODEL NAME SIZE IS 6BYTE
+/**********************
+module defines (CDEV_)
+SFM20R : MODEL_NAME to "SFM20R"
+         MODULE_TYPE to CDEV_MODULE_SFM20R
+SFM60R : MODEL_NAME to "SFM60R"
+         MODULE_TYPE to CDEV_MODULE_SFM60R
+***********************/
 #define CDEV_SW_VER_MAJOR "2"       // 1byte
 #define CDEV_SW_VER_MINOR "04"      // 2byte
 #define CDEV_FS_VER 0x0020          //module_parameter_t version
@@ -27,12 +34,22 @@ senario feature
 #define MODULE_SCENARIO_IHERE_MINI              (2)
 #define MODULE_SCENARIO_MODE_MAX                MODULE_SCENARIO_IHERE_MINI
 #define MODULE_DEFAULT_SCENARIO_TYPE            MODULE_SCENARIO_ASSET_TRACKER
+
+/******************************************************
+module feature
+*******************************************************/
+#define CDEV_MODULE_SFM20R                      (1)
+#define CDEV_MODULE_SFM60R                      (2)
+    
+#define CDEV_MODULE_TYPE                        CDEV_MODULE_SFM20R
+
 /******************************************************
 board feature
 *******************************************************/
 #define CDEV_BOARD_EVB                         (1)
 #define CDEV_BOARD_IHERE                       (2)
 #define CDEV_BOARD_IHERE_MINI                  (3)
+#define CDEV_BOARD_IHEREV2                     (4)
 
 #define CDEV_BOARD_TYPE                        CDEV_BOARD_EVB  //REPLACE_DEVICE_DEFINE_HERE
 /******************************************************
@@ -41,6 +58,7 @@ module feature
 #define CDEV_WIFI_MODULE  //ESP8285
 #define CDEV_GPS_MODULE  //CSRG05E
 
+#define CDEV_BLE_ADVERTISING_ENABLE
 //#define CDEV_SIGFOX_RCZ24
 /******************************************************
 external sensor feature
@@ -63,6 +81,7 @@ funcion feature
 #endif
 #define CDEV_NUS_MODULE
 #define CDEV_BATT_CHECK_MODULE
+#define CDEV_RTC2_DATE_TIME_CLOCK
 /******************************************************/
 
 /******************************************************
@@ -141,7 +160,7 @@ test feature
 #define PIN_DEF_ACC_TWIS_SDA   16
 #define PIN_DEF_ACC_INT1       11
 
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
 #define PIN_DEF_MAGNETIC_SIGNAL       2
 #else
 #define PIN_DEF_MAGNETIC_SIGNAL       3
@@ -169,4 +188,11 @@ test feature
                                  .rc_ctiv       = 0,                                \
                                  .rc_temp_ctiv  = 0,                                \
                                  .xtal_accuracy = NRF_CLOCK_LF_XTAL_ACCURACY_250_PPM}
+
+//modify define
+#if (CDEV_MODULE_TYPE == CDEV_MODULE_SFM60R)  //mwc demo
+#undef CDEV_WIFI_MODULE
+#undef CDEV_BLE_ADVERTISING_ENABLE
+#endif
+
 #endif // __WBOARD_CONFIG_DEF__

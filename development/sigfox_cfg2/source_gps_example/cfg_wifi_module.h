@@ -84,12 +84,6 @@ void cWifi_prepare_start(void);
 void cWifi_set_retry_time(unsigned int retry_time_sec);  //ref module_parameter_t.wifi_scan_retry_time_sec and  module_parameter_item_wifi_scan_retry_time_sec
 
 /**
- * @brief       Function for wifi test mode.
- * @param[in]   test mode enable for always on wifi power
- */
-void cWifi_set_test_mode(bool test_enable);  //always on wifi power ref module_parameter_t.wifi_testmode_enable and  module_parameter_item_wifi_testmode_enable
-
-/**
  * @brief       Function for entering wifi download mode
  */
 void cWifi_enter_download_mode(void);

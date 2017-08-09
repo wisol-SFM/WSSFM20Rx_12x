@@ -242,6 +242,7 @@ help:
 	@echo following targets are available:
 	@echo 	$(TARGETS)
 	@echo 	flash
+	@echo 	flashall
 
 TEMPLATE_PATH_NORDIC := $(SDK_ROOT)/components/toolchain/gcc
 TEMPLATE_PATH := $(THIS_DIR)

@@ -56,6 +56,8 @@ int m_cfg_comm_pwr_mask = 0;
 
 const nrf_drv_spi_config_t m_spi_config_default = NRF_DRV_SPI_DEFAULT_CONFIG;
 extern int dtm_mode(void);
+extern void set_CN0_check_type(int val);  /*for common lib*/
+extern void set_CN0_enable(unsigned int val);  /*for common lib*/
 
 //util function
 void cfg_bin_2_hexadecimal(const uint8_t *pBin, int binSize, char *pHexadecimal)
@@ -163,6 +165,138 @@ int cfg_atoi(const char *str)
     return (num * val);
 }
 
+#ifdef CDEV_RTC2_DATE_TIME_CLOCK
+#define MAX_RTC2_TASKS_DELAY     47                                          /**< Maximum delay until an RTC task is executed. ref MAX_RTC_TASKS_DELAY*/
+#define RTC2_TIMER_CONFIG_IRQ_PRIORITY 7  //ref APP_TIMER_CONFIG_IRQ_PRIORITY
+#define DATE_TIME_CLOCK_DEFAULT (1483196400+32400)  //2017.01.01-00:00:00 based linux timestamp - max is 2038-01-19 03:14:07
+
+static uint32_t date_time_clock_timestamp;
+static bool date_time_clock_start_flag = false;
+
+void RTC2_IRQHandler(void)
+{
+    cPrintLog(CDBG_COMMON_LOG, "Rtc2 IRQ occurred\n");
+
+    date_time_clock_timestamp += 2097152;  //PRESCALER 4095 =  2097152 sec - about 582.542 hours //PRESCALER 0 is 512 sec
+    NRF_RTC2->EVENTS_COMPARE[0] = 0;
+    NRF_RTC2->EVENTS_COMPARE[1] = 0;
+    NRF_RTC2->EVENTS_COMPARE[2] = 0;
+    NRF_RTC2->EVENTS_COMPARE[3] = 0;
+    NRF_RTC2->EVENTS_TICK       = 0;
+    NRF_RTC2->EVENTS_OVRFLW     = 0;
+}
+
+void RTC2_date_time_clock_init_N_start(void)  //date_time
+{
+    NRF_RTC2->PRESCALER = 4095;  //2097152 sec  //0 is 512 sec
+    NVIC_SetPriority(RTC2_IRQn, RTC2_TIMER_CONFIG_IRQ_PRIORITY);
+
+    NRF_RTC2->EVTENSET = RTC_EVTEN_COMPARE0_Msk;
+    NRF_RTC2->INTENSET = RTC_INTENSET_COMPARE0_Msk;
+
+    NVIC_ClearPendingIRQ(RTC2_IRQn);
+    NVIC_EnableIRQ(RTC2_IRQn);
+
+    date_time_clock_timestamp = DATE_TIME_CLOCK_DEFAULT;
+    NRF_RTC2->TASKS_START = 1;
+    nrf_delay_us(MAX_RTC2_TASKS_DELAY);
+    date_time_clock_start_flag = true;
+}
+
+uint32_t date_time_get_timestamp(void)  //date_time
+{
+    uint32_t RTC2_counter;
+    uint32_t timestamp = 0;
+
+    if(date_time_clock_start_flag)
+    {
+        RTC2_counter = NRF_RTC2->COUNTER;
+        timestamp = (date_time_clock_timestamp + (RTC2_counter / 8));
+    }
+    return timestamp;
+}
+
+void date_time_set_timestamp(uint32_t timestamp)
+{
+    uint32_t RTC2_counter;
+
+    RTC2_counter = NRF_RTC2->COUNTER;
+    if(timestamp < (RTC2_counter / 8))
+    {
+        date_time_clock_timestamp = 0;
+    }
+    else
+    {
+        date_time_clock_timestamp = timestamp - (RTC2_counter / 8);
+    }
+}
+
+void date_time_get_current_time(cfg_date_time_t *tm)
+{
+  uint32_t seconds, minutes, hours, days, year, month;
+  uint32_t dayOfWeek;
+  seconds = date_time_get_timestamp();
+
+  /* calculate minutes */
+  minutes  = seconds / 60;
+  seconds -= minutes * 60;
+  /* calculate hours */
+  hours    = minutes / 60;
+  minutes -= hours   * 60;
+  /* calculate days */
+  days     = hours   / 24;
+  hours   -= days    * 24;
+
+  /* Unix time starts in 1970 on a Thursday */
+  year      = 1970;
+  dayOfWeek = 4;
+
+  while(1)
+  {
+    bool     leapYear   = (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
+    uint16_t daysInYear = leapYear ? 366 : 365;
+    if (days >= daysInYear)
+    {
+      dayOfWeek += leapYear ? 2 : 1;
+      days      -= daysInYear;
+      if (dayOfWeek >= 7)
+        dayOfWeek -= 7;
+      ++year;
+    }
+    else
+    {
+      dayOfWeek  += days;
+      dayOfWeek  %= 7;
+
+      /* calculate the month and day */
+      static const uint8_t daysInMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+      for(month = 0; month < 12; ++month)
+      {
+        uint8_t dim = daysInMonth[month];
+
+        /* add a day to feburary if this is a leap year */
+        if (month == 1 && leapYear)
+          ++dim;
+
+        if (days >= dim)
+          days -= dim;
+        else
+          break;
+      }
+      break;
+    }
+  }
+
+  tm->seconds  = seconds;
+  tm->minutes  = minutes;
+  tm->hours = hours;
+  tm->day = days + 1;
+  tm->month = month + 1;
+  tm->year = year;
+  tm->dayOfWeek = dayOfWeek;
+}
+#endif
+
 void cfg_board_common_power_control(module_comm_pwr_resource_e resource, bool bOn)
 {
     if(bOn)
@@ -200,18 +334,30 @@ bool cfg_ble_led_control(bool bOn)
     if(!bGpioInit)
     {
         nrf_gpio_cfg_output(PIN_DEF_BLE_LED_EN);
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+        nrf_gpio_pin_write(PIN_DEF_BLE_LED_EN, 1);
+#else
         nrf_gpio_pin_write(PIN_DEF_BLE_LED_EN, 0);
+#endif
         bGpioInit = true;
     }
     ret = old_ble_led_status;
     old_ble_led_status = bOn;
     if(bOn)
     {
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+        nrf_gpio_pin_write(PIN_DEF_BLE_LED_EN, 0);
+#else
         nrf_gpio_pin_write(PIN_DEF_BLE_LED_EN, 1);
+#endif
     }
     else
     {
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+        nrf_gpio_pin_write(PIN_DEF_BLE_LED_EN, 1);
+#else
         nrf_gpio_pin_write(PIN_DEF_BLE_LED_EN, 0);
+#endif
     }
     return ret;
 }
@@ -233,16 +379,28 @@ void cfg_wkup_output_control(bool bOn)  // ihere 3color led reference m_module_p
         if(!bGpioInit)
         {
             nrf_gpio_cfg_output(PIN_DEF_WKUP);
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+            nrf_gpio_pin_write(PIN_DEF_WKUP, 1);
+#else
             nrf_gpio_pin_write(PIN_DEF_WKUP, 0);
+#endif
             bGpioInit = true;
         }
         if(bOn)
         {
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+            nrf_gpio_pin_write(PIN_DEF_WKUP, 0);
+#else
             nrf_gpio_pin_write(PIN_DEF_WKUP, 1);
+#endif
         }
         else
         {
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+            nrf_gpio_pin_write(PIN_DEF_WKUP, 1);
+#else
             nrf_gpio_pin_write(PIN_DEF_WKUP, 0);
+#endif
         }
     }
 }
@@ -436,10 +594,18 @@ void cfg_board_gpio_set_default(void)
     nrf_gpio_cfg_default(PIN_DEF_ACC_INT1);
 
     nrf_gpio_cfg_default(PIN_DEF_MAGNETIC_SIGNAL);
+    
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+    nrf_gpio_cfg_output(PIN_DEF_WKUP);
+    nrf_gpio_pin_write(PIN_DEF_WKUP, 1);
+    nrf_gpio_cfg_output(PIN_DEF_BLE_LED_EN);
+    nrf_gpio_pin_write(PIN_DEF_BLE_LED_EN, 1);
+#else
     nrf_gpio_cfg_default(PIN_DEF_WKUP);
 
     nrf_gpio_cfg_output(PIN_DEF_BLE_LED_EN);
     nrf_gpio_pin_write(PIN_DEF_BLE_LED_EN, 0);
+#endif
     
 }
 
@@ -505,12 +671,18 @@ static void cfg_board_check_bootstrap_pin(void)
     bool special_mode = false;
     int i;
 
+#ifdef CDEV_WIFI_MODULE  //ESP8285
     nrf_gpio_cfg_input(PIN_DEF_WIFI_INT, NRF_GPIO_PIN_PULLUP);
+#endif
     nrf_gpio_cfg_input(PIN_DEF_TWIS_BOARD_CTRL_SCL, NRF_GPIO_PIN_PULLDOWN);
     nrf_gpio_cfg_input(PIN_DEF_TWIS_BOARD_CTRL_SDA, NRF_GPIO_PIN_PULLDOWN);
     nrf_delay_ms(50);
 
+#ifdef CDEV_WIFI_MODULE  //ESP8285
     pinLvl_DL_EN = nrf_gpio_pin_read(PIN_DEF_WIFI_INT);
+#else
+    pinLvl_DL_EN = 1;
+#endif
 
     pinLvl_I2C0_SCL_DBG = nrf_gpio_pin_read(PIN_DEF_TWIS_BOARD_CTRL_SCL);
     pinLvl_I2C0_SDA_DBG = nrf_gpio_pin_read(PIN_DEF_TWIS_BOARD_CTRL_SDA);
@@ -538,7 +710,9 @@ static void cfg_board_check_bootstrap_pin(void)
     {
         special_mode = true;
     }
+#ifdef CDEV_WIFI_MODULE  //ESP8285
     nrf_gpio_cfg_default(PIN_DEF_WIFI_INT);
+#endif
     nrf_gpio_cfg_default(PIN_DEF_TWIS_BOARD_CTRL_SCL);
     nrf_gpio_cfg_default(PIN_DEF_TWIS_BOARD_CTRL_SDA);
 
@@ -611,7 +785,14 @@ void cfg_board_init(void)
 #ifdef CDEV_GPS_MODULE
     cGps_resource_init();
     cGps_prepare_start();
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+    set_CN0_check_type(2);  /*for common lib*/
+    set_CN0_enable(CGPS_CNO_CHECK_ENABLE);  /*for common lib*/  //move to here
+#endif
 #endif /* CDEV_GPS_MODULE */
     cfg_board_common_power_control(module_comm_pwr_pon_init, false);
+#ifdef CDEV_RTC2_DATE_TIME_CLOCK
+    RTC2_date_time_clock_init_N_start();
+#endif
 }
 

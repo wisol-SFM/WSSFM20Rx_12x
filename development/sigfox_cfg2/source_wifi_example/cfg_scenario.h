@@ -28,22 +28,13 @@ extern "C" {
 typedef enum
 {
     NONE,
-    WAIT_CTRL_MODE_CHANGE,
     ACC,
     MAIN_SCENARIO_LOOP,
     TMP,   /* TMP102 */
     BLE,   /**< Bluetooth mode, the application acts a simulated Heart Rate sensor. */
     GPS, /**< Gazell mode, the application acts as a 'Gazell Device'. */
     WIFI,
-    WIFI_BYPASS,  //FEATURE_CFG_BYPASS_CONTROL
-    WIFI_TEST_MODE,  //wifi only work
     SIGFOX,
-    SIGFOX_BYPASS,  //FEATURE_CFG_BYPASS_CONTROL
-    MANUAL_MODE,   //only wait do notting
-    SCENARIO_MODE,   //only wait do notting
-    GPS_BYPASS,
-    BLE_CONTROL,
-    ACC_BYPASS,
     IDLE,
     BATTERY_CHECK
 }module_mode_t;

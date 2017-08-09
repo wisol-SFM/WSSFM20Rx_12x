@@ -36,3 +36,4 @@ void main_examples_prepare(void);
 #endif // NRF_BLE_CFG_MAIN_H__
 
 /** @} */
+

@@ -340,7 +340,7 @@ uint32_t bma250_slope_set()
 {
     uint32_t timeout;
 
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
     spi_xfer_done = false;
     m_tx_buf[0] = 0xB6;
     timeout = MPU_TWI_TIMEOUT;
@@ -358,7 +358,7 @@ uint32_t bma250_slope_set()
     bma250_i2c_bus_write(BMA2x2_MODE_CTRL_ADDR,m_tx_buf,BMA2x2_GEN_READ_WRITE_LENGTH);
     while((!spi_xfer_done) && --timeout);
     if(!timeout) return NRF_ERROR_TIMEOUT;
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) 
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
     spi_xfer_done = false;
     m_tx_buf[0] = BMA2x2_RANGE_2G;
     timeout = MPU_TWI_TIMEOUT;
@@ -682,11 +682,9 @@ bool cfg_bma250_write_reg(uint8_t reg_addr, uint8_t reg_data)
 
 uint8_t position[50];
 bool need_setup = false;
-#if(CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI)
+#if(CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
 
-extern bool main_schedule_state_is_tmp(void); 
 extern bool main_schedule_state_is_idle(void);
-extern bool main_schedule_state_is_accbypass(void);
 extern void nus_send_data(char module);
 #endif
 bool mnus_acc_report = false;
@@ -731,8 +729,8 @@ static void bma250_state_handler(void * p_context)
             break;
 
         case READ_DATA_S:
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI)
-            if(main_schedule_state_is_idle()||main_schedule_state_is_accbypass())
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+            if(main_schedule_state_is_idle()||cTBC_bypass_mode_is_accbypass())
 #endif
             {
                 if(m_cfg_i2c_master_init_flag)
@@ -752,7 +750,7 @@ static void bma250_state_handler(void * p_context)
             {
                 memset(position,0x00,50);
                 bma250_read_accel_xyz(&m_accel);
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
                 if(mnus_acc_report)
                 {
                     m_nus_service_parameter.module = 'A';
@@ -786,8 +784,8 @@ static void bma250_state_handler(void * p_context)
 //                    cPrintLog(CDBG_GSEN_INFO, "%s SHAKE WAKE-UP\n", __func__);
 //                }
 //                nrf_delay_ms(1000);
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI)
-                if(main_schedule_state_is_accbypass())
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+                if(cTBC_bypass_mode_is_accbypass())
                 {
                     m_bma250_state = BYPASS_R;
                 }

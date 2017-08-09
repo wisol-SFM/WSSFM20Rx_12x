@@ -17,7 +17,7 @@
 #define CTBC_PROC_REQ_TIME_MS 10
 
 #define CTBC_WAIT_READ_DEVICE_ID_TIME_MS 100
-#define CTBC_WAIT_READ_DEVICE_ID_TIME_OUT_TICK (10 * 10)  // 10 sec
+#define CTBC_WAIT_READ_DEVICE_ID_TIME_OUT_TICK (2 * 10)  // 2 sec
 
 #define CTBC_WAIT_CMD_PROC_MS 100
 
@@ -38,7 +38,9 @@ typedef enum
     CTBC_CMD_SW_RESET           =   0x08,
     CTBC_CMD_FACTORY_RESET      =   0x09,
     CTBC_CMD_GET_SW_VERSION     =   0x0A,
-    CTBC_CMD_TYPE_MAX
+    CTBC_CMD_USER_START         =   0x80,
+    CTBC_CMD_USER_END           =   0x9F,
+    CTBC_CMD_TYPE_MAX           =   0xFF
 }CTBC_CMD_TYPE;
 
 typedef enum
@@ -48,11 +50,16 @@ typedef enum
     cfg_board_work_wifi_bypass          = 0x02,
     cfg_board_work_manual               = 0x03,
     cfg_board_work_gps_bypass           = 0x04,
-    cfg_board_work_ble_crtl             = 0x05,
+    cfg_board_work_ble_crtl             = 0x05,  //not used
     cfg_board_work_acc_bypass           = 0x06,
     cfg_board_work_mode_max,
-    cfg_board_work_mode_get_cur = 0xff,
+    cfg_board_work_mode_get_cur         = 0xff,
 }cfg_board_work_mode_e;
+
+typedef void (*cTBC_bypass_enter_callback_t)(void);
+typedef void (*cTBC_bypass_exit_callback_t)(void);
+typedef void (*cTBC_user_defined_cmd_callback_t)(int cmd, int param_size, const uint8_t *param);
+
 
 #define CTBC_RESP_COMMON_ERROR "<SR>0400NG"
 #define CTBC_RESP_READY "<SR>0700READY"
@@ -81,8 +88,14 @@ char m_cTBC_resp_buf[128];
 extern char m_cTBC_resp_buf[128];
 #endif
 
-void cTBC_init(void);
+void cTBC_init(cTBC_user_defined_cmd_callback_t user_cmd_CB);
+void cTBC_check_N_enter_bypassmode(uint32_t wait_time_ms, cTBC_bypass_enter_callback_t enter_CB, cTBC_bypass_exit_callback_t exit_CB);
+bool cTBC_is_bypass_state(void);
 bool cTBC_is_busy(void);
+bool cTBC_bypass_mode_is_accbypass(void);
+bool cTBC_bypass_mode_is_setting(void);
+
+
 #ifdef FEATURE_CFG_DEBUG_OUT_TO_TBC
 int cTBC_vprintf(const char * sFormat, va_list * pParamList);
 #endif

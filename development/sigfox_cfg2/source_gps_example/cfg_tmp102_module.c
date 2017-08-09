@@ -39,6 +39,10 @@
 #include "cfg_board.h"
 #include "nrf_delay.h"
 
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+#define FEATURE_TMP108
+#endif
+
 static const nrf_drv_spi_t spi = NRF_DRV_SPI_INSTANCE(GSEN_SPI_INSTANCE);  /**< SPI instance. */
 extern volatile bool spi_xfer_done;  /**< Flag used to indicate that SPI instance completed the transfer. */
 
@@ -228,7 +232,11 @@ uint32_t tmp102_i2c_reg_read(u8 reg_addr, u8 *reg_data, u8 cnt)
 uint32_t tmp102_req_shutdown_mode(void)
 {
     u16 reg_data;
+#ifdef FEATURE_TMP108
+    reg_data = TMP108_CONF_REG_DATA_DEFAULT & (~(0x0300));  //clear M1 M0
+#else
     reg_data = TMP102_CONF_REG_DATA_DEFAULT | 0x0100;   //SD(shutdown Mode) set 
+#endif
     return tmp102_i2c_reg_write(TMP102_CONF_REG,reg_data);
 }
 
@@ -237,7 +245,11 @@ uint32_t tmp102_config_set()
     u16 reg_data;
     uint32_t result;
 
+#ifdef FEATURE_TMP108
+    reg_data = TMP108_CONF_REG_DATA_DEFAULT;
+#else
     reg_data = TMP102_CONF_REG_DATA_DEFAULT;
+#endif
     result = tmp102_i2c_reg_write(TMP102_CONF_REG,reg_data);
     if(result != NRF_SUCCESS)return result;
 

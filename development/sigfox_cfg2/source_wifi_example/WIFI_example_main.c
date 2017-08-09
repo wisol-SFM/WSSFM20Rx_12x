@@ -115,24 +115,19 @@ unsigned int main_get_param_val(module_parameter_item_e item)
     return ret;
 }
 
-void main_set_param_val(module_parameter_item_e item, unsigned int val)
+void module_parameter_check_update(void)
 {
+    if(m_module_parameter_update_req)
+    {
+        m_module_parameter_update_req = false;
+    }
     return;
 }
 
-bool main_check_ctrl_mode_allowed_state(void)
-{
-    return false;
-}
 
-bool main_work_mode_change_request(cfg_board_work_mode_e mode)
+void main_set_param_val(module_parameter_item_e item, unsigned int val)
 {
-    return false;
-}
-
-cfg_board_work_mode_e main_work_mode_get_cur(void)
-{
-    return cfg_board_work_normal;
+    return;
 }
 
 int main(void)

@@ -63,7 +63,8 @@ command
              cfg_board_work_wifi_bypass          = 0x02,
              cfg_board_work_manual               = 0x03,
              cfg_board_work_gps_bypass           = 0x04,
-             cfg_board_work_ble_crtl             = 0x05,
+             cfg_board_work_ble_crtl             = 0x05,  //not used
+             cfg_board_work_acc_bypass           = 0x06,
 
        eg) <SC>040201 : sigfox bytepass mode
            ....<SR>0402OK......
@@ -131,4 +132,6 @@ command
 
      eg) <SC>020A
          ....<SR>000aOKSFM20R_V204_01,build-Jun 12 2017 13:55:52,wifi_020101
+
+  0x80~0x9F : user defined command
   

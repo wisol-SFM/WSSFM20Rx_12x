@@ -33,6 +33,7 @@ board feature
 #define CDEV_BOARD_EVB                         (1)
 #define CDEV_BOARD_IHERE                       (2)
 #define CDEV_BOARD_IHERE_MINI                  (3)
+#define CDEV_BOARD_IHEREV2                     (4)
 
 #define CDEV_BOARD_TYPE                        CDEV_BOARD_EVB  //REPLACE_DEVICE_DEFINE_HERE
 /******************************************************
@@ -63,6 +64,7 @@ funcion feature
 #endif
 #define CDEV_NUS_MODULE
 #define CDEV_BATT_CHECK_MODULE
+#define CDEV_RTC2_DATE_TIME_CLOCK
 /******************************************************/
 
 /******************************************************
@@ -141,7 +143,7 @@ test feature
 #define PIN_DEF_ACC_TWIS_SDA   16
 #define PIN_DEF_ACC_INT1       11
 
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
 #define PIN_DEF_MAGNETIC_SIGNAL       2
 #else
 #define PIN_DEF_MAGNETIC_SIGNAL       3

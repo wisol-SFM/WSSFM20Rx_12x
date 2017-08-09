@@ -70,6 +70,7 @@ typedef int32_t s32;/**< used for signed 32bit */
 typedef int64_t s64;/**< used for signed 64bit */
 
 #define TMP102_CONF_REG_DATA_DEFAULT (0x60A0)
+#define TMP108_CONF_REG_DATA_DEFAULT (0x2610)
 
 #define TMP102_INIT_VALUE               ((u8)0)
 #define TMP102_GEN_READ_WRITE_LENGTH    ((u8)1)

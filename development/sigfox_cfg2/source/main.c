@@ -174,7 +174,6 @@ APP_TIMER_DEF(m_main_timer_id);
 extern uint8_t frame_data[(SIGFOX_SEND_PAYLOAD_SIZE*2)+1];  //for hexadecimal
 
 module_mode_t m_module_mode;
-module_mode_t m_exception_mode;
 bool m_init_excute;
 module_parameter_t m_module_parameter;
 bool m_module_parameter_update_req;
@@ -229,16 +228,19 @@ APP_TIMER_DEF(m_battery_timer_id);                                              
 #define ADC_RES_10BIT                     1024                                         /**< Maximum digital value for 10-bit ADC conversion. */
 
 #if (CDEV_BOARD_TYPE == CDEV_BOARD_EVB)
-#define DIODE_FWD_VOLT_DROP_MILLIVOLTS    50
+#define ADJUST_BATTERY_VALUE    50
 #define ADC_RESULT_IN_MILLI_VOLTS(ADC_VALUE) (((((ADC_VALUE) * ADC_REF_VOLTAGE_IN_MILLIVOLTS) / ADC_RES_10BIT) * ADC_PRE_SCALING_COMPENSATION) * 5/3)
-#elif  (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE)
-#define DIODE_FWD_VOLT_DROP_MILLIVOLTS    50
+#elif  (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) 
+#define ADJUST_BATTERY_VALUE    50
 #define ADC_RESULT_IN_MILLI_VOLTS(ADC_VALUE) (((((ADC_VALUE) * ADC_REF_VOLTAGE_IN_MILLIVOLTS) / ADC_RES_10BIT) * ADC_PRE_SCALING_COMPENSATION) * 5/3)
+#elif  (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2) 
+#define ADJUST_BATTERY_VALUE    50
+#define ADC_RESULT_IN_MILLI_VOLTS(ADC_VALUE) (((((ADC_VALUE) * ADC_REF_VOLTAGE_IN_MILLIVOLTS) / ADC_RES_10BIT) * ADC_PRE_SCALING_COMPENSATION) * 168/100)
 #elif  (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI)
-#define DIODE_FWD_VOLT_DROP_MILLIVOLTS    50
+#define ADJUST_BATTERY_VALUE    50
 #define ADC_RESULT_IN_MILLI_VOLTS(ADC_VALUE) (((((ADC_VALUE) * ADC_REF_VOLTAGE_IN_MILLIVOLTS) / ADC_RES_10BIT) * ADC_PRE_SCALING_COMPENSATION) * 5/3)
 #else
-#define DIODE_FWD_VOLT_DROP_MILLIVOLTS    0 //1344 //270                                          /**< Typical forward voltage drop of the diode (Part no: SD103ATW-7-F) that is connected in series with the voltage supply. This is the voltage drop when the forward current is 1mA. Source: Data sheet of 'SURFACE MOUNT SCHOTTKY BARRIER DIODE ARRAY' available at www.diodes.com. */
+#define ADJUST_BATTERY_VALUE    0 //1344 //270                                          /**< Typical forward voltage drop of the diode (Part no: SD103ATW-7-F) that is connected in series with the voltage supply. This is the voltage drop when the forward current is 1mA. Source: Data sheet of 'SURFACE MOUNT SCHOTTKY BARRIER DIODE ARRAY' available at www.diodes.com. */
 #define ADC_RESULT_IN_MILLI_VOLTS(ADC_VALUE) (((((ADC_VALUE) * ADC_REF_VOLTAGE_IN_MILLIVOLTS) / ADC_RES_10BIT) * ADC_PRE_SCALING_COMPENSATION) * 5/3)
 #endif
 
@@ -407,7 +409,7 @@ uint16_t get_avg_batt_lvl_in_milli_volts(void)
 
         adc_result = p_event->data.done.p_buffer[0];
 
-        batt_lvl_in_milli_volts = ADC_RESULT_IN_MILLI_VOLTS(adc_result) + DIODE_FWD_VOLT_DROP_MILLIVOLTS;
+        batt_lvl_in_milli_volts = ADC_RESULT_IN_MILLI_VOLTS(adc_result) + ADJUST_BATTERY_VALUE;
         if(check_count++ < BATTERY_LEVEL_AVG_CNT)
         {
             err_code = nrf_drv_saadc_buffer_convert(p_event->data.done.p_buffer, 1);
@@ -450,7 +452,7 @@ void adc_configure(void)
     ret_code_t err_code = nrf_drv_saadc_init(NULL, saadc_event_handler);
     APP_ERROR_CHECK(err_code);
 
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
     nrf_saadc_channel_config_t config =
         NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(NRF_SAADC_INPUT_AIN1);
 #else
@@ -776,7 +778,7 @@ static void nus_data_handler(ble_nus_t * p_nus, uint8_t * p_data, uint16_t lengt
                 break;
 
             case 'A' :
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
                 mnus_acc_report = true;
                 bma250_set_state(IO_SETUP);
                 cfg_bma250_timers_stop();
@@ -862,8 +864,8 @@ unsigned int main_get_param_val(module_parameter_item_e item)
             ret = m_module_parameter.wkup_gpio_enable;
             break;
 
-        case module_parameter_item_wifi_testmode_enable:
-            ret = m_module_parameter.wifi_testmode_enable;
+        case module_parameter_item_wifi_testmode_enable:  //not used
+            ret = m_module_parameter.wifi_testmode_enable;  //not used
             break;
 
         case module_parameter_item_snek_testmode_enable:
@@ -939,8 +941,8 @@ void main_set_param_val(module_parameter_item_e item, unsigned int val)
             m_module_parameter.wkup_gpio_enable = (char)val;
             break;
 
-        case module_parameter_item_wifi_testmode_enable:
-            m_module_parameter.wifi_testmode_enable = (bool)val;
+        case module_parameter_item_wifi_testmode_enable:  //not used
+            m_module_parameter.wifi_testmode_enable = (bool)val;  //not used
             break;
 
         case module_parameter_item_snek_testmode_enable:
@@ -1010,8 +1012,13 @@ static void module_parameter_fs_evt_handler(fs_evt_t const * const evt, fs_ret_t
     module_parameter_t *p_setting_val;
     if (result == FS_SUCCESS)
     {
+        cPrintLog(CDBG_FLASH_INFO, "FS Evt OK!\n");
         p_setting_val = (module_parameter_t *)(param_fs_config.p_start_addr);
-        if(p_setting_val->magic_top == 0)cfg_board_reset();  //factory reset
+        if(p_setting_val->magic_top == 0)  //factory reset
+        {
+            cPrintLog(CDBG_FLASH_INFO, "target reset for factory reset\n");
+            cfg_board_reset();
+        }
     }
     else
     {
@@ -1216,7 +1223,6 @@ static void module_parameter_init(void)
     module_parameter_adjust_value();
 #ifdef CDEV_WIFI_MODULE
     cWifi_set_retry_time(m_module_parameter.wifi_scan_retry_time_sec);
-    cWifi_set_test_mode(m_module_parameter.wifi_testmode_enable);
 #endif
     //for ID value cache
     memcpy(m_module_peripheral_ID.wifi_MAC_STA, m_module_parameter.wifi_MAC_STA, sizeof(m_module_peripheral_ID.wifi_MAC_STA));
@@ -1504,6 +1510,7 @@ static void advertising_init(void)
  */
 void advertising_start(bool start_flag, bool led_ctrl_flag)
 {
+#ifdef CDEV_BLE_ADVERTISING_ENABLE
     static bool started = false;
     uint32_t err_code;
 
@@ -1529,6 +1536,11 @@ void advertising_start(bool start_flag, bool led_ctrl_flag)
         }
         started = start_flag;
     }
+#else
+    (void)start_flag;
+    (void)led_ctrl_flag;
+    return;
+#endif
 }
 
 /**@brief Function for handling Peer Manager events.
@@ -1823,7 +1835,7 @@ static void gap_params_init(void)
     }
     else
     {
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
         err_code = sd_ble_gap_device_name_set(&sec_mode,
                                               (const uint8_t *)ASSETTRACKER_NAME,
                                               strlen(ASSETTRACKER_NAME));
@@ -2104,49 +2116,6 @@ void main_timer_schedule_stop(void)
     APP_ERROR_CHECK(err_code);
 }
 
-/**
- * @brief Function for checking for entering  the scenario mode into the test mode
- *
- * @return true if possible, nor false
-*/
-bool main_check_ctrl_mode_allowed_state(void)
-{
-    bool ret = false;
-
-    if(m_module_parameter.scenario_mode == MODULE_SCENARIO_MWC_DEMO)
-    {
-        if( m_module_mode == NONE
-           || m_module_mode == WAIT_CTRL_MODE_CHANGE
-           || m_module_mode == MANUAL_MODE
-        )
-        {
-            ret = true;
-        }
-    }
-    else
-    {
-        if( m_module_mode == NONE
-           || m_module_mode == ACC  //boot step state ....
-           || m_module_mode == WAIT_CTRL_MODE_CHANGE
-           || m_module_mode == WIFI_BYPASS
-           || m_module_mode == SIGFOX_BYPASS
-           || m_module_mode == MANUAL_MODE
-           || m_module_mode == GPS_BYPASS
-           || m_module_mode == BLE_CONTROL
-           || m_module_mode == ACC_BYPASS
-        )
-        {
-            ret = true;
-        }
-    }
-    
-    if(!ret)
-    {
-        cPrintLog(CDBG_TBC_INFO, "%d mode change not allowed %d\n", __LINE__, m_module_mode);
-    }
-    return ret;
-}
-
 /**@brief Function for setting main state in main scheduler.
  *
  * @param[in] state  set the next state in main scheduler.
@@ -2161,20 +2130,11 @@ void main_set_module_state(module_mode_t state)
 }
 
 
-bool main_schedule_state_is_accbypass(void)
-{
-    if(m_module_mode == ACC_BYPASS)
-        return true;
-    else
-        return false;
-}
-
 /**@brief Function for indicating whether the current state is idle or not.
  *
  * @return true if it is idle, nor false
  *                         
  */
-
 
 bool main_schedule_state_is_idle(void)
 {
@@ -2233,44 +2193,7 @@ static void main_schedule_timeout_handler_asset_tracker(void * p_context)
                 cfg_bma250_timers_stop();
 //                bma250_set_state(NONE_ACC);
             }
-            main_set_module_state(WAIT_CTRL_MODE_CHANGE);
-            break;
-
-        case WAIT_CTRL_MODE_CHANGE:
-#if defined(FEATURE_CFG_BYPASS_CONTROL)
-            if(m_exception_mode != NONE)
-            {
-                main_set_module_state(IDLE);
-                break;
-            }
-
-            ++m_module_ready_wait_timeout_tick;
-            if(cTBC_check_host_connected())
-            {
-                if(m_module_ready_wait_timeout_tick > (APP_MAIN_SCHEDULE_HZ * m_module_parameter.start_wait_time_for_ctrl_mode_change_sec))
-                {
-                    main_set_module_state(SCENARIO_MODE);
-                }
-                else
-                {
-                    main_set_module_state(MANUAL_MODE);
-                }
-            }
-            else
-            {
-                if(m_module_ready_wait_timeout_tick > (APP_MAIN_SCHEDULE_HZ * m_module_parameter.start_wait_time_for_board_control_attach_sec))
-                {
-                    main_set_module_state(SCENARIO_MODE);
-                }
-                else
-                {
-                    if((m_module_ready_wait_timeout_tick == 1) || ((m_module_ready_wait_timeout_tick % 10) == 0))
-                        cPrintLog(CDBG_FCTRL_INFO, "%s %d Wait for host conect! %d\n", __func__, __LINE__, m_module_ready_wait_timeout_tick);
-                }
-            }
-#else
             main_set_module_state(MAIN_SCENARIO_LOOP);
-#endif
             break;
 
         case MAIN_SCENARIO_LOOP:
@@ -2580,81 +2503,7 @@ static void main_schedule_timeout_handler_asset_tracker(void * p_context)
                 }
             }
             break;
-        case WIFI_BYPASS:
-#if defined(FEATURE_CFG_BYPASS_CONTROL)
-#if defined(CDEV_WIFI_MODULE)
-            if(m_init_excute)
-            {
-                if(cWifi_is_detected())
-                {
-                    if(cWifi_is_busy())
-                    {
-                        if(m_module_ready_wait_timeout_tick < 20)
-                        {
-                            if((m_module_ready_wait_timeout_tick == 1) || ((m_module_ready_wait_timeout_tick % 5) == 0))
-                            {
-                                cPrintLog(CDBG_FCTRL_ERR, "%s %d Wait Wifi Module%d\n", __func__, __LINE__, m_module_ready_wait_timeout_tick);
-                            }
-                        }
-                        else
-                        {
-                            m_init_excute = false;
-                        }
-                    }
-                    else
-                    {
-                        if(cWifi_bypass_req(cTBC_put_bypass_data, cTBC_mode_change_msg_noti) == CWIFI_Result_OK)
-                        {
-                            cPrintLog(CDBG_FCTRL_INFO, "%s %d WIFI_BYPASS requested!\n", __func__, __LINE__);
-                            m_init_excute = false;
-                        }
-                        else
-                        {
-                            cTBC_mode_change_msg_noti(false, "Not Support!");
-                            cPrintLog(CDBG_FCTRL_INFO, "%s %d Not Availalble Wifi Module!\n", __func__, __LINE__);
-                            m_init_excute = false;
-                        }
-                    }
-                }
-                else
-                {
-                    cPrintLog(CDBG_FCTRL_ERR, "%s %d Wifi is not detected!\n", __func__, __LINE__);
-                    cTBC_mode_change_msg_noti(false, "Not Available!");
-                    main_set_module_state(WAIT_CTRL_MODE_CHANGE);
-                }
-            }
-            else
-            {
-                if(!cWifi_is_bypass_state() && !cWifi_bus_busy_check())
-                {
-                    main_set_module_state(MANUAL_MODE);
-                }
-            }
-#else
-            cTBC_mode_change_msg_noti(false, "Not Support!");
-            cPrintLog(CDBG_FCTRL_ERR, "%s %d WIFI_BYPASS mode not supported!\n", __func__, __LINE__);
-            main_set_module_state(WAIT_CTRL_MODE_CHANGE);
-#endif
-#else  //FEATURE_CFG_BYPASS_CONTROL
-            main_set_module_state(WAIT_CTRL_MODE_CHANGE);
-#endif //FEATURE_CFG_BYPASS_CONTROL
-            break;
-        case WIFI_TEST_MODE:
-            if(m_init_excute)
-            {
-#ifdef CDEV_WIFI_MODULE
-                cWifi_enter_rftest_mode();
-#else
-                cPrintLog(CDBG_FCTRL_ERR, "Wifi Not Defined!\n");
-#endif
-                cTBC_boot_msg_noti("SettingMode");
-                m_init_excute = false;
-            }
-            else
-            {
-                module_parameter_check_update();
-            }
-            break;
+
         case SIGFOX:
             if(sigfox_get_state() == SETUP_S)
             {
@@ -2676,160 +2525,6 @@ static void main_schedule_timeout_handler_asset_tracker(void * p_context)
                 nus_send_data('B');
             }
             break;
-        case SIGFOX_BYPASS:  //FEATURE_CFG_BYPASS_CONTROL
-#ifdef FEATURE_CFG_BYPASS_CONTROL
-            if(m_init_excute)
-            {
-                if(sigfox_bypass_req(cTBC_put_bypass_data, cTBC_mode_change_msg_noti) == NRF_SUCCESS)
-                {
-                    cPrintLog(CDBG_FCTRL_INFO, "%s %d start SIGFOX_BYPASS\n", __func__, __LINE__);
-                    cTBC_write_state_noti("SigfoxBypass");
-                }
-                else
-                {
-                    cTBC_mode_change_msg_noti(false, "sigfox busy");
-                    cPrintLog(CDBG_FCTRL_ERR, "%s %d start SIGFOX_BUSY\n", __func__, __LINE__);
-                }
-                m_init_excute = false;
-            }
-            else
-            {
-                if(sigfox_check_exit_excute())
-                {
-                    cPrintLog(CDBG_FCTRL_INFO, "%s %d stop SIGFOX_BYPASS\n", __func__, __LINE__);
-                    cfg_sigfox_timers_stop();
-                    sigfox_set_state(SETUP_S);
-                    main_set_module_state(MANUAL_MODE);
-                }
-            }
-#else
-            main_set_module_state(WAIT_CTRL_MODE_CHANGE);
-#endif
-            break;
-
-        case MANUAL_MODE:
-            if(m_exception_mode != NONE)
-            {
-                main_set_module_state(IDLE);
-                break;
-            }
-            m_module_ready_wait_timeout_tick++;
-            if(m_init_excute)
-            {
-                cTBC_boot_msg_noti("ManualMode");
-                m_init_excute = false;
-            }
-            else
-            {
-                module_parameter_check_update();
-                if((m_module_ready_wait_timeout_tick == 1) || ((m_module_ready_wait_timeout_tick % (10 * 6)) == 0))
-                {
-                    cPrintLog(CDBG_FCTRL_DBG, "%s %d Wait control cmd%d\n", __func__, __LINE__, m_module_ready_wait_timeout_tick);
-                }
-            }
-            break;
-
-        case SCENARIO_MODE:
-            cTBC_boot_msg_noti("ScenarioMode");
-            main_set_module_state(MAIN_SCENARIO_LOOP);
-            break;
-
-        case GPS_BYPASS:
-#if defined(FEATURE_CFG_BYPASS_CONTROL)
-#if defined(CDEV_GPS_MODULE)
-            if(m_init_excute)  // 바이패스 실행
-            {
-                if(cGps_bypass_available_check() == CGPS_Result_OK)  // Gps 정상 체크
-                {
-                    if(cGps_bypass_request() == CGPS_Result_OK)   // bypass 진입 가능할지 체크 및 bypass로 상태 변경
-                    {
-                        cPrintLog(CDBG_FCTRL_INFO, "%s %d GPS_BYPASS requested!\n", __func__, __LINE__);
-                        m_init_excute = false;
-                    }
-                    else   // 바이패스로 진입이 불가한 상태이면 not available처리...
-                    {
-                        cTBC_mode_change_msg_noti(false, "Not Support!");
-                        cPrintLog(CDBG_FCTRL_INFO, "%s %d Not Available Gps Module!\n", __func__, __LINE__);
-                        m_init_excute = false;
-                    }
-                }
-            }
-            else
-            {
-                if(cGps_is_bypass_mode())
-                {
-                    // gps bypass
-                }
-                else if((cGps_bypass_get_mode_change() == CGPS_Result_OK)  &&  !cGps_bus_busy_check())
-                {
-                    cPrintLog(CDBG_FCTRL_INFO, "%s %d stop GPS_BYPASS\n", __func__, __LINE__);
-                    main_set_module_state(MANUAL_MODE);
-                }
-                else
-                {
-                    cTBC_mode_change_msg_noti(false, "Not Support!");
-                    cPrintLog(CDBG_FCTRL_ERR, "%s %d GPS_BYPASS mode not supported!\n", __func__, __LINE__);
-                    main_set_module_state(WAIT_CTRL_MODE_CHANGE);
-                }
-
-            }
-
-#else
-            cTBC_mode_change_msg_noti(false, "Not Support!");
-            cPrintLog(CDBG_FCTRL_ERR, "%s %d GPS_BYPASS mode not supported!\n", __func__, __LINE__);
-            main_set_module_state(WAIT_CTRL_MODE_CHANGE);
-#endif
-#else
-            main_set_module_state(WAIT_CTRL_MODE_CHANGE);
-#endif
-            break;
-        case BLE_CONTROL:
-        case ACC_BYPASS:
-#ifdef FEATURE_CFG_BYPASS_CONTROL
-            if(m_init_excute) 
-            {
-                if(bma250_get_state() == NONE_ACC)
-                {
-                    cPrintLog(CDBG_FCTRL_INFO, "%s %d ACC BYPASS started\n",  __func__, __LINE__);
-                    cfg_i2c_master_uninit();
-                    cfg_i2c_master_init();
-                    nrf_delay_ms(1);
-                    bma250_set_state(BYPASS_S);
-                    cfg_bma250_timers_start();
-                    m_init_excute = false;
-                }
-                else   // If it is not possible to enter into bypass ...
-                {
-                    cTBC_mode_change_msg_noti(false, "Not Support!");
-                    cPrintLog(CDBG_FCTRL_INFO, "%s %d Not Available ACC BYPASS!\n", __func__, __LINE__);
-                    m_init_excute = false;
-                }
-            }
-            else
-            {
-                if(acc_is_bypass_mode())
-                {
-                    // acc bypass
-                }
-                else if(bma250_get_state() == EXIT_ACC)
-                {
-                    cPrintLog(CDBG_FCTRL_INFO, "%s %d stop GPS_BYPASS\n", __func__, __LINE__);
-                    cfg_bma250_timers_stop();
-                    bma250_set_state(NONE_ACC);
-                    main_set_module_state(MANUAL_MODE);
-                }
-                else
-                {
-                    cTBC_mode_change_msg_noti(false, "Not Support!");
-                    cPrintLog(CDBG_FCTRL_ERR, "%s %d ACC_BYPASS mode not supported!\n", __func__, __LINE__);
-                    main_set_module_state(WAIT_CTRL_MODE_CHANGE);
-                }
-            }
-
-#else
-            main_set_module_state(WAIT_CTRL_MODE_CHANGE);
-#endif
-            break;
 
         case IDLE:
             cPrintLog(CDBG_FCTRL_INFO, "IDLE MODULE started\r\n");
@@ -2838,19 +2533,11 @@ static void main_schedule_timeout_handler_asset_tracker(void * p_context)
             main_timer_schedule_stop();
             main_timer_schedule_start();
 //            m_module_mode = ACC;
-            if(m_exception_mode != NONE)
+
+            main_set_module_state(MAIN_SCENARIO_LOOP);
+            if(cfg_is_3colorled_contorl())
             {
-                cPrintLog(CDBG_FCTRL_INFO, "%s %d m_exception_mode detected : %d started\n", __func__, __LINE__, m_exception_mode);
-                main_set_module_state(m_exception_mode);
-                m_exception_mode = NONE;
-            }
-            else
-            {
-                main_set_module_state(MAIN_SCENARIO_LOOP);
-                if(cfg_is_3colorled_contorl())
-                {
-                    cfg_ble_led_control(true);
-                }
+                cfg_ble_led_control(true);
             }
             break;
 
@@ -2873,33 +2560,6 @@ static void main_schedule_timeout_handler_MWC_demo(void * p_context)
     main_schedule_tick++;
     switch(m_module_mode)
     {
-        case WAIT_CTRL_MODE_CHANGE:
-            ++m_module_ready_wait_timeout_tick;
-            if(cTBC_check_host_connected())
-            {
-                if(m_module_ready_wait_timeout_tick > (APP_MAIN_SCHEDULE_HZ * m_module_parameter.start_wait_time_for_ctrl_mode_change_sec))
-                {
-                    main_set_module_state(SCENARIO_MODE);
-                }
-                else
-                {
-                    main_set_module_state(MANUAL_MODE);
-                }
-            }
-            else
-            {
-                if(m_module_ready_wait_timeout_tick > (APP_MAIN_SCHEDULE_HZ * m_module_parameter.start_wait_time_for_board_control_attach_sec))
-                {
-                    main_set_module_state(SCENARIO_MODE);
-                }
-                else
-                {
-                    if((m_module_ready_wait_timeout_tick == 1) || ((m_module_ready_wait_timeout_tick % 10) == 0))
-                        cPrintLog(CDBG_FCTRL_INFO, "%s %d Wait for host conect! %d\n", __func__, __LINE__, m_module_ready_wait_timeout_tick);
-                }
-            }
-            break;
-
         case MAIN_SCENARIO_LOOP:
             cPrintLog(CDBG_FCTRL_INFO, "==MAIN_SCENARIO_LOOP %u==\n", main_schedule_tick);
             main_set_module_state(WIFI);
@@ -3006,33 +2666,6 @@ static void main_schedule_timeout_handler_MWC_demo(void * p_context)
             }
             break;
 
-        case MANUAL_MODE:  //setting only
-            if(m_init_excute)
-            {
-                cTBC_boot_msg_noti("ManualMode");
-#ifdef CDEV_GPS_MODULE
-                cGps_power_control(false, true);
-#endif
-                m_init_excute = false;
-            }
-            else
-            {
-                module_parameter_check_update();
-                if(m_exception_mode != NONE)
-                {
-                    if(m_exception_mode == SCENARIO_MODE)
-                    {
-                        main_set_module_state(MAIN_SCENARIO_LOOP);
-                    }
-                    else
-                    {
-                        cTBC_mode_change_msg_noti(false, "NotSupported");
-                    }
-                    m_exception_mode = NONE;
-                }
-            }
-            break;
-
         case SIGFOX:
             if(sigfox_get_state() == SETUP_S)
             {
@@ -3070,26 +2703,6 @@ static void main_schedule_timeout_handler_MWC_demo(void * p_context)
             }
             break;
 
-        case SCENARIO_MODE:
-            if(m_init_excute)
-            {
-#ifdef CDEV_GPS_MODULE
-                cGps_power_control(false, true);
-#endif
-                cTBC_boot_msg_noti("ScenarioMode");
-                cPrintLog(CDBG_FCTRL_DBG, "Prepare NECTAR Service\n");
-                m_init_excute = false;
-            }
-            else
-            {
-                if(m_module_ready_wait_timeout_tick++ > 10)
-                {
-                    cPrintLog(CDBG_FCTRL_DBG, "Start NECTAR Service\n");
-                    main_set_module_state(MAIN_SCENARIO_LOOP);
-                }
-            }
-            break;
-
         case IDLE:
             main_timer_schedule_stop();
             main_timer_schedule_start();
@@ -3100,126 +2713,22 @@ static void main_schedule_timeout_handler_MWC_demo(void * p_context)
     }
 }
 
-bool main_work_mode_change_request(cfg_board_work_mode_e mode)
+static void main_bypass_enter_CB(void)
 {
-    bool ret = false;
-    if(m_exception_mode != NONE)
-    {
-        cPrintLog(CDBG_FCTRL_ERR, "%s mode_change busy! %d, %d\n", __func__, m_exception_mode, m_module_mode);
-        return ret;
-    }
-    switch(mode)
-    {
-        case cfg_board_work_normal:
-            cPrintLog(CDBG_FCTRL_INFO, "%s normal mode request!\n", __func__);
-            m_exception_mode = SCENARIO_MODE;
-            ret = true;
-            advertising_start(true, true);
-            break;
-
-        case cfg_board_work_sigfox_bypass:
-            cPrintLog(CDBG_FCTRL_INFO, "%s sigfox_bypass mode request!\n", __func__);
-            m_exception_mode = SIGFOX_BYPASS;
-            ret = true;
-            advertising_start(false, true);
+    cPrintLog(CDBG_FCTRL_INFO, "call %s\n", __func__);
+    advertising_start(false, true);
 #ifdef CDEV_GPS_MODULE
-            cGps_power_control(false, true);
+    cGps_power_control(false, false);
 #endif
-            break;
-
-        case cfg_board_work_wifi_bypass:
-            cPrintLog(CDBG_FCTRL_INFO, "%s wifi_bypass mode request!\n", __func__);
-            m_exception_mode = WIFI_BYPASS;
-            ret = true;
-            advertising_start(false, true);
-#ifdef CDEV_GPS_MODULE
-            cGps_power_control(false, true);
-#endif
-            break;
-
-        case cfg_board_work_manual:
-            cPrintLog(CDBG_FCTRL_INFO, "%s cfg_board_work_manual mode request!\n", __func__);
-            m_exception_mode = MANUAL_MODE;
-            ret = true;
-            advertising_start(false, true);
-            break;
-
-        case cfg_board_work_gps_bypass:
-            cPrintLog(CDBG_FCTRL_INFO, "%s cfg_board_work_gps_bypass mode request!\n", __func__);
-            m_exception_mode = GPS_BYPASS;
-            ret = true;
-            advertising_start(false, true);
-            break;
-
-        case cfg_board_work_ble_crtl:
-        case cfg_board_work_acc_bypass:
-            cPrintLog(CDBG_FCTRL_INFO, "%s cfg_board_work_ble_crtl mode request!\n", __func__);
-//            m_exception_mode = BLE_CONTROL;
-            m_exception_mode = ACC_BYPASS;
-            ret = true;
-            advertising_start(false, true);
-            break;
-
-        default:
-            break;
-    }
-
-    switch(m_module_mode)  //abort request
-    {
-        case WIFI_BYPASS:
-#ifdef CDEV_WIFI_MODULE
-            cWifi_abort_req();
-#endif
-            break;
-
-        case SIGFOX_BYPASS:
-            sigfox_abort_request();
-            break;
-
-        case GPS_BYPASS:
-#ifdef CDEV_GPS_MODULE
-            cGps_bypass_abort_request();
-#endif
-            break;
-        case BLE_CONTROL:
-        case ACC_BYPASS:
-            nrf_delay_ms(10);
-            bma250_set_state(EXIT_ACC);
-            break;
-        case IDLE:
-            main_timer_schedule_stop();
-            main_timer_schedule_start();
-            break;
-
-        default:
-            break;
-    }
-    return ret;
 }
 
-
-cfg_board_work_mode_e main_work_mode_get_cur(void)
+static void main_bypass_exit_CB(void)
 {
-    cfg_board_work_mode_e cur_mode = cfg_board_work_normal;
-
-    if(m_module_mode == SIGFOX_BYPASS)
-    {
-        cur_mode = cfg_board_work_sigfox_bypass;
-    }
-    else if(m_module_mode == WIFI_BYPASS)
-    {
-        cur_mode = cfg_board_work_wifi_bypass;
-    }
-    else if(m_module_mode == GPS_BYPASS)
-    {
-        cur_mode = cfg_board_work_gps_bypass;
-    }
-    else if(m_module_mode == ACC_BYPASS)
-    {
-        cur_mode = cfg_board_work_acc_bypass;
-    }
-
-    return cur_mode;
+    cPrintLog(CDBG_FCTRL_INFO, "call %s\n", __func__);
+    advertising_start(true, true);
+#ifdef CDEV_GPS_MODULE
+    cGps_power_control(true, false);
+#endif
 }
 
 /**
@@ -3634,6 +3143,42 @@ void main_examples_prepare(void)
     APP_ERROR_CHECK(err_code);
 }
 
+void dbg_i2c_user_cmd_proc(int cmd, int param_size, const uint8_t *param)
+{
+    cPrintLog(CDBG_MAIN_LOG, "user cmd : %d, param size:%d\n", cmd, param_size);
+    switch(cmd /*CTBC_CMD_TYPE*/)
+    {
+        case 0x80:  //all led on for factory test  //CTBC_CMD_USER_START
+            cPrintLog(CDBG_MAIN_LOG, "led on\n");
+            if(cfg_is_3colorled_contorl())
+            {
+                cfg_ble_led_control(true);
+                cfg_wkup_output_control(true);
+            }
+            else
+            {
+                cfg_ble_led_control(true);
+            }
+            break;
+
+        case 0x81:  //all led off for factory test
+            cPrintLog(CDBG_MAIN_LOG, "led off\n");
+            if(cfg_is_3colorled_contorl())
+            {
+                cfg_ble_led_control(false);
+                cfg_wkup_output_control(false);
+            }
+            else
+            {
+                cfg_ble_led_control(false);
+            }
+            break;
+
+        default:
+            break;
+    }
+}
+
 int main(void)
 {
     bool    erase_bonds = 0;
@@ -3662,7 +3207,7 @@ int main(void)
 #ifdef CDEV_NUS_MODULE
     nus_data_init();
 #endif
-    cTBC_init();
+    cTBC_init(dbg_i2c_user_cmd_proc);
     get_ble_mac_address();
 
     nfc_init();
@@ -3711,48 +3256,29 @@ int main(void)
 #ifdef CDEV_BATT_CHECK_MODULE
     cfg_bas_timer_create();
 #endif
-    // Start execution.
 
-    if(0){}  //dummy if
-#if defined(CDEV_WIFI_MODULE)  //wifi testmode (wifi alway on only)
-    else if((main_get_param_val(module_parameter_item_scenario_mode)== MODULE_SCENARIO_ASSET_TRACKER) 
-        && main_get_param_val(module_parameter_item_wifi_testmode_enable))  //wifi_testmode_enable
+    // Start execution.
+    cPrintLog(CDBG_FCTRL_INFO, "%s main schedule start! state:%d\n", __func__, m_module_mode);
+    if(m_module_parameter.scenario_mode == MODULE_SCENARIO_ASSET_TRACKER)
     {
-        main_set_module_state(WIFI_TEST_MODE);
-#ifdef CDEV_GPS_MODULE
-        cGps_power_control(false, true);
-#endif
-        cPrintLog(CDBG_FCTRL_INFO, "%s startup wifi test mode\n", __func__);
-        // Enter main loop.
-        main_timer_schedule_start();
-    }
-#endif
-    else
-    {
-        cPrintLog(CDBG_FCTRL_INFO, "%s main schedule start! state:%d\n", __func__, m_module_mode);
-        if(m_module_parameter.scenario_mode == MODULE_SCENARIO_ASSET_TRACKER)
-        {
-            cfg_sigfox_downlink_on_off(false);
+        cfg_sigfox_downlink_on_off(false);
 #if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI)
-            mnfc_tag_on_CB = main_timer_schedule_restart_check_idle;
+        mnfc_tag_on_CB = main_timer_schedule_restart_check_idle;
 #endif
-        }
-        else if(m_module_parameter.scenario_mode == MODULE_SCENARIO_MWC_DEMO)
-        {            
-            //set start state
-            m_module_mode = WAIT_CTRL_MODE_CHANGE;
-            cfg_sigfox_downlink_on_off(true);
-        }
-        else if(m_module_parameter.scenario_mode == MODULE_SCENARIO_IHERE_MINI)
-        {
-            cfg_sigfox_downlink_on_off(false);
-            mnfc_tag_on_CB = ihere_mini_current_schedule_start;
-            charging_indicator_init();
-        }
-        // Enter main loop.
-        main_timer_schedule_start();
-        advertising_start(true, true);
     }
+    else if(m_module_parameter.scenario_mode == MODULE_SCENARIO_MWC_DEMO)
+    {            
+        //set start state
+        m_module_mode = MAIN_SCENARIO_LOOP;
+        cfg_sigfox_downlink_on_off(true);
+    }
+    else if(m_module_parameter.scenario_mode == MODULE_SCENARIO_IHERE_MINI)
+    {
+        cfg_sigfox_downlink_on_off(false);
+        mnfc_tag_on_CB = ihere_mini_current_schedule_start;
+        charging_indicator_init();
+    }
+    advertising_start(true, true);
 
     cPrintLog(CDBG_FCTRL_INFO, "BLE MAC:");
     cDataDumpPrintOut(CDBG_FCTRL_INFO, m_module_peripheral_ID.ble_MAC, 6);
@@ -3772,6 +3298,11 @@ int main(void)
         cPrintLog(CDBG_FCTRL_INFO, "WIFI AppVer:%02x, InitDataVer:%04x\n", wifi_app_ver, initDataVer);
     }
 #endif
+
+    cTBC_check_N_enter_bypassmode(200, main_bypass_enter_CB, main_bypass_exit_CB);
+
+    // Enter main loop.
+    main_timer_schedule_start();
 
     for (;; )
     {
@@ -3810,7 +3341,6 @@ int main(void)
             m_module_parameter_save_N_reset_req = false;
             m_module_parameter_update_req = true;
             module_parameter_check_update();
-			
             nrf_delay_ms(1000);
             NVIC_SystemReset(); 
         }
