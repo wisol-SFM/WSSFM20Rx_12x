@@ -19,7 +19,7 @@ The main core of the module is based on the Nordic nRF52832 SOC. Wisol has devel
   - nRF52 DK board: optional, used as a master to connect to the Wisol dev kit using SWD. Can be bypassed if you own JTAG/SWD debugger probe.
 
 - __Software__
-  - __MinGW__ and __MSys__: Windows users only (http://www.mingw.org/). Provides open-source GNU tools required to use the Makefiles. Don't use Cygwin as there are incompatibilities.
+  - __MinGW__ and __MSys__: Windows users only (http://www.mingw.org/). Provides open-source GNU tools required to use the Makefiles. Don't use Cygwin as there are incompatibilities. (test by git bash for windows64, mingw64-make)
   - __J-Link software__ for debugging (https://www.segger.com/downloads/jlink/)
   - __nrfutil__: for Linux/macOS only. If you have python and pip already installed, just run the following command:
 ```
@@ -55,8 +55,15 @@ Wisol SDK includes Nordic tools and gcc-arm to compile and flash the code for Wi
 
 Go into the example directory to be flashed, ie source_sigfox_example:
 
+Linux/macOS users
 ```
-cd development/sigfox_cfg2/source_sigfox_example/
+cd development/sigfox_cfg2/source/
+make
+```
+
+mingw64 users
+```
+cd development/sigfox_cfg2/source/s132/armgcc
 make
 ```
 

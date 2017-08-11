@@ -1,0 +1,7 @@
+GNU_INSTALL_ROOT = $(abspath $(SDK_ROOT)/development/sigfox_cfg2/tools/gcc-win32/)
+GNU_VERSION = 5.4.1
+GNU_PREFIX = arm-none-eabi
+
+NRFJPROG := nrfjprog.exe
+MERGEHEX := $(SDK_ROOT)/development/sigfox_cfg2/tools/nrftools/mergehex.exe
+NRFUTIL  := $(SDK_ROOT)/development/sigfox_cfg2/tools/nrftools/nrfutil.exe
