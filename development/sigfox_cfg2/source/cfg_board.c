@@ -671,18 +671,12 @@ static void cfg_board_check_bootstrap_pin(void)
     bool special_mode = false;
     int i;
 
-#ifdef CDEV_WIFI_MODULE  //ESP8285
     nrf_gpio_cfg_input(PIN_DEF_WIFI_INT, NRF_GPIO_PIN_PULLUP);
-#endif
     nrf_gpio_cfg_input(PIN_DEF_TWIS_BOARD_CTRL_SCL, NRF_GPIO_PIN_PULLDOWN);
     nrf_gpio_cfg_input(PIN_DEF_TWIS_BOARD_CTRL_SDA, NRF_GPIO_PIN_PULLDOWN);
     nrf_delay_ms(50);
 
-#ifdef CDEV_WIFI_MODULE  //ESP8285
     pinLvl_DL_EN = nrf_gpio_pin_read(PIN_DEF_WIFI_INT);
-#else
-    pinLvl_DL_EN = 1;
-#endif
 
     pinLvl_I2C0_SCL_DBG = nrf_gpio_pin_read(PIN_DEF_TWIS_BOARD_CTRL_SCL);
     pinLvl_I2C0_SDA_DBG = nrf_gpio_pin_read(PIN_DEF_TWIS_BOARD_CTRL_SDA);
@@ -710,9 +704,7 @@ static void cfg_board_check_bootstrap_pin(void)
     {
         special_mode = true;
     }
-#ifdef CDEV_WIFI_MODULE  //ESP8285
     nrf_gpio_cfg_default(PIN_DEF_WIFI_INT);
-#endif
     nrf_gpio_cfg_default(PIN_DEF_TWIS_BOARD_CTRL_SCL);
     nrf_gpio_cfg_default(PIN_DEF_TWIS_BOARD_CTRL_SDA);
 

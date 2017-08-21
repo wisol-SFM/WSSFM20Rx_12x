@@ -157,7 +157,7 @@ int main(void)
     gps_init();
 
 /* set gps tracking interval time */
-    gps_sec = 60*3; // sec
+    gps_sec = 60; // sec
     gps_tracking_set_interval(module_parameter_item_gps_tracking_time_sec, gps_sec);
 
 /* get gps tracking timeout */ 
@@ -179,7 +179,7 @@ int main(void)
         cPrintLog(CDBG_MAIN_LOG, "[%d]  size[%d]  m_cGpsNMEABuf[%s]  \n",__LINE__, sizeof(m_cGpsRxNMEA_Buf), m_cGpsRxNMEA_Buf);
         cPrintLog(CDBG_MAIN_LOG, "LINE[%d]  ==================================================== --]]    \n",__LINE__);
 
-        if (cGps_nmea_position_fix_check() == CGPS_Result_OK)
+        if(cGPS_waiting_tracking_end_check())
         {
             break;
         }

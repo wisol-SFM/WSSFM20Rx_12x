@@ -190,7 +190,7 @@ test feature
                                  .xtal_accuracy = NRF_CLOCK_LF_XTAL_ACCURACY_250_PPM}
 
 //modify define
-#if (CDEV_MODULE_TYPE == CDEV_MODULE_SFM60R)  //mwc demo
+#if (CDEV_MODULE_TYPE == CDEV_MODULE_SFM60R)
 #undef CDEV_WIFI_MODULE
 #undef CDEV_BLE_ADVERTISING_ENABLE
 #endif

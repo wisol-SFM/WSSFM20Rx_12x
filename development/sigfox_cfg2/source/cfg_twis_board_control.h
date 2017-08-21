@@ -59,7 +59,7 @@ typedef enum
 typedef void (*cTBC_bypass_enter_callback_t)(void);
 typedef void (*cTBC_bypass_exit_callback_t)(void);
 typedef void (*cTBC_user_defined_cmd_callback_t)(int cmd, int param_size, const uint8_t *param);
-
+typedef void (*cTBC_debugmode_run_function_t)(void);
 
 #define CTBC_RESP_COMMON_ERROR "<SR>0400NG"
 #define CTBC_RESP_READY "<SR>0700READY"
@@ -84,8 +84,10 @@ extern "C" {
 
 #ifdef CTBC_INSTANCE
 char m_cTBC_resp_buf[128];
+cTBC_debugmode_run_function_t m_cTBC_dbg_mode_run_func;
 #else
 extern char m_cTBC_resp_buf[128];
+extern cTBC_debugmode_run_function_t m_cTBC_dbg_mode_run_func;
 #endif
 
 void cTBC_init(cTBC_user_defined_cmd_callback_t user_cmd_CB);

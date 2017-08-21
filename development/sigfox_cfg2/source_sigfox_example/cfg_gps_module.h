@@ -575,6 +575,12 @@ int get_NMEA_Direction(char **ns, char **ew);
  */
 int get_NMEA_UTCDate(uint8_t *year, uint8_t *month, uint8_t *day);
 
+/**
+ * @brief        Check status of gps tracking end.
+ * @return       Return true if gps tracking end (position fixed success or fixed fail) 
+ */
+bool cGPS_waiting_tracking_end_check(void);
+
 #ifdef __cplusplus
 }
 #endif
