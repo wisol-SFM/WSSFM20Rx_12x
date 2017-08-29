@@ -2324,11 +2324,12 @@ static void main_schedule_timeout_handler_asset_tracker(void * p_context)
             }
             else if(work_mode == GPS_WORK)
             {
-                if(cGps_acquire_tracking_check() == CGPS_Result_OK)
+                get_nmea_result = cGps_acquire_tracking_check();
+                if(get_nmea_result == CGPS_Result_OK)
                 {
                     work_mode = GPS_END;
                 }
-                else if (cGps_acquire_tracking_check() == CGPS_Result_NoData)
+                else if (get_nmea_result == CGPS_Result_Fix_Fail)
                 {
                     while(cGps_bus_busy_check()){nrf_delay_ms(100);};
                     work_mode = GPS_START;
@@ -2340,7 +2341,19 @@ static void main_schedule_timeout_handler_asset_tracker(void * p_context)
                     main_set_module_state(WIFI);
                     nus_send_data('G');
                 }
-                else if(cGps_acquire_tracking_check() == CGPS_Result_NotStarted)
+                else if(get_nmea_result == CGPS_Result_NotStarted)
+                {
+                    while(cGps_bus_busy_check()){nrf_delay_ms(100);};
+                    work_mode = GPS_START;
+                    if(cfg_is_3colorled_contorl())
+                    {
+                        cfg_ble_led_control(old_ble_led);
+                        cfg_wkup_output_control(false);
+                    }
+                    main_set_module_state(WIFI);
+                    nus_send_data('G');
+                }
+                else if(get_nmea_result == CGPS_Result_NotSupported)
                 {
                     while(cGps_bus_busy_check()){nrf_delay_ms(100);};
                     work_mode = GPS_START;
