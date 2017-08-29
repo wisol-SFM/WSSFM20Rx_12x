@@ -305,7 +305,6 @@ void cfg_board_common_power_control(module_comm_pwr_resource_e resource, bool bO
         {
             nrf_gpio_cfg_output(PIN_DEF_2ND_POW_EN);
             nrf_gpio_pin_write(PIN_DEF_2ND_POW_EN, 1);
-            nrf_delay_ms(2);  //spec is 2uS
         }
         m_cfg_comm_pwr_mask = (m_cfg_comm_pwr_mask | (0x01<<resource));
     }
@@ -316,7 +315,6 @@ void cfg_board_common_power_control(module_comm_pwr_resource_e resource, bool bO
         {
             nrf_gpio_cfg_output(PIN_DEF_2ND_POW_EN);
             nrf_gpio_pin_write(PIN_DEF_2ND_POW_EN, 0);
-            nrf_delay_ms(1);
         }
     }
 }
@@ -767,6 +765,7 @@ void cfg_board_init(void)
     cfg_board_resource_init();
 
     cfg_board_common_power_control(module_comm_pwr_pon_init, true);
+    nrf_delay_ms(2);
 
 #ifdef CDEV_WIFI_MODULE
     cWifi_resource_init();
