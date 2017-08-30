@@ -32,7 +32,8 @@ extern "C" {
 #define CWIFI_Result_NotSupported  (-6)
 
 #define CWIFI_SPI_BUF_SIZE 80
-#define CWIFI_AT_CMD_SIZE_MAX 256
+#define CWIFI_BYPASS_DEFAULT_BUFFER_SIZE 256
+#define CWIFI_RESPONSE_CACHE_BUFFER_SIZE 128
 #define CWIFI_AT_CMD_RESP_PACKET_MAX 63  // & 0x3F : 6bit max value
 
 #define CWIFI_BSSID_CNT 2
@@ -58,7 +59,7 @@ extern "C" {
 
 #define CWIFI_SPI_CMD_RESP_TIME_OUT_TICK_LONG 500  //for first response time out tick
 #define CWIFI_SPI_CMD_RESP_WAIT_TIME_MS_LONG 20  //for first response time out time
-#define CWIFI_SPI_CMD_RESP_TIME_OUT_TICK 1
+#define CWIFI_SPI_CMD_RESP_TIME_OUT_TICK 2
 #define CWIFI_SPI_CMD_RESP_WAIT_TIME_MS 10
 
 #define CWIFI_SCAN_RETRY_WAIT_TIME_MS 2000
@@ -188,6 +189,15 @@ bool cWifi_BSSID_null_check(void);
 
 #ifdef FEATURE_CFG_BYPASS_CONTROL
 /**
+ * @brief       Function for remapping of bypass buffer
+ * @param[in]   pBuf pointer of bypass buffer. default size is CWIFI_BYPASS_DEFAULT_BUFFER_SIZE
+ * @param[in]   bufSize size of buffer
+ *
+ * @return      boolean
+ */
+bool cWifiState_bypass_buffer_remapping(uint8_t *pBuf, unsigned int bufSize);
+
+/**
  * @brief       Function for bypass data to wifi module
  * @param[in]   pData pointer of send data
  * @param[in]   dataSize size of send data
@@ -200,6 +210,11 @@ bool cWifiState_bypass_write_request(const char *pData, unsigned int dataSize);
  * @brief       Function for status check (available check)
  */
 bool cWifiState_is_bypass_mode(void);
+
+/**
+ * @brief       Function for status check (available cWifiState_bypass_write_request)
+ */
+bool cWifiState_is_bypass_ready(void);
 #endif
 
 /**

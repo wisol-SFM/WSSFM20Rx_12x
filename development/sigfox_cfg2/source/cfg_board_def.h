@@ -192,7 +192,7 @@ test feature
 //modify define
 #if (CDEV_MODULE_TYPE == CDEV_MODULE_SFM60R)
 #undef CDEV_WIFI_MODULE
-#undef CDEV_BLE_ADVERTISING_ENABLE
+//#undef CDEV_BLE_ADVERTISING_ENABLE
 #endif
 
 #endif // __WBOARD_CONFIG_DEF__

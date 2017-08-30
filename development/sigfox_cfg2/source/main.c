@@ -72,7 +72,11 @@
 #define CENTRAL_LINK_COUNT              0                                           /**< Number of central links used by the application. When changing this number remember to adjust the RAM settings*/
 #define PERIPHERAL_LINK_COUNT           1                                           /**< Number of peripheral links used by the application. When changing this number remember to adjust the RAM settings*/
 
+#if (CDEV_MODULE_TYPE == CDEV_MODULE_SFM60R)
+#define DEVICE_NAME                     "WISOL_SFM60R"                           /**< Name of device. Will be included in the advertising data. */
+#else
 #define DEVICE_NAME                     "WISOL_SFM21R"                           /**< Name of device. Will be included in the advertising data. */
+#endif
 #define MANUFACTURER_NAME               "WISOL_Corp"                       /**< Manufacturer. Will be passed to Device Information Service. */
 #define ASSETTRACKER_NAME               "ihere"
 #define MINI_ASSETTRACKER_NAME          "ihere mini"
@@ -2329,31 +2333,11 @@ static void main_schedule_timeout_handler_asset_tracker(void * p_context)
                 {
                     work_mode = GPS_END;
                 }
-                else if (get_nmea_result == CGPS_Result_Fix_Fail)
+                else  if(get_nmea_result ==  CGPS_Result_Busy)
                 {
-                    while(cGps_bus_busy_check()){nrf_delay_ms(100);};
-                    work_mode = GPS_START;
-                    if(cfg_is_3colorled_contorl())
-                    {
-                        cfg_ble_led_control(old_ble_led);
-                        cfg_wkup_output_control(false);
-                    }
-                    main_set_module_state(WIFI);
-                    nus_send_data('G');
+					;
                 }
-                else if(get_nmea_result == CGPS_Result_NotStarted)
-                {
-                    while(cGps_bus_busy_check()){nrf_delay_ms(100);};
-                    work_mode = GPS_START;
-                    if(cfg_is_3colorled_contorl())
-                    {
-                        cfg_ble_led_control(old_ble_led);
-                        cfg_wkup_output_control(false);
-                    }
-                    main_set_module_state(WIFI);
-                    nus_send_data('G');
-                }
-                else if(get_nmea_result == CGPS_Result_NotSupported)
+                else
                 {
                     while(cGps_bus_busy_check()){nrf_delay_ms(100);};
                     work_mode = GPS_START;
