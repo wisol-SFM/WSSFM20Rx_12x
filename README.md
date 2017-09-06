@@ -17,6 +17,7 @@ The main core of the module is based on the Nordic nRF52832 SOC. Wisol has devel
   - Wisol SFM20Rx evaluation board
   - JLink/SWD cable
   - nRF52 DK board: optional, used as a master to connect to the Wisol dev kit using SWD. Can be bypassed if you own JTAG/SWD debugger probe.
+  - [Block diagram](development/sigfox_cfg2/documentation/wssfm20r_block.pdf)
 
 - __Software__
   - __MinGW__ and __MSys__: Windows users only (http://www.mingw.org/). Provides open-source GNU tools required to use the Makefiles. Don't use Cygwin as there are incompatibilities. (test by git bash for windows64, mingw64-make)
@@ -26,7 +27,6 @@ The main core of the module is based on the Nordic nRF52832 SOC. Wisol has devel
 pip install nrfutil
 ```
 For more information, see the link https://github.com/NordicSemiconductor/pc-nrfutil
-
 
 ### Architecture of the SDK
 
