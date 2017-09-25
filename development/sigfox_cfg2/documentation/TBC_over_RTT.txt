@@ -1,0 +1,54 @@
+================================================================
+TBC_OVER_RTT
+RTT packet size max : 64
+RTT packet interval : 100ms
+msg
+==TBC_OVER_RTT connected==
+==TBC_OVER_RTT started==
+==TBC_OVER_RTT WaitEnd==
+==TBC_OVER_RTT WaitCon==
+
+common cmd
+CC  :  TBC OVER RTT connect
+CR  :  module reset
+CF  :  module factory reset
+
+================================================================
+sigfox
+<SC>040201 : change to sigfox mode
+<SC>0603AT\r\n : send "AT" <SR>0603OK
+<SC>0B03AT$I=10\r\n : get id <SR>0a03XXXXXXXX
+<SC>0B03AT$I=11\r\n : get paccode <SR>1203XXXXXXXXXXXXXXXX
+<SC>1803AT$CW=868130000,1,15\r\n : CwEuOn  <SR>0403OK
+<SC>1803AT$CW=868130000,0,15\r\n : CwEuOff  <SR>0403OK
+<SC>1803AT$CW=902200000,1,24\r\n : CWUsOn  <SR>0403OK
+<SC>1803AT$CW=902200000,0,24\r\n : CwUsOff  <SR>0403OK
+<SC>1803AT$CW=920800000,1,24\r\n : CwRcz4On  <SR>0403OK
+<SC>1803AT$CW=902200000,0,24\r\n : CwRcz4Off  <SR>0403OK
+
+================================================================
+gps
+<SC>040204 : change to gps mode
+<SC>0A03AT+GPS : START GPS Tracking 1 min...
+<SC>0A03AT+CN0 : START GPS C/N0... <SR>0400OK<SR>0f03C/N0[0]dB-Hz
+
+================================================================
+ble DTM (need boot mode change)
+CR
+CC
+wait "<SR>0e00OKManualMode"
+<SC>0C040300000003 : 3:ble test change boot mode to (save NV)
+CR
+use DTM cmd via RTT (telnet localhost(127.0.0.1) port:19021)
+
+*goto Normal mode : "CF" via RTT
+
+================================================================
+wifi RF test (need boot mode change)
+CR
+CC
+wait "<SR>0e00OKManualMode"
+<SC>0C040300000003 : change boot mode (save NV)
+use RF test cmd via wifi uart (see ESP8266_RF_Performance_Test_Demonstration__EN.pdf)
+
+*goto Normal mode : "CF" via RTT
