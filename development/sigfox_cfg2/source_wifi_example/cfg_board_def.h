@@ -8,12 +8,16 @@ module info
 module defines (CDEV_)
 SFM20R : MODEL_NAME to "SFM20R"
          MODULE_TYPE to CDEV_MODULE_SFM20R
+SFM40R : MODEL_NAME to "SFM40R"
+         MODULE_TYPE to CDEV_MODULE_SFM40R
+SFM50R : MODEL_NAME to "SFM50R"
+         MODULE_TYPE to CDEV_MODULE_SFM50R
 SFM60R : MODEL_NAME to "SFM60R"
          MODULE_TYPE to CDEV_MODULE_SFM60R
 ***********************/
 #define CDEV_SW_VER_MAJOR "2"       // 1byte
 #define CDEV_SW_VER_MINOR "04"      // 2byte
-#define CDEV_FS_VER 0x0020          //module_parameter_t version
+#define CDEV_FS_VER 0x0021          //module_parameter_t version
 #define CDEV_BL_VER "1"             // 1byte
 #define CDEV_BL_SETTING_VER "1"     // 1byte ref NRF_DFU_SETTINGS_VERSION predeine
 #define CDEV_HW_VER "52"            //NRF_DFU_HW_VERSION NRF52
@@ -39,7 +43,9 @@ senario feature
 module feature
 *******************************************************/
 #define CDEV_MODULE_SFM20R                      (1)
-#define CDEV_MODULE_SFM60R                      (2)
+#define CDEV_MODULE_SFM40R                      (2)
+#define CDEV_MODULE_SFM50R                      (3)
+#define CDEV_MODULE_SFM60R                      (4)
     
 #define CDEV_MODULE_TYPE                        CDEV_MODULE_SFM20R
 
@@ -56,7 +62,7 @@ board feature
 module feature
 *******************************************************/
 #define CDEV_WIFI_MODULE  //ESP8285
-#define CDEV_GPS_MODULE  //CSRG05E
+#define CDEV_GPS_MODULE   //UBX-G8020
 
 #define CDEV_BLE_ADVERTISING_ENABLE
 //#define CDEV_SIGFOX_RCZ24
@@ -70,17 +76,23 @@ external sensor feature
 /******************************************************
 funcion feature
 *******************************************************/
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_EVB)
 #define FEATURE_CFG_CHECK_BOOTSTRAP_PIN  //support boot strap mode
+#endif
+#define FEATURE_CFG_CHECK_NV_BOOT_MODE  //support bootmode (m_module_parameter)
 #define FEATURE_CFG_DEBUG_PRINT_OUT //debug print out
 #define FEATURE_CFG_DEBUG_OUT_TO_TBC //depend on FEATURE_CFG_DEBUG_PRINT_OUT
 #define FEATURE_CFG_BYPASS_CONTROL
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+#define FEATURE_CFG_ACC_REPORT
+#endif
+#define FEATURE_CFG_RTT_MODULE_CONTROL //RTT over TBC(twis board control), Test mode control via RTT
 
 #ifdef CDEV_GPS_MODULE
 //#define CDEV_UBLOX_GPS_MODULE  //  not used
 //#define CDEV_CSR_GPS_MODULE // not used - CSR gps
 #endif
 #define CDEV_NUS_MODULE
-#define CDEV_BATT_CHECK_MODULE
 #define CDEV_RTC2_DATE_TIME_CLOCK
 /******************************************************/
 
@@ -97,7 +109,7 @@ test feature
 
 #ifndef FEATURE_WISOL_BOOTLOADER
 #define APP_TIMER_PRESCALER             0                                 /**< Value of the RTC1 PRESCALER register. */
-#define APP_TIMER_OP_QUEUE_SIZE         12                                 /**< Size of timer operation queues. */
+#define APP_TIMER_OP_QUEUE_SIZE         12                                /**< Size of timer operation queues. */
 #endif
 #define APP_MAIN_SCHEDULE_MS            200
 #define APP_MAIN_SCHEDULE_HZ            (1000/APP_MAIN_SCHEDULE_MS)  //for use main_schedule_tick
@@ -177,8 +189,18 @@ test feature
 #define PIN_DEF_AIN0    2
 #define PIN_DEF_AIN1    3
 
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_EVB)
 #define PIN_DEF_DTM_RX    PIN_DEF_AIN0 //used source_direct_test_mode
 #define PIN_DEF_DTM_TX    PIN_DEF_AIN1 //used source_direct_test_mode
+#else
+#define PIN_DEF_DTM_RX    PIN_DEF_TWIS_BOARD_CTRL_SCL //used source_direct_test_mode
+#define PIN_DEF_DTM_TX    PIN_DEF_TWIS_BOARD_CTRL_SDA //used source_direct_test_mode
+#endif
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+#define PIN_DEF_BATTERY_ADC_INPUT NRF_SAADC_INPUT_AIN1
+#else
+#define PIN_DEF_BATTERY_ADC_INPUT NRF_SAADC_INPUT_AIN0
+#endif
 
 #define PIN_DEF_BOOTSTRAP_CONFIG0  PIN_DEF_BLE_LED_EN         //STATE0/P0.18
 #define PIN_DEF_BOOTSTRAP_CONFIG1  PIN_DEF_WKUP                //WKUP/P0.20
@@ -190,7 +212,12 @@ test feature
                                  .xtal_accuracy = NRF_CLOCK_LF_XTAL_ACCURACY_250_PPM}
 
 //modify define
-#if (CDEV_MODULE_TYPE == CDEV_MODULE_SFM60R)
+#if (CDEV_MODULE_TYPE == CDEV_MODULE_SFM40R)
+#undef CDEV_GPS_MODULE
+#elif (CDEV_MODULE_TYPE == CDEV_MODULE_SFM50R)
+#undef CDEV_GPS_MODULE
+#undef CDEV_WIFI_MODULE
+#elif (CDEV_MODULE_TYPE == CDEV_MODULE_SFM60R)
 #undef CDEV_WIFI_MODULE
 //#undef CDEV_BLE_ADVERTISING_ENABLE
 #endif

@@ -116,6 +116,15 @@ void main_set_param_val(module_parameter_item_e item, unsigned int val)
     return;
 }
 
+bool module_parameter_get_bootmode(int *bootmode)
+{
+    return false;
+}
+bool module_parameter_erase_and_reset(void)
+{
+    return false;
+}
+
 void module_parameter_check_update(void)
 {
     if(m_module_parameter_update_req)
@@ -125,6 +134,10 @@ void module_parameter_check_update(void)
     return;
 }
 
+void main_examples_prepare(void)
+{
+    return;
+}
 
 int main(void)
 {

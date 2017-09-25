@@ -95,6 +95,11 @@ unsigned int main_get_param_val(module_parameter_item_e item)
     return ret;
 }
 
+bool module_parameter_erase_and_reset(void)
+{
+    return false;
+}
+
 void module_parameter_check_update(void)
 {
     if(m_module_parameter_update_req)
@@ -449,24 +454,37 @@ static void Sigfox_send_payload(unsigned char *payload)
 static bool gps_acquire(unsigned char *position)
 {
     uint8_t *pGpsInfo;
+    bool ret = false;
     
     memset(position, 12, 0);
     if(start_gps_tracking() == CGPS_Result_OK)
     {
+        while(!(cGPS_waiting_tracking_end_check()));
+            
         if(cGps_nmea_get_bufPtr(&pGpsInfo) == CGPS_Result_OK)
         {
             memcpy(position, pGpsInfo, 12);
-            return true;
+            ret = true;
         }
     }
 
     while(cGps_bus_busy_check());  //wait for release gps spi 
-    return false;
+    return ret;
 }
 
 void Ble_start_beacon(void)
 {
     ble_advertising_start(BLE_ADV_MODE_FAST);
+}
+
+bool module_parameter_get_bootmode(int *bootmode)
+{
+    return false;
+}
+
+void main_examples_prepare(void)
+{
+    return;
 }
 
 int main(void)

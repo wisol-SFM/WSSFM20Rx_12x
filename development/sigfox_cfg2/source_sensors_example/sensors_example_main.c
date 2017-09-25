@@ -110,6 +110,20 @@ unsigned int main_get_param_val(module_parameter_item_e item)
     return ret;
 }
 
+void main_set_param_val(module_parameter_item_e item, unsigned int val)
+{
+    return;
+}
+
+bool module_parameter_get_bootmode(int *bootmode)
+{
+    return false;
+}
+bool module_parameter_erase_and_reset(void)
+{
+    return false;
+}
+
 void module_parameter_check_update(void)
 {
     if(m_module_parameter_update_req)
@@ -119,8 +133,7 @@ void module_parameter_check_update(void)
     return;
 }
 
-
-void main_set_param_val(module_parameter_item_e item, unsigned int val)
+void main_examples_prepare(void)
 {
     return;
 }
@@ -165,7 +178,7 @@ int main(void)
     ble_stack_init_minimal();
 
     //magnetic sensor 
-    cfg_magnetic_sensor_init(main_wakeup_interrupt_set);
+    cfg_magnetic_sensor_init(main_wakeup_interrupt_set, NULL);
 
     //gpio key init
     cfg_wkup_gpio_init(main_wakeup_interrupt_set);

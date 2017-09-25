@@ -108,6 +108,20 @@ unsigned int main_get_param_val(module_parameter_item_e item)
     return ret;
 }
 
+void main_set_param_val(module_parameter_item_e item, unsigned int val)
+{
+    return;
+}
+
+bool module_parameter_get_bootmode(int *bootmode)
+{
+    return false;
+}
+bool module_parameter_erase_and_reset(void)
+{
+    return false;
+}
+
 void module_parameter_check_update(void)
 {
     if(m_module_parameter_update_req)
@@ -117,8 +131,7 @@ void module_parameter_check_update(void)
     return;
 }
 
-
-void main_set_param_val(module_parameter_item_e item, unsigned int val)
+void main_examples_prepare(void)
 {
     return;
 }
@@ -145,10 +158,10 @@ int main(void)
     cfg_sigfox_timer_create();
 
     //Set the power level
-	  if(!cfg_sigfox_set_powerlevel(14))
-		{
-			 cPrintLog(CDBG_MAIN_LOG, "ERROR SET POWER LEVEL");
-		}
+    if(!cfg_sigfox_set_powerlevel(14))
+    {
+        cPrintLog(CDBG_MAIN_LOG, "ERROR SET POWER LEVEL");
+    }
     //set RCZ
     sigfox_set_rcz(RCZ_1);
     sigfox_send_payload(test_data,&p_down_link_data);

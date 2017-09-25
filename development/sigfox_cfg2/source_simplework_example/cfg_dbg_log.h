@@ -97,8 +97,11 @@ void __cLogOut(unsigned int dbgID, const char * x_fmt, ...)
     if(CDBGOutMask & CDBG_NUM2MASK(dbgID))
     {
 #if defined(NRF_LOG_USES_RTT) && (NRF_LOG_USES_RTT == 1)
-        va_start(ParamList, x_fmt);
-        SEGGER_RTT_vprintf(0, x_fmt, &ParamList);
+        if(!m_cTBC_over_rtt_connected)
+        {
+            va_start(ParamList, x_fmt);
+            SEGGER_RTT_vprintf(0, x_fmt, &ParamList);
+        }
 #endif
 
 #if defined(FEATURE_CFG_DEBUG_OUT_TO_TBC)
@@ -141,15 +144,16 @@ void __cDataDumpPrintOut(unsigned int dbgID, const unsigned char *pData, unsigne
                 buf[1]='A'+(dL-10);
             }
 #if defined(NRF_LOG_USES_RTT) && (NRF_LOG_USES_RTT == 1)
-            SEGGER_RTT_Write(0, buf, 2);
+            if(!m_cTBC_over_rtt_connected)SEGGER_RTT_Write(0, buf, 2);
 #endif
 #if defined(FEATURE_CFG_DEBUG_OUT_TO_TBC)
             cTBC_write_tx_data(buf, 2);
 #endif
 
         }
+
 #if defined(NRF_LOG_USES_RTT) && (NRF_LOG_USES_RTT == 1)
-        SEGGER_RTT_Write(0, "\n", 1);
+        if(!m_cTBC_over_rtt_connected)SEGGER_RTT_Write(0, "\n", 1);
 #endif
 #if defined(FEATURE_CFG_DEBUG_OUT_TO_TBC)
         cTBC_write_tx_data("\n", 1);

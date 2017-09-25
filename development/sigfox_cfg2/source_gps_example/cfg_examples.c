@@ -142,7 +142,7 @@ void cfg_examples_wifi_scan_filtered(void)
 #if (CFG_EXAMPLES_TYPE_DEF == CFG_EXAMPLES_MAGNET_SENSOR)
 void cfg_examples_magnet_sensor(void)
 {
-    cfg_magnetic_sensor_init(NULL);
+    cfg_magnetic_sensor_init(NULL, NULL);
 }
 #endif
 

@@ -72,7 +72,11 @@
 #define CENTRAL_LINK_COUNT              0                                           /**< Number of central links used by the application. When changing this number remember to adjust the RAM settings*/
 #define PERIPHERAL_LINK_COUNT           1                                           /**< Number of peripheral links used by the application. When changing this number remember to adjust the RAM settings*/
 
-#if (CDEV_MODULE_TYPE == CDEV_MODULE_SFM60R)
+#if (CDEV_MODULE_TYPE == CDEV_MODULE_SFM40R)
+#define DEVICE_NAME                     "WISOL_SFM40R"                           /**< Name of device. Will be included in the advertising data. */
+#elif (CDEV_MODULE_TYPE == CDEV_MODULE_SFM50R)
+#define DEVICE_NAME                     "WISOL_SFM50R"                           /**< Name of device. Will be included in the advertising data. */
+#elif (CDEV_MODULE_TYPE == CDEV_MODULE_SFM60R)
 #define DEVICE_NAME                     "WISOL_SFM60R"                           /**< Name of device. Will be included in the advertising data. */
 #else
 #define DEVICE_NAME                     "WISOL_SFM21R"                           /**< Name of device. Will be included in the advertising data. */
@@ -121,6 +125,10 @@ static ble_nus_t                        m_nus;                                  
 //static ble_uuid_t m_adv_uuids[] = {{BLE_UUID_NUS_SERVICE, NUS_SERVICE_UUID_TYPE}};  /**< Universally unique service identifier. */
 #else
 //static ble_uuid_t m_adv_uuids[] = {{BLE_UUID_DEVICE_INFORMATION_SERVICE, BLE_UUID_TYPE_BLE}}; /**< Universally unique service identifiers. */
+#endif
+
+#if (CDEV_MODULE_TYPE == CDEV_MODULE_SFM50R)
+extern int tmp102a, tmp102b;
 #endif
 
 static bool m_softdevice_init_flag;
@@ -182,12 +190,14 @@ bool m_init_excute;
 module_parameter_t m_module_parameter;
 bool m_module_parameter_update_req;
 bool m_module_parameter_save_N_reset_req;
+bool m_module_parameter_fs_init_flag = false;
 
 int m_module_ready_wait_timeout_tick = 0;
 
 volatile bool main_wakeup_interrupt;
 
 volatile bool mnfc_tag_on = false;
+volatile bool mnfc_init_flag = false;
 main_nfg_tag_on_callback mnfc_tag_on_CB = NULL;
 volatile bool main_powerdown_request = false;
 
@@ -222,7 +232,7 @@ static const uint8_t m_android_package_name[] = {'h','t','t','p','s',':','/','/'
 /* nRF Toolbox application ID for Windows phone */
 uint8_t m_ndef_msg_buf[256];
 
-#ifdef CDEV_BATT_CHECK_MODULE
+#ifdef PIN_DEF_BATTERY_ADC_INPUT
 APP_TIMER_DEF(m_battery_timer_id);                                               /**< Battery measurement timer. */
 
 #define ADC_REF_VOLTAGE_IN_MILLIVOLTS     600                                          /**< Reference voltage (in milli volts) used by ADC while doing conversion. */
@@ -287,7 +297,7 @@ void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name)
     app_error_handler(DEAD_BEEF, line_num, p_file_name);
 }
 
-#ifdef CDEV_BATT_CHECK_MODULE
+#ifdef PIN_DEF_BATTERY_ADC_INPUT
 /**@brief Function for handling the Battery measurement timer timeout.
  *
  * @details This function will be called each time the battery level measurement timer expires.
@@ -456,13 +466,8 @@ void adc_configure(void)
     ret_code_t err_code = nrf_drv_saadc_init(NULL, saadc_event_handler);
     APP_ERROR_CHECK(err_code);
 
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
-    nrf_saadc_channel_config_t config =
-        NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(NRF_SAADC_INPUT_AIN1);
-#else
-    nrf_saadc_channel_config_t config =
-        NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(NRF_SAADC_INPUT_AIN0);
-#endif
+    nrf_saadc_channel_config_t config = NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(PIN_DEF_BATTERY_ADC_INPUT);
+
     err_code = nrf_drv_saadc_channel_init(0, &config);
     APP_ERROR_CHECK(err_code);
 
@@ -478,9 +483,9 @@ void adc_configure(void)
 #ifdef CDEV_NUS_MODULE
 void nus_module_parameter_get(void)
 {
-	m_nus_service_parameter.report_count[0]= (ONE_DAY_SEC / m_module_parameter.idle_time)&0x000000FF;
-	m_nus_service_parameter.wifi_scan_time[0] = (uint8_t)m_module_parameter.wifi_scan_retry_time_sec&0x000000FF;
-	m_nus_service_parameter.gps_tracking_time[0] = (uint8_t)m_module_parameter.gps_acquire_tracking_time_sec&0x000000FF;
+    m_nus_service_parameter.report_count[0]= (ONE_DAY_SEC / m_module_parameter.idle_time)&0x000000FF;
+    m_nus_service_parameter.wifi_scan_time[0] = (uint8_t)m_module_parameter.wifi_scan_retry_time_sec&0x000000FF;
+    m_nus_service_parameter.gps_tracking_time[0] = (uint8_t)m_module_parameter.gps_acquire_tracking_time_sec&0x000000FF;
 }
 
 static void nus_data_init()
@@ -551,8 +556,15 @@ void nus_send_data(char module)
  //               strLen = sprintf((char *)&nus_send_buffer[1], "T %s", (const char *)m_cfg_build_time);
  //               err_code = ble_nus_string_send(&m_nus, (uint8_t*)&nus_send_buffer, (strLen+1));
                 break;
-			case 'O':
-				nus_module_parameter_get();
+            case 'D':  //send build date
+                nus_send_buffer[0]='D';
+                strLen = sprintf((char *)&nus_send_buffer[1], "D %s", (const char *)m_cfg_build_date);
+                err_code = ble_nus_string_send(&m_nus, (uint8_t*)&nus_send_buffer, (strLen+1));
+                strLen = sprintf((char *)&nus_send_buffer[1], "T %s", (const char *)m_cfg_build_time);
+                err_code = ble_nus_string_send(&m_nus, (uint8_t*)&nus_send_buffer, (strLen+1));
+                break;
+            case 'O':
+                nus_module_parameter_get();
                 nus_send_buffer[0]='O';
                 nus_send_buffer[1]=m_nus_service_parameter.report_count[0];
                 nus_send_buffer[2]=m_nus_service_parameter.wifi_scan_time[0];
@@ -716,15 +728,15 @@ static void on_nus_evt(ble_nus_t * p_nus, ble_evt_t * p_ble_evt)
                 ihere_mini_fast_schedule_start();
                 nus_service = false;
             }
-			if(nus_parameter_update)
-			{
-			    nus_parameter_update = false;
-				m_module_parameter_update_req = true;
-				module_parameter_check_update();
+            if(nus_parameter_update)
+            {
+                nus_parameter_update = false;
+                m_module_parameter_update_req = true;
+                module_parameter_check_update();
 
-				nrf_delay_ms(1000);
-				NVIC_SystemReset();
-			}
+                nrf_delay_ms(1000);
+                NVIC_SystemReset();
+            }
             break;
         case BLE_GATTS_EVT_WRITE:
             break;
@@ -793,15 +805,20 @@ static void nus_data_handler(ble_nus_t * p_nus, uint8_t * p_data, uint16_t lengt
             case 'V':  //read version
                 nus_send_data('V');
 //                break;
-//			case 'O': 
-				nus_send_data('O');
+//              case 'O': 
+                nus_send_data('O');
                 break;
-			case 'Z':
-			 	m_module_parameter.idle_time=(ONE_DAY_SEC/p_data[1]);
-				m_module_parameter.wifi_scan_retry_time_sec = p_data[2];
-				m_module_parameter.gps_acquire_tracking_time_sec = p_data[3];
-				m_module_parameter_save_N_reset_req = true;
-				break;
+
+            case 'D':  //build date
+                nus_send_data('D');
+                break;
+
+            case 'Z':
+                m_module_parameter.idle_time=(ONE_DAY_SEC/p_data[1]);
+                m_module_parameter.wifi_scan_retry_time_sec = p_data[2];
+                m_module_parameter.gps_acquire_tracking_time_sec = p_data[3];
+                m_module_parameter_save_N_reset_req = true;
+                break;
 
             default:
                 break;
@@ -899,61 +916,77 @@ void main_set_param_val(module_parameter_item_e item, unsigned int val)
     switch(item)
     {
         case module_parameter_item_idle_time:
+            cPrintLog(CDBG_MAIN_LOG, "wakeup time:%d to %d\n", m_module_parameter.idle_time, val);
             m_module_parameter.idle_time = (uint32_t)val;
             break;
 
         case module_parameter_item_beacon_interval:
+            cPrintLog(CDBG_MAIN_LOG, "BLE beacon interval:%d to %d\n", m_module_parameter.beacon_interval, val);
             m_module_parameter.beacon_interval = (uint32_t)val;
             break;
 
         case module_parameter_item_wifi_scan_retry_time_sec:
             m_module_parameter.wifi_scan_retry_time_sec = (uint32_t)val;
+            cPrintLog(CDBG_MAIN_LOG, "wifi scan retry time:%d to %d\n", m_module_parameter.wifi_scan_retry_time_sec, val);
 #ifdef CDEV_WIFI_MODULE
             cWifi_set_retry_time(m_module_parameter.wifi_scan_retry_time_sec);
 #endif
             break;
             
         case module_parameter_item_start_wait_time_for_board_control_attach_sec:
+            cPrintLog(CDBG_MAIN_LOG, "sfm_boot_mode:%d to %d\n", m_module_parameter.start_wait_time_for_board_control_attach_sec, val);  //use to sfm_boot_mode START_WAIT_TIME_FOR_BOARD_CONTROL_ATTACH_SEC
+            cPrintLog(CDBG_MAIN_LOG, "mode def:0:normal, 1:wifi rf test, 2:wifi always on, 3:ble test, 4:gps test mode\n");
+            cPrintLog(CDBG_MAIN_LOG, "mode def:5:wifi rf test bridge from RTT to uart, 6:sigfox over RTT, 7:sigfox over Uart, 8:WIFI AP(SFMTEST0000) and BLE BEACON(SFMTEST0000)\n");
             m_module_parameter.start_wait_time_for_board_control_attach_sec = (uint32_t)val;
             break;
 
         case module_parameter_item_start_wait_time_for_ctrl_mode_change_sec:
+            cPrintLog(CDBG_MAIN_LOG, "sigfox DL:%d to %d\n", m_module_parameter.start_wait_time_for_ctrl_mode_change_sec, val);
             m_module_parameter.start_wait_time_for_ctrl_mode_change_sec = (uint32_t)val;
             break;
 
         case module_parameter_item_gps_tracking_time_sec:
+            cPrintLog(CDBG_MAIN_LOG, "gps acquire tracking time:%d to %d\n", m_module_parameter.gps_acquire_tracking_time_sec, val);
             m_module_parameter.gps_acquire_tracking_time_sec = (uint32_t)val;
             break;
 
         case module_parameter_item_boot_nfc_unlock:
+            cPrintLog(CDBG_MAIN_LOG, "booting enter power down:%d to %d\n", m_module_parameter.boot_nfc_unlock, val);
             m_module_parameter.boot_nfc_unlock = (bool)val;
             break;
 
         case module_parameter_item_fota_enable:
+            cPrintLog(CDBG_MAIN_LOG, "ble fota(DFU):%d to %d\n", m_module_parameter.fota_enable, val);
             m_module_parameter.fota_enable = (bool)val;
             break;
 
         case module_parameter_item_scenario_mode:
+            cPrintLog(CDBG_MAIN_LOG, "scenario type:%d to %d\n",  m_module_parameter.scenario_mode, val);
             m_module_parameter.scenario_mode = (uint16_t)val;
             break;
 
         case module_parameter_item_magnetic_gpio_enable:
+            cPrintLog(CDBG_MAIN_LOG, "magnetic:%d to %d\n",  m_module_parameter.magnetic_gpio_enable, val);
             m_module_parameter.magnetic_gpio_enable = (bool)val;
             break;
 
         case module_parameter_item_wkup_gpio_enable:
+            cPrintLog(CDBG_MAIN_LOG, "wakeup key:%d to %d\n",  m_module_parameter.wkup_gpio_enable, val);
             m_module_parameter.wkup_gpio_enable = (char)val;
             break;
 
         case module_parameter_item_wifi_testmode_enable:  //not used
+            cPrintLog(CDBG_MAIN_LOG, "not used:%d to %d\n",  m_module_parameter.wifi_testmode_enable, val);
             m_module_parameter.wifi_testmode_enable = (bool)val;  //not used
             break;
 
         case module_parameter_item_snek_testmode_enable:
+            cPrintLog(CDBG_MAIN_LOG, "snek test mode:%d to %d\n",  m_module_parameter.sigfox_snek_testmode_enable, val);
             m_module_parameter.sigfox_snek_testmode_enable = (bool)val;
             break;
 
         case module_parameter_item_gps_cn0_current_savetime_enable:
+            cPrintLog(CDBG_MAIN_LOG, "cgps_cn0_current_savetime_enable:%d to %d\n",  m_module_parameter.cgps_cn0_current_savetime_enable, val);
             m_module_parameter.cgps_cn0_current_savetime_enable = (bool)val;
             break;
 
@@ -1016,7 +1049,7 @@ static void module_parameter_fs_evt_handler(fs_evt_t const * const evt, fs_ret_t
     module_parameter_t *p_setting_val;
     if (result == FS_SUCCESS)
     {
-        cPrintLog(CDBG_FLASH_INFO, "FS Evt OK!\n");
+        cPrintLog(CDBG_FLASH_INFO, "FS Evt OK! %d\n", evt->id);
         p_setting_val = (module_parameter_t *)(param_fs_config.p_start_addr);
         if(p_setting_val->magic_top == 0)  //factory reset
         {
@@ -1027,7 +1060,7 @@ static void module_parameter_fs_evt_handler(fs_evt_t const * const evt, fs_ret_t
     else
     {
         // An error occurred.
-        cPrintLog(CDBG_FLASH_ERR, "%s %d FS Evt Error!\n", __func__, __LINE__);
+        cPrintLog(CDBG_FLASH_ERR, "FS Evt Error! %d, %d\n", evt->id, result);
     }
 }
 
@@ -1077,30 +1110,28 @@ static bool module_parameter_adjust_value(void)
         cPrintLog(CDBG_MAIN_LOG, "adjust wifi_scan_retry_time_sec %d to %d\n", old_val, m_module_parameter.wifi_scan_retry_time_sec);
     }
 
-    if(((int)(m_module_parameter.start_wait_time_for_board_control_attach_sec) < 1) || ((int)(m_module_parameter.start_wait_time_for_board_control_attach_sec) > CTBC_WAIT_READ_DEVICE_ID_TIME_OUT_TICK))
+    if(((int)(m_module_parameter.start_wait_time_for_board_control_attach_sec) > 10)) //use to sfm_boot_mode START_WAIT_TIME_FOR_BOARD_CONTROL_ATTACH_SEC
     {
         adjusted = true;
         old_val = m_module_parameter.start_wait_time_for_board_control_attach_sec;
-        if((int)(m_module_parameter.start_wait_time_for_board_control_attach_sec) < 1)m_module_parameter.start_wait_time_for_board_control_attach_sec = 1;
-        else m_module_parameter.start_wait_time_for_board_control_attach_sec = CTBC_WAIT_READ_DEVICE_ID_TIME_OUT_TICK;
+        m_module_parameter.start_wait_time_for_board_control_attach_sec = 0;
         cPrintLog(CDBG_MAIN_LOG, "adjust start_wait_time_for_board_control_attach_sec %d to %d\n", old_val, m_module_parameter.start_wait_time_for_board_control_attach_sec);
     }
 
-    if(((int)(m_module_parameter.start_wait_time_for_ctrl_mode_change_sec) < 1) || ((int)(m_module_parameter.start_wait_time_for_ctrl_mode_change_sec) > 30))
+    if(((int)(m_module_parameter.start_wait_time_for_ctrl_mode_change_sec) > 1)) //use to sigfox dl enable
     {
         adjusted = true;
         old_val = m_module_parameter.start_wait_time_for_ctrl_mode_change_sec;
-        if((int)(m_module_parameter.start_wait_time_for_ctrl_mode_change_sec) < 1)m_module_parameter.start_wait_time_for_ctrl_mode_change_sec = 1;
-        else m_module_parameter.start_wait_time_for_ctrl_mode_change_sec = 30;
+        m_module_parameter.start_wait_time_for_ctrl_mode_change_sec = 0;
         cPrintLog(CDBG_MAIN_LOG, "adjust start_wait_time_for_ctrl_mode_change_sec %d to %d\n", old_val, m_module_parameter.start_wait_time_for_ctrl_mode_change_sec);
     }
 
-    if(((int)(m_module_parameter.gps_acquire_tracking_time_sec) < 30) || ((int)(m_module_parameter.gps_acquire_tracking_time_sec) > 300))
+    if(((int)(m_module_parameter.gps_acquire_tracking_time_sec) < 30) || ((int)(m_module_parameter.gps_acquire_tracking_time_sec) > 7200))
     {
         adjusted = true;
         old_val = m_module_parameter.gps_acquire_tracking_time_sec;
         if((int)(m_module_parameter.gps_acquire_tracking_time_sec) < 30)m_module_parameter.gps_acquire_tracking_time_sec = 30;
-        else m_module_parameter.gps_acquire_tracking_time_sec = 300;
+        else m_module_parameter.gps_acquire_tracking_time_sec = 7200;
         cPrintLog(CDBG_MAIN_LOG, "adjust gps_acquire_tracking_time_sec %d to %d\n", old_val, m_module_parameter.gps_acquire_tracking_time_sec);
     }
 
@@ -1169,24 +1200,85 @@ static bool module_parameter_adjust_value(void)
 
     return adjusted;
 }
+bool module_parameter_fs_init(void)
+{
+    fs_ret_t fs_ret;
+    if(m_module_parameter_fs_init_flag)
+    {
+        return true;
+    }
+    else
+    {
+        if(FS_MAX_WRITE_SIZE_WORDS < sizeof(m_module_parameter))
+        {
+            cPrintLog(CDBG_FLASH_ERR, "parameter too big more page size:%d, param size:%d\n", FS_MAX_WRITE_SIZE_WORDS, sizeof(m_module_parameter));
+            APP_ERROR_CHECK(NRF_ERROR_NO_MEM);  //fs_config num_pages size over
+        }
+        fs_ret = fs_init();
+        if(fs_ret == FS_SUCCESS)
+        {
+            m_module_parameter_fs_init_flag = true;
+            cPrintLog(CDBG_FLASH_INFO, "fs_init OK! Addr:0x%p\n", param_fs_config.p_start_addr);
+            return true;
+        }
+        else
+        {
+            cPrintLog(CDBG_FLASH_ERR, "fs_init Error! %d\n", fs_ret);
+            m_module_parameter_fs_init_flag = false;
+        }
+    }
+    return false;
+}
+static void module_parameter_early_read(void)
+{
+    if(!module_parameter_fs_init())
+    {
+        return;
+    }
+    memcpy(&m_module_parameter, param_fs_config.p_start_addr, sizeof(m_module_parameter));
+}
+
+bool module_parameter_get_bootmode(int *bootmode)
+{
+    if((m_module_parameter.magic_top == MODULE_PARAMETER_MAGIC_TOP && m_module_parameter.magic_bottom == MODULE_PARAMETER_MAGIC_BOTTOM))
+    {
+        if(bootmode)*bootmode = m_module_parameter.start_wait_time_for_board_control_attach_sec;
+        return true;
+    }
+    return false;
+}
+
+bool module_parameter_erase_and_reset(void)  //for factory reset
+{
+    fs_ret_t fs_ret;
+    if(!module_parameter_fs_init())
+    {
+        return false;
+    }
+    fs_ret = fs_erase(&param_fs_config, address_of_page(0), 1, NULL);
+
+    if (fs_ret == FS_SUCCESS)
+    {
+        nrf_delay_ms(200);
+        NVIC_SystemReset();
+    }
+    else
+    {
+        cPrintLog(CDBG_FLASH_ERR, "fs_erase error! %d\n",fs_ret);
+        return false;
+    }
+    return true;
+}
 
 static void module_parameter_init(void)
 {
     fs_ret_t fs_ret;
     bool parameter_rebuild_req = false;
 
-    if(FS_MAX_WRITE_SIZE_WORDS < sizeof(m_module_parameter))
+    if(!module_parameter_fs_init())
     {
-        cPrintLog(CDBG_FLASH_ERR, "%s %d page size:%d, param size:%d\n", __func__, __LINE__, FS_MAX_WRITE_SIZE_WORDS, sizeof(m_module_parameter));
-        APP_ERROR_CHECK(NRF_ERROR_NO_MEM);  //fs_config num_pages size over
+        return;
     }
-
-    fs_ret = fs_init();
-    if(fs_ret != FS_SUCCESS)
-    {
-        cPrintLog(CDBG_FLASH_ERR, "%s %d fs_init Error!\n", __func__, __LINE__);
-    }
-
     memcpy(&m_module_parameter, param_fs_config.p_start_addr, sizeof(m_module_parameter));
 
     if(!(m_module_parameter.magic_top == MODULE_PARAMETER_MAGIC_TOP && m_module_parameter.magic_bottom == MODULE_PARAMETER_MAGIC_BOTTOM))
@@ -1258,7 +1350,7 @@ static bool module_parameter_ID_value_update(void)
 void module_parameter_check_update(void)
 {
     fs_ret_t fs_ret;
-    if(m_module_parameter_update_req)
+    if(m_module_parameter_fs_init_flag && m_module_parameter_update_req)
     {
         nrf_delay_ms(1);
         cPrintLog(CDBG_FLASH_INFO, "%s %d excute parameter update!\n", __func__, __LINE__);
@@ -1503,7 +1595,7 @@ static void advertising_init(void)
     memset(&options, 0, sizeof(options));
     options.ble_adv_fast_enabled  = true;
     options.ble_adv_fast_interval = MSEC_TO_UNITS(m_module_parameter.beacon_interval, UNIT_0_625_MS);
-        options.ble_adv_fast_timeout = 0; //APP_ADV_TIMEOUT_IN_SECONDS;
+    options.ble_adv_fast_timeout = 0; //APP_ADV_TIMEOUT_IN_SECONDS;
 
     err_code = ble_advertising_init(&advdata, NULL, &options, on_adv_evt, NULL);
     APP_ERROR_CHECK(err_code);
@@ -1531,7 +1623,7 @@ void advertising_start(bool start_flag, bool led_ctrl_flag)
         }
         else
         {
-            if(led_ctrl_flag)cfg_ble_led_control(false);        
+            if(led_ctrl_flag)cfg_ble_led_control(false);
             err_code = sd_ble_gap_adv_stop();
             if(err_code != NRF_ERROR_INVALID_STATE)
             {
@@ -2133,7 +2225,6 @@ void main_set_module_state(module_mode_t state)
     m_module_mode = state;
 }
 
-
 /**@brief Function for indicating whether the current state is idle or not.
  *
  * @return true if it is idle, nor false
@@ -2155,6 +2246,11 @@ void main_wkup_det_callback(void)
         cTBC_write_state_noti("WKUP_DET");
         main_wakeup_interrupt = true;
     }
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_EVB)
+    else if(cTBC_bypass_mode_is_setting())
+    {
+    }
+#endif
 }
 
 void main_magnet_attach_callback(void)
@@ -2162,6 +2258,9 @@ void main_magnet_attach_callback(void)
     if(main_schedule_state_is_idle())
     {
         main_wakeup_interrupt = true;
+    }
+    else if(cTBC_bypass_mode_is_setting())
+    {
     }
 }
 
@@ -2207,7 +2306,7 @@ static void main_schedule_timeout_handler_asset_tracker(void * p_context)
             break;
 
         case BATTERY_CHECK:
-#ifdef CDEV_BATT_CHECK_MODULE
+#ifdef PIN_DEF_BATTERY_ADC_INPUT
             ++m_module_ready_wait_timeout_tick;
             if(m_init_excute)
             {
@@ -2228,7 +2327,7 @@ static void main_schedule_timeout_handler_asset_tracker(void * p_context)
                     avg_batt_lvl_in_milli_volts = get_avg_batt_lvl_in_milli_volts();
                     if(3000 <= avg_batt_lvl_in_milli_volts && 5200 >= avg_batt_lvl_in_milli_volts)
                     {
-                        if(avg_batt_lvl_in_milli_volts < 3550)  //low battery
+                        if(!cTBC_check_host_connected() && avg_batt_lvl_in_milli_volts < 3550)  //low battery
                         {
                             if(log_once_flag)cPrintLog(CDBG_MAIN_LOG, "Battery Low:%d\n", avg_batt_lvl_in_milli_volts);
                             main_powerdown_request = true;
@@ -2339,15 +2438,17 @@ static void main_schedule_timeout_handler_asset_tracker(void * p_context)
                 }
                 else
                 {
-                    while(cGps_bus_busy_check()){nrf_delay_ms(100);};
-                    work_mode = GPS_START;
-                    if(cfg_is_3colorled_contorl())
+                    if(!cGps_bus_busy_check())
                     {
-                        cfg_ble_led_control(old_ble_led);
-                        cfg_wkup_output_control(false);
+                        work_mode = GPS_START;
+                        if(cfg_is_3colorled_contorl())
+                        {
+                            cfg_ble_led_control(old_ble_led);
+                            cfg_wkup_output_control(false);
+                        }
+                        main_set_module_state(WIFI);
+                        nus_send_data('G');
                     }
-                    main_set_module_state(WIFI);
-                    nus_send_data('G');
                 }
             }
             else if(work_mode == GPS_END)
@@ -2375,29 +2476,32 @@ static void main_schedule_timeout_handler_asset_tracker(void * p_context)
                         cfg_wkup_output_control(false);
                     }
 #ifdef TEST_SIGFOX_CURRENT_CONSUMPTION
-                    while(cGps_bus_busy_check()){nrf_delay_ms(100);};
-                    work_mode = GPS_START;
-                    if(cfg_is_3colorled_contorl())
+                    if(!cGps_bus_busy_check())
                     {
-                        cfg_ble_led_control(old_ble_led);
-                        cfg_wkup_output_control(false);
+                        work_mode = GPS_START;
+                        if(cfg_is_3colorled_contorl())
+                        {
+                            cfg_ble_led_control(old_ble_led);
+                            cfg_wkup_output_control(false);
+                        }
+                        main_set_module_state(WIFI);
                     }
-                    main_set_module_state(WIFI);
 #else
                     main_set_module_state(SIGFOX);
 #endif
                 }
                 else
                 {
-                    while(cGps_bus_busy_check()){nrf_delay_ms(100);};
-                    work_mode = GPS_START;
-                    if(cfg_is_3colorled_contorl())
+                    if(!cGps_bus_busy_check())
                     {
-                        cfg_ble_led_control(old_ble_led);
-                        cfg_wkup_output_control(false);
+                        work_mode = GPS_START;
+                        if(cfg_is_3colorled_contorl())
+                        {
+                            cfg_ble_led_control(old_ble_led);
+                            cfg_wkup_output_control(false);
+                        }
+                        main_set_module_state(WIFI);
                     }
-                    main_set_module_state(WIFI);
-
                 }
                 nus_send_data('G');
             }
@@ -2488,7 +2592,17 @@ static void main_schedule_timeout_handler_asset_tracker(void * p_context)
                 }                    
 #else
                 m_module_peripheral_data.sigfixdata_wifi_flag = 0;
+#if (CDEV_MODULE_TYPE == CDEV_MODULE_SFM50R)
+                send_data[0] = avg_report_volts;
+                send_data[1] = tmp102a;
+                send_data[2] = tmp102b;
+
+                cPrintLog(CDBG_FCTRL_INFO, "%s %d CDEV_WIFI_MODULE Not Defined!\n", __func__, __LINE__);
+                cPrintLog(CDBG_FCTRL_INFO, "%s %d Voltage[%d][0x%02x]-100mV / Tmp102[%d.%d][0x%02x.0x%02x]  !\n", __func__, __LINE__, 
+                    avg_report_volts, avg_report_volts, tmp102a,tmp102b, tmp102a,tmp102b);
+#else
                 cPrintLog(CDBG_FCTRL_INFO, "%s %d CDEV_WIFI_MODULE Not Defined! send NUll data!\n", __func__, __LINE__);
+#endif
                 send_data_req = true;
 #endif
                 if(send_data_req)
@@ -2828,7 +2942,6 @@ static void main_deepsleep_control(void)
                 || m_cfg_GPIO_wake_up_detected  //wake up condition
                 || m_cfg_debug_interface_wake_up_detected
                 || cTBC_check_host_connected()  //exception condition
-                || m_module_parameter.wifi_testmode_enable  //exception condition
              )
             {
                 if(m_module_parameter.magnetic_gpio_enable)nrf_gpio_cfg_default(PIN_DEF_MAGNETIC_SIGNAL);
@@ -3069,44 +3182,47 @@ void nfc_init()
 {
     uint32_t err_code;
 
-    /* Set up NFC */
-    err_code = nfc_t2t_setup(nfc_callback, NULL);
-    APP_ERROR_CHECK(err_code);
+    if(!mnfc_init_flag)
+    {
+        /* Set up NFC */
+        err_code = nfc_t2t_setup(nfc_callback, NULL);
+        APP_ERROR_CHECK(err_code);
 
-    /** @snippet [NFC URI usage_1] */
-    /* Provide information about available buffer size to encoding function */
-    uint32_t len = sizeof(m_ndef_msg_buf);
-#if 0
-    /* Encode URI message into buffer */
-    err_code = nfc_uri_msg_encode( NFC_URI_HTTPS,
-                                   m_url,
-                                   sizeof(m_url),
-                                   m_ndef_msg_buf,
-                                   &len);
-#else
-    welcome_msg_encode(m_ndef_msg_buf, &len);
-#endif
+        /** @snippet [NFC URI usage_1] */
+        /* Provide information about available buffer size to encoding function */
+        uint32_t len = sizeof(m_ndef_msg_buf);
 
-    /** @snippet [NFC URI usage_1] */
+        welcome_msg_encode(m_ndef_msg_buf, &len);
 
-    /* Set created message as the NFC payload */
-    err_code = nfc_t2t_payload_set(m_ndef_msg_buf, len);
-    APP_ERROR_CHECK(err_code);
+        /** @snippet [NFC URI usage_1] */
 
-    /* Start sensing NFC field */
-    err_code = nfc_t2t_emulation_start();
+        /* Set created message as the NFC payload */
+        err_code = nfc_t2t_payload_set(m_ndef_msg_buf, len);
+        APP_ERROR_CHECK(err_code);
+
+        /* Start sensing NFC field */
+        err_code = nfc_t2t_emulation_start();
+        mnfc_init_flag = true;
+    }
 }
 
 void nfc_uninit(void)
 {
-    nfc_t2t_emulation_stop();
+    if(mnfc_init_flag)
+    {
+        mnfc_init_flag = false;
+        nfc_t2t_emulation_stop();
+    }
 }
 
 void nfc_restart(void)
 {
-    nfc_t2t_emulation_stop();
-    nfc_t2t_done();
-    nfc_ndef_msg_clear(&NFC_NDEF_MSG(welcome_msg));
+    if(mnfc_init_flag)
+    {
+        nfc_t2t_emulation_stop();
+        nfc_t2t_done();
+        nfc_ndef_msg_clear(&NFC_NDEF_MSG(welcome_msg));
+    }
     nfc_init();
 }
 
@@ -3130,6 +3246,7 @@ void main_examples_prepare(void)
 
     //parameter init
     module_parameter_init();
+    get_ble_mac_address();
 
     err_code = app_timer_create(&m_main_timer_id,
                                 APP_TIMER_MODE_REPEATED,
@@ -3182,7 +3299,8 @@ int main(void)
 
     cPrintLog(CDBG_MAIN_LOG, "\n====== %s Module Started Ver:%s bdtype:%d======\n", m_cfg_model_name, m_cfg_sw_ver, m_cfg_board_type);
     cPrintLog(CDBG_MAIN_LOG, "build date:%s, %s\n", m_cfg_build_date, m_cfg_build_time);
-    
+    module_parameter_early_read();
+
     cfg_examples_check_enter();
     cfg_board_early_init();
     main_wakeup_interrupt = false;
@@ -3205,6 +3323,8 @@ int main(void)
     nus_data_init();
 #endif
     cTBC_init(dbg_i2c_user_cmd_proc);
+    cTBC_OVER_RTT_init();  //FEATURE_CFG_RTT_MODULE_CONTROL
+
     get_ble_mac_address();
 
     nfc_init();
@@ -3218,7 +3338,7 @@ int main(void)
         nfc_restart();
     }
 
-    if(main_get_param_val(module_parameter_item_magnetic_gpio_enable))cfg_magnetic_sensor_init(main_magnet_attach_callback);
+    if(main_get_param_val(module_parameter_item_magnetic_gpio_enable))cfg_magnetic_sensor_init(main_magnet_attach_callback, NULL);
     if(main_get_param_val(module_parameter_item_wkup_gpio_enable)==1)cfg_wkup_gpio_init(main_wkup_det_callback);
 
 //    nfc_init();
@@ -3250,7 +3370,7 @@ int main(void)
 //    nus_timer_create();
 #endif
 
-#ifdef CDEV_BATT_CHECK_MODULE
+#ifdef PIN_DEF_BATTERY_ADC_INPUT
     cfg_bas_timer_create();
 #endif
 
@@ -3258,7 +3378,10 @@ int main(void)
     cPrintLog(CDBG_FCTRL_INFO, "%s main schedule start! state:%d\n", __func__, m_module_mode);
     if(m_module_parameter.scenario_mode == MODULE_SCENARIO_ASSET_TRACKER)
     {
-        cfg_sigfox_downlink_on_off(false);
+        if(m_module_parameter.start_wait_time_for_ctrl_mode_change_sec)  //use to sigfox dl enable
+            cfg_sigfox_downlink_on_off(true);
+        else
+            cfg_sigfox_downlink_on_off(false);
 #if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI)
         mnfc_tag_on_CB = main_timer_schedule_restart_check_idle;
 #endif
@@ -3267,11 +3390,17 @@ int main(void)
     {            
         //set start state
         m_module_mode = MAIN_SCENARIO_LOOP;
-        cfg_sigfox_downlink_on_off(true);
+        if(m_module_parameter.start_wait_time_for_ctrl_mode_change_sec)  //use to sigfox dl enable
+            cfg_sigfox_downlink_on_off(true);
+        else
+            cfg_sigfox_downlink_on_off(false);
     }
     else if(m_module_parameter.scenario_mode == MODULE_SCENARIO_IHERE_MINI)
     {
-        cfg_sigfox_downlink_on_off(false);
+        if(m_module_parameter.start_wait_time_for_ctrl_mode_change_sec)  //use to sigfox dl enable
+            cfg_sigfox_downlink_on_off(true);
+        else
+            cfg_sigfox_downlink_on_off(false);
         mnfc_tag_on_CB = ihere_mini_current_schedule_start;
         charging_indicator_init();
     }

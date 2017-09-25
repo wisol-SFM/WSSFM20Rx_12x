@@ -33,8 +33,8 @@ extern "C" {
 #define BEACON_INTERVAL_TIME_DEFAULT    1000
 #define NUS_INTERVAL_TIME_DEFAULT       3    
 
-#define START_WAIT_TIME_FOR_BOARD_CONTROL_ATTACH_SEC    2
-#define START_WAIT_TIME_FOR_CTRL_MODE_CHANGE_SEC        10
+#define START_WAIT_TIME_FOR_BOARD_CONTROL_ATTACH_SEC    0    //use to sfm_boot_mode [0:normal, 1:wifi rf test, 2:wifi always on, 3:ble test, 4:gps test mode, 5:wifi rf test uart bridge, 6:sigfox uart over RTT, etc...]
+#define START_WAIT_TIME_FOR_CTRL_MODE_CHANGE_SEC        0    //use to sigfox dl enable
 
 #define CWIFI_SEC_RETRY_TIMEOUT_SEC_DEFAULT 10   //0 is wifi off
 #define CWIFI_SEC_RETRY_TIMEOUT_SEC_MIN 1  //Scan once
@@ -106,8 +106,8 @@ typedef enum
     module_parameter_item_idle_time                                     =  0,  //MAIN_IDLE_TIME_DEFAULT                          60 ~ 604800(sec)
     module_parameter_item_beacon_interval                               =  1,  //BEACON_INTERVAL_TIME_DEFAULT                    20 ~ 10240(ms) 
     module_parameter_item_wifi_scan_retry_time_sec                      =  2,  //CWIFI_SEC_RETRY_TIMEOUT_SEC_DEFAULT             1 ~ 60(sec)
-    module_parameter_item_start_wait_time_for_board_control_attach_sec  =  3,  //START_WAIT_TIME_FOR_BOARD_CONTROL_ATTACH_SEC    1 ~ 10(sec)
-    module_parameter_item_start_wait_time_for_ctrl_mode_change_sec      =  4,  //START_WAIT_TIME_FOR_CTRL_MODE_CHANGE_SEC        1 ~ 30(sec)
+    module_parameter_item_start_wait_time_for_board_control_attach_sec  =  3,  //START_WAIT_TIME_FOR_BOARD_CONTROL_ATTACH_SEC    1 ~ 10(sec)  //use to sfm_boot_mode START_WAIT_TIME_FOR_BOARD_CONTROL_ATTACH_SEC
+    module_parameter_item_start_wait_time_for_ctrl_mode_change_sec      =  4,  //START_WAIT_TIME_FOR_CTRL_MODE_CHANGE_SEC        1 ~ 30(sec)  //use to sigfox dl enable
     module_parameter_item_gps_tracking_time_sec                         =  5,  //CGPS_ACQUIRE_TRACKING_TIME_SEC                  30 ~ 300(sec)
     module_parameter_item_boot_nfc_unlock                               =  6,  //MAIN_BOOT_NFC_UNLOCK_DEFAULT                    0 ~ 1
     module_parameter_item_fota_enable                                   =  7,  //MAIN_FOTA_ENABLE_DEFAULT                        0 ~ 1
@@ -140,8 +140,8 @@ typedef struct
     uint32_t    idle_time;                                      //module_parameter_item_idle_time
     uint32_t    beacon_interval;                                //module_parameter_item_beacon_interval
     uint32_t    wifi_scan_retry_time_sec;                       //module_parameter_item_wifi_scan_retry_time_sec
-    uint32_t    start_wait_time_for_board_control_attach_sec;   //module_parameter_item_start_wait_time_for_board_control_attach_sec (boot wait time)  max is CTBC_WAIT_READ_DEVICE_ID_TIME_OUT_TICK
-    uint32_t    start_wait_time_for_ctrl_mode_change_sec;       //module_parameter_item_start_wait_time_for_ctrl_mode_change_sec  (mode change wait time)
+    uint32_t    start_wait_time_for_board_control_attach_sec;   //module_parameter_item_start_wait_time_for_board_control_attach_sec //use to sfm_boot_mode START_WAIT_TIME_FOR_BOARD_CONTROL_ATTACH_SEC
+    uint32_t    start_wait_time_for_ctrl_mode_change_sec;       //module_parameter_item_start_wait_time_for_ctrl_mode_change_sec  //use to sigfox dl enable
     uint32_t    gps_acquire_tracking_time_sec;                  //module_parameter_item_gps_tracking_time_sec
     bool        boot_nfc_unlock;                                //module_parameter_item_boot_nfc_unlock
     bool        fota_enable;                                    //module_parameter_item_fota_enable
@@ -305,6 +305,8 @@ void cfg_i2c_master_uninit(void);
 unsigned int main_get_param_val(module_parameter_item_e item);
 void main_set_param_val(module_parameter_item_e item, unsigned int val);
 bool main_schedule_state_is_idle(void);
+bool module_parameter_erase_and_reset(void);
+bool module_parameter_get_bootmode(int *bootmode);
 
 /////////////////////////////////////////////////////////////////////////////////////////
 void cfg_board_early_init(void);

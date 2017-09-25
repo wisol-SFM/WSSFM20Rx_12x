@@ -37,9 +37,6 @@
 #include <stdint.h>
 #include "cfg_bma250_module.h"
 
-#define APP_TIMER_PRESCALER             0                                 /**< Value of the RTC1 PRESCALER register. */
-#define APP_TIMER_OP_QUEUE_SIZE         12                                 /**< Size of timer operation queues. */
-
 #define TMP102_SIZE 2
 #define TMP102_SUM_S_CNT 2
 #define TMP102_SUM_E_CNT 8

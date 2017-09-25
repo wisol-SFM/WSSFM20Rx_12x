@@ -20,6 +20,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include "nordic_common.h"
 #include "nrf.h"
 #include "nrf_gpio.h"
@@ -28,25 +29,12 @@
 #include "ble_dtm.h"
 #include "boards.h"
 #include "cfg_board_def.h"
+#include "cfg_board.h"
+#include "SEGGER_RTT.h"
 #include "ble.h"
 #include "softdevice_handler.h"
 #include "nrf_dfu_settings.h"
 #include "nrf_sdm.h"
-
-//#define TEST_FEATURE_UART_ECHO
-#define FEATURE_DFU_SUPPORT  //download mode key goto bootloader
-#define FEATURE_TEST_LED_ON_OFF  // 'a' -> led on, 'b' -> Led off
-
-#ifdef FEATURE_DFU_SUPPORT
-#define CENTRAL_LINK_COUNT              0                                           /**< Number of central links used by the application. When changing this number remember to adjust the RAM settings*/
-#define PERIPHERAL_LINK_COUNT           1                                           /**< Number of peripheral links used by the application. When changing this number remember to adjust the RAM settings*/
-#if (NRF_SD_BLE_API_VERSION == 3)
-#define NRF_BLE_MAX_MTU_SIZE            GATT_MTU_SIZE_DEFAULT                       /**< MTU size used in the softdevice enabling and to reply to a BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST event. */
-#endif
-#endif
-
-extern void nrf_dfu_settings_init(void);
-
 
 // @note: The BLE DTM 2-wire UART standard specifies 8 data bits, 1 stop bit, no flow control.
 //        These parameters are not configurable in the BLE standard.
@@ -122,127 +110,6 @@ static uint32_t dtm_cmd_put(uint16_t command)
     return dtm_cmd(command_code, freq, length, payload);
 }
 
-#if 0
-void flash_callback(fs_evt_t const * const evt, fs_ret_t result)
-{
-    if (result == FS_SUCCESS)
-    {
-        nrf_gpio_pin_clear(PIN_DEF_BLE_LED_EN);
-        nrf_delay_ms(200);
-        NVIC_SystemReset();
-    }
-}
-
-static void sys_evt_dispatch(uint32_t sys_evt)
-{
-    // Dispatch the system event to the fstorage module, where it will be
-    // dispatched to the Flash Data Storage (FDS) module.
-    fs_sys_event_handler(sys_evt);
-}
-
-static nrf_clock_lf_cfg_t clock_lf_cfg = NRF_CLOCK_LFCLKSRC;
-static ble_enable_params_t ble_enable_params;
-
-void bootloader_check_enter(void)
-{
-    uint32_t err_code;
-    volatile int dl_pin = 0;
-    int i;
-
-    nrf_gpio_cfg_input(PIN_DEF_WIFI_INT, NRF_GPIO_PIN_PULLUP);
-    nrf_delay_ms(100);
-
-#if 0
-    while(1)
-    {
-        dl_pin = nrf_gpio_pin_read(PIN_DEF_WIFI_INT);
-        nrf_delay_ms(500);
-        nrf_gpio_pin_write(PIN_DEF_BLE_LED_EN, dl_pin);
-    };
-#endif
-
-    dl_pin = nrf_gpio_pin_read(PIN_DEF_WIFI_INT);
-    if(!dl_pin)  //wifo download mode enable check
-    {
-        for(i=0; i<10; i++)
-        {
-            if(i%2 == 0)
-            {
-                nrf_gpio_pin_set(PIN_DEF_BLE_LED_EN);
-            }
-            else
-            {
-                nrf_gpio_pin_clear(PIN_DEF_BLE_LED_EN);
-            }
-            nrf_delay_ms(300);
-        }
-        // Initialize the SoftDevice handler module.
-        SOFTDEVICE_HANDLER_INIT(&clock_lf_cfg, NULL);
-    
-        err_code = softdevice_enable_get_default_config(CENTRAL_LINK_COUNT,
-                                                        PERIPHERAL_LINK_COUNT,
-                                                        &ble_enable_params);
-        APP_ERROR_CHECK(err_code);
-        
-        //Check the ram settings against the used number of links
-        CHECK_RAM_START_ADDR(CENTRAL_LINK_COUNT,PERIPHERAL_LINK_COUNT);
-    
-#if (NRF_SD_BLE_API_VERSION == 3)
-        ble_enable_params.gatt_enable_params.att_mtu = NRF_BLE_MAX_MTU_SIZE;
-#endif
-        
-        // Enable BLE stack.
-        err_code = softdevice_enable(&ble_enable_params);
-        APP_ERROR_CHECK(err_code);
-
-        err_code = softdevice_sys_evt_handler_set(sys_evt_dispatch);
-        APP_ERROR_CHECK(err_code);
-        
-        err_code = nrf_dfu_flash_init(true);
-        APP_ERROR_CHECK(err_code);
-
-        nrf_dfu_settings_init();
-
-        nrf_delay_ms(1);
-        if(!s_dfu_settings.enter_buttonless_dfu)
-        {
-            s_dfu_settings.enter_buttonless_dfu = true;
-            (void)nrf_dfu_settings_write(flash_callback);
-            while(1);
-        }
-        else
-        {
-            nrf_gpio_pin_clear(PIN_DEF_BLE_LED_EN);
-            nrf_delay_ms(200);
-            NVIC_SystemReset();
-        }
-    }
-}
-#endif
-
-#ifdef TEST_FEATURE_UART_ECHO
-static void uart_echo_test(void)
-{
-    uint8_t     rx_byte;                   // Last byte read from UART.
-    volatile int out_lvl = 0;
-    while(1)
-    {
-        if (NRF_UART0->EVENTS_RXDRDY == 0)
-        {
-            // Nothing read from the UART.
-            continue;
-        }
-        NRF_UART0->EVENTS_RXDRDY = 0;
-        rx_byte                  = (uint8_t)NRF_UART0->RXD;
-        NRF_UART0->TXD = rx_byte;
-        while (NRF_UART0->EVENTS_TXDRDY != 1);
-        NRF_UART0->EVENTS_TXDRDY = 0;
-        nrf_gpio_pin_write(PIN_DEF_BLE_LED_EN, out_lvl);
-        out_lvl = !out_lvl;
-    };
-}
-#endif
-
 /**@brief Function for application main entry.
  *
  * @details This function serves as an adaptation layer between a 2-wire UART interface and the
@@ -250,6 +117,7 @@ static void uart_echo_test(void)
  *          dtmlib and events (i.e. results from the command) is reported back through the UART.
  */
 
+int opCnt, ErCnt;
 int dtm_mode(void)
 {
     uint32_t    current_time;
@@ -259,23 +127,12 @@ int dtm_mode(void)
     uint16_t    dtm_cmd_from_uart = 0;     // Packed command containing command_code:freqency:length:payload in 2:6:6:2 bits.
     uint8_t     rx_byte;                   // Last byte read from UART.
     dtm_event_t result;                    // Result of a DTM operation.
-
-    nrf_gpio_cfg_output(PIN_DEF_BLE_LED_EN);
-    nrf_gpio_pin_set(PIN_DEF_BLE_LED_EN);
-
-    nrf_gpio_cfg_output(PIN_DEF_2ND_POW_EN);
-    nrf_gpio_pin_clear(PIN_DEF_2ND_POW_EN);
-
-#if 0  //goto bootloaer for fota
-    bootloader_check_enter();
+#ifdef FEATURE_CFG_RTT_MODULE_CONTROL
+    unsigned rtt_rd_size;
+    bool rtt_remain_byte_flag = false;
+    char rtt_rd_bufffer[4];   //check BUFFER_SIZE_DOWN
 #endif
-
     uart_init();
-
-#ifdef TEST_FEATURE_UART_ECHO
-    uart_echo_test();
-#endif
-
     dtm_error_code = dtm_init();
     if (dtm_error_code != DTM_SUCCESS)
     {
@@ -283,29 +140,78 @@ int dtm_mode(void)
         return -1;
     }
 
+#ifdef FEATURE_CFG_RTT_MODULE_CONTROL
+    SEGGER_RTT_printf(0, "\n==TBC_OVER_RTT Testmode==\n");  //start marker is "==TBC_OVER_RTT Testmode==" don't change this
+    memset(rtt_rd_bufffer, 0, sizeof(rtt_rd_bufffer));
+#endif
+
     for (;;)
     {
         // Will return every timeout, 625 us.
         current_time = dtm_wait();
 
-        if (NRF_UART0->EVENTS_RXDRDY == 0)
+#ifdef FEATURE_CFG_RTT_MODULE_CONTROL
+        if(rtt_remain_byte_flag)
+        {
+            rtt_rd_bufffer[0] = rtt_rd_bufffer[1];
+            rtt_rd_bufffer[1] = 0;
+            rtt_rd_size = 1;
+            rtt_remain_byte_flag = false;
+        }
+        else
+        {
+            rtt_rd_size = SEGGER_RTT_Read(0, rtt_rd_bufffer, 2);  //check BUFFER_SIZE_DOWN
+//            if(rtt_rd_size)SEGGER_RTT_Write(0,rtt_rd_bufffer,rtt_rd_size);  //loopback for test
+        }
+#endif
+        if (NRF_UART0->EVENTS_RXDRDY == 0
+#ifdef FEATURE_CFG_RTT_MODULE_CONTROL
+            && rtt_rd_size == 0
+#endif
+        )
         {
             // Nothing read from the UART.
             continue;
         }
-        NRF_UART0->EVENTS_RXDRDY = 0;
-        rx_byte                  = (uint8_t)NRF_UART0->RXD;
 
-#ifdef FEATURE_TEST_LED_ON_OFF
-        if(rx_byte == 'a')
+        if(0)
         {
-            nrf_gpio_pin_set(PIN_DEF_BLE_LED_EN);
+            ; //dummy if
         }
-        else if(rx_byte == 'b')
+#ifdef FEATURE_CFG_RTT_MODULE_CONTROL
+        else if(rtt_rd_size == 1)
         {
-            nrf_gpio_pin_clear(PIN_DEF_BLE_LED_EN);
+            rx_byte = (uint8_t)(rtt_rd_bufffer[0]);
         }
-#endif
+        else if(rtt_rd_size == 2)
+        {
+            if(((rtt_rd_bufffer[0] == 'C') && ((rtt_rd_bufffer[1] == 'R') || (rtt_rd_bufffer[1] == 'F'))))
+            {
+                if((rtt_rd_bufffer[1] == 'R'))
+                {
+                    SEGGER_RTT_printf(0, "reset\n");
+                    cfg_board_reset();  //reset work
+                }
+                else if(rtt_rd_bufffer[1] == 'F')
+                {
+                    SEGGER_RTT_printf(0, "factory reset\n");
+                    module_parameter_erase_and_reset();  //factory work
+                }
+                continue;
+            }
+            else
+            {                
+                rtt_remain_byte_flag = true;
+                rx_byte = rtt_rd_bufffer[0];
+            }
+        }
+ #endif
+        else
+        {
+            NRF_UART0->EVENTS_RXDRDY = 0;
+            rx_byte                  = (uint8_t)NRF_UART0->RXD;
+        }
+
         if (!is_msb_read)
         {
             // This is first byte of two-byte command.
@@ -332,6 +238,17 @@ int dtm_mode(void)
         is_msb_read        = false;
         dtm_cmd_from_uart |= (dtm_cmd_t)rx_byte;
 
+        if(dtm_cmd_from_uart == 0x4352 /*"CR"*/)
+        {
+            cfg_board_reset();  //reset work
+            continue;
+        }
+        else if(dtm_cmd_from_uart == 0x4346 /*"CF"*/)
+        {
+            module_parameter_erase_and_reset();  //factory work
+            continue;
+        }
+
         if (dtm_cmd_put(dtm_cmd_from_uart) != DTM_SUCCESS)
         {
             // Extended error handling may be put here.
@@ -343,24 +260,40 @@ int dtm_mode(void)
         // for the duration of the byte transmissions on the UART.
         if (dtm_event_get(&result))
         {
-            // Report command status on the UART.
-            // Transmit MSB of the result.
-            NRF_UART0->TXD = (result >> 8) & 0xFF;
-            // Wait until MSB is sent.
-            while (NRF_UART0->EVENTS_TXDRDY != 1)
+            if(0)
             {
-                // Do nothing.
+                ; //dummy if
             }
-            NRF_UART0->EVENTS_TXDRDY = 0;
+#ifdef FEATURE_CFG_RTT_MODULE_CONTROL
+            else if(rtt_rd_size)  //rtt resp
+            {
+                char rtt_wr_bufffer[4];   //check BUFFER_SIZE_DOWN
+                rtt_wr_bufffer[0] = (result >> 8) & 0xFF;
+                rtt_wr_bufffer[1] = result & 0xFF;
+                SEGGER_RTT_Write(0, rtt_wr_bufffer, 2);  //send result
+            }
+#endif
+            else  //uart resp
+            {
+                // Report command status on the UART.
+                // Transmit MSB of the result.
+                NRF_UART0->TXD = (result >> 8) & 0xFF;
+                // Wait until MSB is sent.
+                while (NRF_UART0->EVENTS_TXDRDY != 1)
+                {
+                    // Do nothing.
+                }
+                NRF_UART0->EVENTS_TXDRDY = 0;
 
-            // Transmit LSB of the result.
-            NRF_UART0->TXD = result & 0xFF;
-            // Wait until LSB is sent.
-            while (NRF_UART0->EVENTS_TXDRDY != 1)
-            {
-                // Do nothing.
+                // Transmit LSB of the result.
+                NRF_UART0->TXD = result & 0xFF;
+                // Wait until LSB is sent.
+                while (NRF_UART0->EVENTS_TXDRDY != 1)
+                {
+                    // Do nothing.
+                }
+                NRF_UART0->EVENTS_TXDRDY = 0;
             }
-            NRF_UART0->EVENTS_TXDRDY = 0;
         }
     }
 }

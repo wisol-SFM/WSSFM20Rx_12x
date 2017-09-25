@@ -83,13 +83,9 @@ typedef void (*cTBC_debugmode_run_function_t)(void);
 extern "C" {
 #endif
 
-#ifdef CTBC_INSTANCE
-char m_cTBC_resp_buf[128];
-cTBC_debugmode_run_function_t m_cTBC_dbg_mode_run_func;
-#else
 extern char m_cTBC_resp_buf[128];
 extern cTBC_debugmode_run_function_t m_cTBC_dbg_mode_run_func;
-#endif
+extern bool m_cTBC_over_rtt_connected;
 
 void cTBC_init(cTBC_user_defined_cmd_callback_t user_cmd_CB);
 void cTBC_check_N_enter_bypassmode(uint32_t wait_time_ms, cTBC_bypass_enter_callback_t enter_CB, cTBC_bypass_exit_callback_t exit_CB);
@@ -97,7 +93,8 @@ bool cTBC_is_bypass_state(void);
 bool cTBC_is_busy(void);
 bool cTBC_bypass_mode_is_accbypass(void);
 bool cTBC_bypass_mode_is_setting(void);
-
+void cTBC_OVER_RTT_init(void);
+bool cTBC_setting_erase_wait_for_testmode(int timeout_sec);
 
 #ifdef FEATURE_CFG_DEBUG_OUT_TO_TBC
 int cTBC_vprintf(const char * sFormat, va_list * pParamList);

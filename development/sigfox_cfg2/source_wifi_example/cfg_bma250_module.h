@@ -38,9 +38,6 @@
 #include "bsp_btn_ble.h"
 //#include "bma2x2.h"
 
-#define APP_TIMER_PRESCALER             0                                 /**< Value of the RTC1 PRESCALER register. */
-#define APP_TIMER_OP_QUEUE_SIZE         12                                 /**< Size of timer operation queues. */
-
 #ifdef __cplusplus
 extern "C" {
 #endif

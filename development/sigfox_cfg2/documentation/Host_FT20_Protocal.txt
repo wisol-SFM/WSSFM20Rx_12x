@@ -87,15 +87,15 @@ command
     module_parameter_item_idle_time                                     =  0,  //MAIN_IDLE_TIME_DEFAULT                          60 ~ 604800(sec)
     module_parameter_item_beacon_interval                               =  1,  //BEACON_INTERVAL_TIME_DEFAULT                    20 ~ 10240(ms) 
     module_parameter_item_wifi_scan_retry_time_sec                      =  2,  //CWIFI_SEC_RETRY_TIMEOUT_SEC_DEFAULT             1 ~ 60(sec)
-    module_parameter_item_start_wait_time_for_board_control_attach_sec  =  3,  //START_WAIT_TIME_FOR_BOARD_CONTROL_ATTACH_SEC    1 ~ 10(sec)
-    module_parameter_item_start_wait_time_for_ctrl_mode_change_sec      =  4,  //START_WAIT_TIME_FOR_CTRL_MODE_CHANGE_SEC        1 ~ 30(sec)
+    module_parameter_item_start_wait_time_for_board_control_attach_sec  =  3,  //START_WAIT_TIME_FOR_BOARD_CONTROL_ATTACH_SEC    1 ~ 10(sec)  //use to sfm_boot_mode [0:normal, 1:wifi rf test, 2:wifi always on, 3:ble test, 4:gps test mode]
+    module_parameter_item_start_wait_time_for_ctrl_mode_change_sec      =  4,  //START_WAIT_TIME_FOR_CTRL_MODE_CHANGE_SEC        1 ~ 30(sec)  //use to sigfox dl enable
     module_parameter_item_gps_tracking_time_sec                         =  5,  //CGPS_ACQUIRE_TRACKING_TIME_SEC                  30 ~ 300(sec)
     module_parameter_item_boot_nfc_unlock                               =  6,  //MAIN_BOOT_NFC_UNLOCK_DEFAULT                    0 ~ 1
     module_parameter_item_fota_enable                                   =  7,  //MAIN_FOTA_ENABLE_DEFAULT                        0 ~ 1
     module_parameter_item_scenario_mode                                 =  8,  //MAIN_SCENARIO_MODE_DEFAULT                      0 ~ 1
     module_parameter_item_magnetic_gpio_enable                          =  9,  //MAIN_MAGNETIC_GPIO_ENABLE_DEFAULT               0 ~ 1
     module_parameter_item_wkup_gpio_enable                              = 10,  //MAIN_WKUP_GPIO_ENABLE_DEFAULT                   0 ~ 2
-    module_parameter_item_wifi_testmode_enable                          = 11,  //MAIN_WIFI_TESTMODE_ENABLE_DEFAULT               0 ~ 1
+    module_parameter_item_wifi_testmode_enable                          = 11,  //MAIN_WIFI_TESTMODE_ENABLE_DEFAULT               0 ~ 1  //not used
     module_parameter_item_snek_testmode_enable                          = 12,  //MAIN_SIGFOX_SNEK_TESTMODE_ENABLE_DEFAULT        0 ~ 1
     module_parameter_item_gps_cn0_current_savetime_enable               = 13,  //CGPS_CN0_CURRENT_SAVETIME_ENABLE                0 ~ 1
     

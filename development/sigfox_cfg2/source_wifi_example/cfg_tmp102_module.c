@@ -20,7 +20,6 @@
 #include "nordic_common.h"
 #include "nrf.h"
 #include "nrf_log.h"
-#include "nrf_drv_spi.h"
 #include "ble_hci.h"
 #include "ble_advdata.h"
 #include "ble_advertising.h"
@@ -43,7 +42,6 @@
 #define FEATURE_TMP108
 #endif
 
-static const nrf_drv_spi_t spi = NRF_DRV_SPI_INSTANCE(GSEN_SPI_INSTANCE);  /**< SPI instance. */
 extern volatile bool spi_xfer_done;  /**< Flag used to indicate that SPI instance completed the transfer. */
 
 /* TWI instance. */
@@ -72,38 +70,6 @@ int tmp102a, tmp102b;
 
 APP_TIMER_DEF(m_tmp102_timer_id);                        /**BMA250 timer. */
 
-/**
- * @brief SPI user event handler.
- * @param event
- */
-void spi_event_tmp102_handler(nrf_drv_spi_evt_t const * p_event)
-{
-    spi_xfer_done = true;
-    NRF_LOG_INFO("Transfer completed.\r\n");
-    if (m_rx_buf[0] != 0)
-    {
-        NRF_LOG_INFO(" Received: \r\n");
-        NRF_LOG_HEXDUMP_INFO(m_rx_buf, strlen((const char *)m_rx_buf));
-    }
-}
-
-void cfg_tmp102_spi_init(void)
-{
-    nrf_drv_spi_config_t spi_config;
-    memcpy(&spi_config, &m_spi_config_default, sizeof(nrf_drv_spi_config_t));
-    spi_config.ss_pin   = 20;
-    spi_config.miso_pin = 16;
-    spi_config.mosi_pin = 15;
-    spi_config.sck_pin  = 18;
-//    spi_config.frequency
-//    spi_config.bit_order
-//    spi_config.irq_priority
-    spi_config.mode = NRF_DRV_SPI_MODE_3;
-//    spi_config.orc
-    APP_ERROR_CHECK(nrf_drv_spi_init(&spi, &spi_config, spi_event_tmp102_handler));
-}
-
-
 tmp102_state_s tmp102_get_state()
 {
     return m_tmp102_state;
@@ -113,62 +79,6 @@ void tmp102_set_state(tmp102_state_s m_state)
 {
 //    cPrintLog(CDBG_FCTRL_INFO, "%s  m_state[%d]  started\n",  __func__, m_tmp102_state);
     m_tmp102_state = m_state;
-}
-
-void tmp102_spi_bus_write(u8 reg_addr, u8 *reg_data, u8 cnt)
-{
-
-    u8 array[SPI_BUFFER_LEN * 2];
-    u8 stringpos = TMP102_INIT_VALUE;
-
-    for (stringpos = TMP102_INIT_VALUE; stringpos < cnt; stringpos++) {
-        /* the operation of (reg_addr++)&0x7F done:
-        because it ensure the
-        0 and 1 of the given value
-        It is done only for 8bit operation*/
-        array[stringpos * 2] = (reg_addr++);// &
-//        TMP102_SPI_BUS_WRITE_CONTROL_BYTE;
-        array[stringpos * 2 + TMP102_BUS_READ_WRITE_ARRAY_INDEX] =
-        *(reg_data + stringpos);
-    }
-    APP_ERROR_CHECK(nrf_drv_spi_transfer(&spi, array, cnt*2, NULL, 0));
-}
-
-void tmp102_SPI_bus_read(u8 reg_addr, u8 *reg_data, u8 cnt)
-{
-//    32 iError = TMP102_INIT_VALUE;
-    u8 array[SPI_BUFFER_LEN] = {0xFF};
-    u8 stringpos;
-//    uint8_t count = 0;
-/*  For the SPI mode only 7 bits of register addresses are used.
-The MSB of register address is declared the bit what functionality it is
-read/write (read as 1/write as 0)*/
-array[TMP102_INIT_VALUE] = reg_addr/*|TMP102_SPI_BUS_READ_CONTROL_BYTE*/;
-/*read routine is initiated register address is mask with 0x80*/
-/*
-* Please take the below function as your reference for
-* read the data using SPI communication
-* " IERROR = SPI_READ_WRITE_STRING(ARRAY, ARRAY, CNT+1)"
-* add your SPI read function here
-* iError is an return value of SPI read function
-* Please select your valid return value
-* In the driver SUCCESS defined as 0
-* and FAILURE defined as -1
-* Note :
-* This is a full duplex operation,
-* The first read data is discarded, for that extra write operation
-* have to be initiated. For that cnt+1 operation done in the SPI read
-* and write string function
-* For more information please refer data sheet SPI communication:
-*/
-    APP_ERROR_CHECK(nrf_drv_spi_transfer(&spi, array,1 , reg_data, cnt+1));
-    for (stringpos = TMP102_INIT_VALUE; stringpos < cnt; stringpos++) {
-        *(reg_data + stringpos) = array[stringpos +
-        TMP102_BUS_READ_WRITE_ARRAY_INDEX];
-
-    }
-
-
 }
 
 uint32_t tmp102_i2c_reg_write(u8 reg_addr, u16 reg_data)  //not support burst mode reg_data size is 2byte

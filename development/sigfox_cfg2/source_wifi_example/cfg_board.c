@@ -51,13 +51,30 @@ bool m_cfg_available_bootloader_detected = false;
 bool m_cfg_NFC_wake_up_detected = false;
 bool m_cfg_GPIO_wake_up_detected = false;
 bool m_cfg_i2c_master_init_flag = false;
+static bool m_cfg_bridge_from_uart_to_uart_flag = false;  //for sigfox uart bridge
 
 int m_cfg_comm_pwr_mask = 0;
+static uint32_t m_cfg_testmode_wait_tick;
 
 const nrf_drv_spi_config_t m_spi_config_default = NRF_DRV_SPI_DEFAULT_CONFIG;
+
+static uint8_t *m_cfg_board_testmode_tx_buf_uart;
+static uint32_t m_cfg_board_testmode_tx_buf_uart_idx;
+static uint8_t *m_cfg_board_testmode_rx_buf_uart;
+static uint32_t m_cfg_board_testmode_rx_buf_uart_idx;
+static uint8_t *m_cfg_board_testmode_rx_buf_rtt;  //down data to rtt
+static uint32_t m_cfg_board_testmode_rx_buf_rtt_idx;  //down data to rtt
+static uint8_t *m_cfg_board_testmode_tx_buf_rtt;  //up data to rtt
+static uint32_t m_cfg_board_testmode_tx_buf_rtt_idx;  //up data to rtt
+static uint8_t *m_cfg_board_testmode_tx_buf_uart_2nd;      //for sigfox uart bridge
+static uint32_t m_cfg_board_testmode_tx_buf_uart_idx_2nd;  //for sigfox uart bridge
+static uint8_t *m_cfg_board_testmode_rx_buf_uart_2nd;      //for sigfox uart bridge
+static uint32_t m_cfg_board_testmode_rx_buf_uart_idx_2nd;  //for sigfox uart bridge
+
 extern int dtm_mode(void);
 extern void set_CN0_check_type(int val);  /*for common lib*/
 extern void set_CN0_enable(unsigned int val);  /*for common lib*/
+extern void main_examples_prepare(void);
 
 //util function
 void cfg_bin_2_hexadecimal(const uint8_t *pBin, int binSize, char *pHexadecimal)
@@ -634,28 +651,576 @@ static void cfg_board_testmode_gps_wifi_download(void)
     }
 }
 
-static void cfg_board_testmode_wifi(void)
+static void cfg_board_RTT_reset_N_factory_reset_proc(void)
 {
-    bool led_on_off = false;
-    int tickCnt = 0;
+    unsigned rtt_rd_size;
+    char rtt_rd_bufffer[64];   //check BUFFER_SIZE_DOWN
 
-    cPrintLog(CDBG_FCTRL_INFO, "====enter wifi test mode (always on)====\n");
-#ifdef CDEV_WIFI_MODULE
-    cWifi_enter_rftest_mode();
+#ifdef FEATURE_CFG_RTT_MODULE_CONTROL
+    SEGGER_RTT_printf(0, "\n==TBC_OVER_RTT Testmode==\n");  //start marker is "==TBC_OVER_RTT Testmode==" don't change this
+    memset(rtt_rd_bufffer, 0, sizeof(rtt_rd_bufffer));
 #endif
     while(1)
     {
-        cPrintLog(CDBG_FCTRL_INFO, "testmode_wifi %d\n", tickCnt++);
-        (void)tickCnt;
-        cfg_ble_led_control(led_on_off);
-        led_on_off = !led_on_off;
-        nrf_delay_ms(5000);
+        rtt_rd_size = SEGGER_RTT_Read(0, rtt_rd_bufffer, 64);  //check BUFFER_SIZE_DOWN
+        if(rtt_rd_size == 2 && ((rtt_rd_bufffer[0] == 'C') && ((rtt_rd_bufffer[1] == 'R') || (rtt_rd_bufffer[1] == 'F'))))
+        {
+            if((rtt_rd_bufffer[1] == 'R'))
+            {               
+                cfg_board_reset();  //reset work
+            }
+            else if(rtt_rd_bufffer[1] == 'F')
+            {
+                module_parameter_erase_and_reset();  //factory reset work
+            }
+        }
+    }
+}
+
+static void cfg_board_testmode_wifi(void)
+{
+    SEGGER_RTT_printf(0, "====enter wifi rf test mode====\n");
+#ifdef CDEV_WIFI_MODULE
+    cWifi_enter_rftest_mode();
+#endif
+    cfg_board_RTT_reset_N_factory_reset_proc();
+}
+
+#ifdef CDEV_WIFI_MODULE
+static void cfg_board_testmode_wifi_always_on(void)
+{
+    SEGGER_RTT_printf(0, "====enter wifi always on mode====\n");
+#ifdef CDEV_WIFI_MODULE
+    cWifi_power_control(true);
+#endif
+    cfg_board_RTT_reset_N_factory_reset_proc();
+}
+#endif
+
+#ifdef CDEV_GPS_MODULE
+static const nrf_drv_spi_t m_cfg_board_testmode_gps_Spi = NRF_DRV_SPI_INSTANCE(GPS_SPI_INSTANCE);  /**< SPI instance. */
+static volatile bool m_cfg_board_testmode_gps_spi_XferDone; 
+static uint8_t *m_cfg_board_testmode_gps_spi_tx_buf;
+static uint8_t *m_cfg_board_testmode_gps_spi_rx_buf;
+static void cfg_board_testmode_gps_uart_event_handle(app_uart_evt_t * p_event)
+{
+    uint8_t uart_byte;
+    switch (p_event->evt_type)
+    {
+        case APP_UART_DATA_READY:
+            UNUSED_VARIABLE(app_uart_get(&uart_byte));
+            if(m_cfg_board_testmode_tx_buf_uart_idx < 128)
+            {
+                m_cfg_board_testmode_tx_buf_uart[m_cfg_board_testmode_tx_buf_uart_idx++] = uart_byte;
+            }
+//            app_uart_put(uart_byte);  //echo test
+            break;
+
+        case APP_UART_COMMUNICATION_ERROR:
+//            cPrintLog(CDBG_FCTRL_INFO, "GPS test uart Commu Err!\n");
+            break;
+
+        case APP_UART_FIFO_ERROR:
+//            cPrintLog(CDBG_FCTRL_INFO, "GPS test uart fifo Err!\n");
+            break;
+
+        default:
+            break;
+    }
+}
+
+static void cfg_board_testmode_gps_spi_event_handler(nrf_drv_spi_evt_t const * p_event)
+{
+    m_cfg_board_testmode_gps_spi_XferDone = true;
+}
+
+static void cfg_board_testmode_gps(void)
+{
+//    cfg_ble_led_control(1);  //test power led
+
+    uint32_t                     err_code;
+    const app_uart_comm_params_t comm_params =
+    {
+        PIN_DEF_TWIS_BOARD_CTRL_SCL, //RX_PIN_NUMBER,
+        PIN_DEF_TWIS_BOARD_CTRL_SDA,  //TX_PIN_NUMBER,
+        UART_PIN_DISCONNECTED,  //RTS_PIN_NUMBER, //
+        UART_PIN_DISCONNECTED,  //CTS_PIN_NUMBER, //
+        APP_UART_FLOW_CONTROL_DISABLED,
+        false,
+        UART_BAUDRATE_BAUDRATE_Baud9600
+    };
+    nrf_drv_spi_config_t spi_config;
+    unsigned rtt_rd_size;
+    char rtt_rd_bufffer[64];   //check BUFFER_SIZE_DOWN
+    int i;
+    uint32_t tick_cnt, tick_cnt_old_rtt;
+
+    SEGGER_RTT_printf(0, "====enter gps test mode====\n");
+    cGps_gpio_init();
+    cGps_power_control(1, 1);  //gps power on
+
+    //Since the TBC can not be executed, it uses TBC buffers.
+    if((1024 <= CTBC_TX_BUF_SIZE))
+    {
+        extern uint8_t m_cTBC_tx_buf[CTBC_TX_BUF_SIZE];
+        app_uart_buffers_t buffers;
+
+        memcpy(&spi_config, &m_spi_config_default, sizeof(nrf_drv_spi_config_t));
+        spi_config.ss_pin   = PIN_DEF_GPS_SPI_CS;
+        spi_config.miso_pin = PIN_DEF_GPS_SPI_MISO;
+        spi_config.mosi_pin = PIN_DEF_GPS_SPI_MOSI;
+        spi_config.sck_pin  = PIN_DEF_GPS_SPI_SCK;
+        spi_config.frequency = NRF_DRV_SPI_FREQ_125K;
+        spi_config.mode = NRF_DRV_SPI_MODE_0;
+        spi_config.bit_order = NRF_DRV_SPI_BIT_ORDER_MSB_FIRST;
+        APP_ERROR_CHECK(nrf_drv_spi_init(&m_cfg_board_testmode_gps_Spi, &spi_config, cfg_board_testmode_gps_spi_event_handler));
+    
+        m_cfg_board_testmode_gps_spi_tx_buf = &m_cTBC_tx_buf[0];
+        m_cfg_board_testmode_gps_spi_rx_buf = &m_cTBC_tx_buf[128];
+        m_cfg_board_testmode_tx_buf_uart = &m_cTBC_tx_buf[256];
+        m_cfg_board_testmode_rx_buf_uart = &m_cTBC_tx_buf[384];
+
+        //ref APP_UART_FIFO_INIT()
+        buffers.rx_buf      = &m_cTBC_tx_buf[512];
+        buffers.rx_buf_size = 128;
+        buffers.tx_buf      = &m_cTBC_tx_buf[640];
+        buffers.tx_buf_size = 128;
+        err_code = app_uart_init(&comm_params, &buffers, cfg_board_testmode_gps_uart_event_handle, APP_IRQ_PRIORITY_LOW);
+        APP_ERROR_CHECK(err_code);
+
+        m_cfg_board_testmode_rx_buf_rtt = &m_cTBC_tx_buf[768];
+        m_cfg_board_testmode_tx_buf_rtt = &m_cTBC_tx_buf[896];
+
+        while(1)
+        {
+            tick_cnt++;
+            memset(m_cfg_board_testmode_gps_spi_tx_buf, 0xff, 128);
+            if(m_cfg_board_testmode_tx_buf_uart_idx > 0)
+            {
+                CRITICAL_REGION_ENTER();
+                memcpy(m_cfg_board_testmode_gps_spi_tx_buf, m_cfg_board_testmode_tx_buf_uart, m_cfg_board_testmode_tx_buf_uart_idx);
+                m_cfg_board_testmode_tx_buf_uart_idx = 0;
+                CRITICAL_REGION_EXIT();
+            }
+            else
+            {
+                rtt_rd_size = SEGGER_RTT_Read(0, rtt_rd_bufffer, 64);  //check BUFFER_SIZE_DOWN
+                if(rtt_rd_size > 0)
+                {
+                    tick_cnt_old_rtt = tick_cnt;
+                    for(i=0;i<rtt_rd_size;i++)
+                    {
+                        m_cfg_board_testmode_rx_buf_rtt[m_cfg_board_testmode_rx_buf_rtt_idx++] = rtt_rd_bufffer[i];
+                    }
+
+                }
+                if((m_cfg_board_testmode_rx_buf_rtt_idx > 0) && ((tick_cnt_old_rtt + 2) == tick_cnt))
+                {
+                    memcpy(m_cfg_board_testmode_gps_spi_tx_buf, m_cfg_board_testmode_rx_buf_rtt, m_cfg_board_testmode_rx_buf_rtt_idx);
+                    m_cfg_board_testmode_rx_buf_rtt_idx = 0;
+                }
+            }
+
+            if(((m_cfg_board_testmode_gps_spi_tx_buf[0] == 'C') && ((m_cfg_board_testmode_gps_spi_tx_buf[1] == 'R') || (m_cfg_board_testmode_gps_spi_tx_buf[1] == 'F'))))
+            {
+                if((m_cfg_board_testmode_gps_spi_tx_buf[1] == 'R'))
+                {               
+                    cfg_board_reset();  //reset work
+                }
+                else if(m_cfg_board_testmode_gps_spi_tx_buf[1] == 'F')
+                {
+                    module_parameter_erase_and_reset();  //factory reset work
+                }
+            }
+            else
+            {
+                m_cfg_board_testmode_gps_spi_XferDone = false;
+                nrf_drv_spi_transfer(&m_cfg_board_testmode_gps_Spi, m_cfg_board_testmode_gps_spi_tx_buf, 128, m_cfg_board_testmode_gps_spi_rx_buf, 128);
+                while(!m_cfg_board_testmode_gps_spi_XferDone);
+
+                for(i=0; i<128; i++)
+                {
+                    if(m_cfg_board_testmode_gps_spi_rx_buf[i] != 0xff)
+                    {
+                        m_cfg_board_testmode_rx_buf_uart[m_cfg_board_testmode_rx_buf_uart_idx++] = m_cfg_board_testmode_gps_spi_rx_buf[i];
+                        m_cfg_board_testmode_tx_buf_rtt[m_cfg_board_testmode_tx_buf_rtt_idx++] = m_cfg_board_testmode_gps_spi_rx_buf[i];
+                    }
+                }
+
+                if(m_cfg_board_testmode_rx_buf_uart_idx > 0)
+                {
+                    for(i=0; i<m_cfg_board_testmode_rx_buf_uart_idx; i++)
+                    {
+                        app_uart_put(m_cfg_board_testmode_rx_buf_uart[i]);
+                    }
+                    m_cfg_board_testmode_rx_buf_uart_idx = 0;
+                }
+                
+
+                if(m_cfg_board_testmode_tx_buf_rtt_idx > 0)
+                {
+                    SEGGER_RTT_Write(0, m_cfg_board_testmode_tx_buf_rtt, m_cfg_board_testmode_tx_buf_rtt_idx);
+                    m_cfg_board_testmode_tx_buf_rtt_idx = 0;
+                }
+            }
+            nrf_delay_ms(200);
+        }
+    }
+}
+#endif
+
+static void cfg_board_bridge_from_RTT_to_uart_uart_event_handle(app_uart_evt_t * p_event)
+{
+    uint8_t uart_byte;
+    switch (p_event->evt_type)
+    {
+        case APP_UART_DATA_READY:
+            UNUSED_VARIABLE(app_uart_get(&uart_byte));
+            if(m_cfg_board_testmode_rx_buf_uart_idx < 512)
+            {
+                m_cfg_board_testmode_rx_buf_uart[m_cfg_board_testmode_rx_buf_uart_idx++] = uart_byte;
+            }
+//            app_uart_put(uart_byte);  //echo test
+            break;
+
+        case APP_UART_COMMUNICATION_ERROR:
+//            cPrintLog(CDBG_FCTRL_INFO, "GPS test uart Commu Err!\n");
+            break;
+
+        case APP_UART_FIFO_ERROR:
+//            cPrintLog(CDBG_FCTRL_INFO, "GPS test uart fifo Err!\n");
+            break;
+
+        default:
+            break;
+    }
+}
+
+static void cfg_board_bridge_from_RTT_to_uart(uint32_t baud_rate, uint32_t rx_pin_no, uint32_t tx_pin_no)
+{
+    uint32_t                     err_code;
+    app_uart_comm_params_t comm_params =
+    {
+        PIN_DEF_TWIS_BOARD_CTRL_SCL, //RX_PIN_NUMBER,
+        PIN_DEF_TWIS_BOARD_CTRL_SDA,  //TX_PIN_NUMBER,
+        UART_PIN_DISCONNECTED,  //RTS_PIN_NUMBER, //
+        UART_PIN_DISCONNECTED,  //CTS_PIN_NUMBER, //
+        APP_UART_FLOW_CONTROL_DISABLED,
+        false,
+        UART_BAUDRATE_BAUDRATE_Baud115200
+    };
+    unsigned rtt_rd_size;
+    char rtt_rd_bufffer[64];   //check BUFFER_SIZE_DOWN
+    int i;
+    uint32_t rtt_read_time_out;
+
+    SEGGER_RTT_printf(0, "bridge_from_RTT_to_uart baud rate:%08x, rx:%d, tx:%d\n", baud_rate, rx_pin_no, tx_pin_no);
+    comm_params.baud_rate = baud_rate;
+    comm_params.rx_pin_no = rx_pin_no;
+    comm_params.tx_pin_no = tx_pin_no;
+
+    //Since the TBC can not be executed, it uses TBC buffers.
+    if((2048 <= CTBC_TX_BUF_SIZE) && (256 <= CTBC_BYPASS_CMD_BUF_SIZE))
+    {
+        extern uint8_t m_cTBC_tx_buf[CTBC_TX_BUF_SIZE];
+        extern uint8_t m_cTBC_bypasscmd_buf[CTBC_BYPASS_CMD_BUF_SIZE];
+        app_uart_buffers_t buffers;
+
+        m_cfg_board_testmode_tx_buf_uart = &m_cTBC_tx_buf[0];
+        m_cfg_board_testmode_rx_buf_uart = &m_cTBC_tx_buf[512];
+
+        //ref APP_UART_FIFO_INIT()
+        buffers.rx_buf      = &m_cTBC_bypasscmd_buf[0];
+        buffers.rx_buf_size = 128;
+        buffers.tx_buf      = &m_cTBC_bypasscmd_buf[128];
+        buffers.tx_buf_size = 128;
+        err_code = app_uart_init(&comm_params, &buffers, cfg_board_bridge_from_RTT_to_uart_uart_event_handle, APP_IRQ_PRIORITY_LOW);
+        APP_ERROR_CHECK(err_code);
+
+        m_cfg_board_testmode_rx_buf_rtt = &m_cTBC_tx_buf[1024];
+        m_cfg_board_testmode_tx_buf_rtt = &m_cTBC_tx_buf[1536];
+
+        while(1)
+        {
+            rtt_read_time_out++;
+            if(m_cfg_board_testmode_rx_buf_uart_idx > 0)
+            {
+                CRITICAL_REGION_ENTER();
+                memcpy(m_cfg_board_testmode_tx_buf_rtt, m_cfg_board_testmode_rx_buf_uart, m_cfg_board_testmode_rx_buf_uart_idx);
+                m_cfg_board_testmode_tx_buf_rtt_idx = m_cfg_board_testmode_rx_buf_uart_idx;
+                m_cfg_board_testmode_rx_buf_uart_idx = 0;
+                CRITICAL_REGION_EXIT();
+            }
+            else
+            {
+                rtt_rd_size = SEGGER_RTT_Read(0, rtt_rd_bufffer, 64);  //check BUFFER_SIZE_DOWN
+                if(rtt_rd_size > 0)
+                {
+                    for(i=0;i<rtt_rd_size;i++)
+                    {
+                        if(m_cfg_board_testmode_rx_buf_rtt_idx < 512)m_cfg_board_testmode_rx_buf_rtt[m_cfg_board_testmode_rx_buf_rtt_idx++] = rtt_rd_bufffer[i];
+                    }
+                    rtt_read_time_out = 0;
+                }
+                if((m_cfg_board_testmode_rx_buf_rtt_idx > 0) && rtt_read_time_out > 40000)  //about 100ms
+                {
+                    memcpy(m_cfg_board_testmode_tx_buf_uart, m_cfg_board_testmode_rx_buf_rtt, m_cfg_board_testmode_rx_buf_rtt_idx);
+                    m_cfg_board_testmode_tx_buf_uart_idx = m_cfg_board_testmode_rx_buf_rtt_idx;
+                    m_cfg_board_testmode_rx_buf_rtt_idx = 0;
+                }
+            }
+
+            if((m_cfg_board_testmode_tx_buf_uart_idx == 2)
+                && ((m_cfg_board_testmode_tx_buf_uart[0] == 'C') && ((m_cfg_board_testmode_tx_buf_uart[1] == 'R') || (m_cfg_board_testmode_tx_buf_uart[1] == 'F'))))
+            {
+                if((m_cfg_board_testmode_tx_buf_uart[1] == 'R'))
+                {               
+                    cfg_board_reset();  //reset work
+                }
+                else if(m_cfg_board_testmode_tx_buf_uart[1] == 'F')
+                {
+                    module_parameter_erase_and_reset();  //factory reset work
+                }
+            }
+
+            if(m_cfg_board_testmode_tx_buf_rtt_idx > 0)
+            {
+                SEGGER_RTT_Write(0, m_cfg_board_testmode_tx_buf_rtt, m_cfg_board_testmode_tx_buf_rtt_idx);
+                m_cfg_board_testmode_tx_buf_rtt_idx = 0;
+            }
+
+            if(m_cfg_board_testmode_tx_buf_uart_idx > 0)
+            {
+                for(i=0; i<m_cfg_board_testmode_tx_buf_uart_idx; i++)
+                {
+                    app_uart_put(m_cfg_board_testmode_tx_buf_uart[i]);
+                }
+                m_cfg_board_testmode_tx_buf_uart_idx = 0;
+            }
+        }
+    }
+}
+
+static void cfg_board_uart_bridge_from_external_to_sigfox_event_handle(app_uart_evt_t * p_event)
+{
+    uint8_t uart_byte;
+    switch (p_event->evt_type)
+    {
+        case APP_UART_DATA_READY:
+            UNUSED_VARIABLE(app_uart_get(&uart_byte));
+            if(m_cfg_board_testmode_rx_buf_uart_idx < 256)
+            {
+                m_cfg_board_testmode_rx_buf_uart[m_cfg_board_testmode_rx_buf_uart_idx++] = uart_byte;
+                if(m_cfg_board_testmode_rx_buf_uart_idx == 2 && m_cfg_board_testmode_rx_buf_uart[0]=='C')
+                {
+                    if(m_cfg_board_testmode_rx_buf_uart[1]=='R')
+                    {
+                        cfg_board_reset();  //reset work
+                    }
+                    else if(m_cfg_board_testmode_rx_buf_uart[1]=='F')
+                    {
+                        module_parameter_erase_and_reset();  //factory reset work
+                    }
+                }
+
+                if(uart_byte == '\n')
+                {
+                    m_cfg_bridge_from_uart_to_uart_flag = true;
+                }
+            }
+            break;
+
+        case APP_UART_COMMUNICATION_ERROR:
+            cPrintLog(CDBG_FCTRL_INFO, "external uart Commu Err!\n");
+            break;
+
+        case APP_UART_FIFO_ERROR:
+            cPrintLog(CDBG_FCTRL_INFO, "external uart fifo Err!\n");
+            break;
+
+        default:
+            break;
+    }
+}
+
+static void cfg_board_uart_bridge_from_sigfox_to_external_event_handle(app_uart_evt_t * p_event)
+{
+    uint8_t uart_byte;
+    switch (p_event->evt_type)
+    {
+        case APP_UART_DATA_READY:
+            UNUSED_VARIABLE(app_uart_get(&uart_byte));
+            if(m_cfg_board_testmode_rx_buf_uart_idx_2nd < 256)
+            {
+                m_cfg_board_testmode_rx_buf_uart_2nd[m_cfg_board_testmode_rx_buf_uart_idx_2nd++] = uart_byte;
+                if(uart_byte == '\n')
+                {
+                    m_cfg_testmode_wait_tick = 1;
+                }
+            }
+            break;
+
+        case APP_UART_COMMUNICATION_ERROR:
+            cPrintLog(CDBG_FCTRL_INFO, "sigfox uart Commu Err!\n");
+            break;
+
+        case APP_UART_FIFO_ERROR:
+            cPrintLog(CDBG_FCTRL_INFO, "sigfox uart fifo Err!\n");
+            break;
+
+        default:
+            break;
+    }
+}
+
+
+static void cfg_board_sigfox_bridge_from_uart(uint32_t baud_rate, uint32_t rx_pin_no, uint32_t tx_pin_no)
+{
+    uint32_t err_code;
+    int i;
+    bool bridge_from_uart_to_uart_flag_old;
+    app_uart_comm_params_t comm_params =
+    {
+        PIN_DEF_TWIS_BOARD_CTRL_SCL, //RX_PIN_NUMBER,
+        PIN_DEF_TWIS_BOARD_CTRL_SDA,  //TX_PIN_NUMBER,
+        UART_PIN_DISCONNECTED,  //RTS_PIN_NUMBER, //
+        UART_PIN_DISCONNECTED,  //CTS_PIN_NUMBER, //
+        APP_UART_FLOW_CONTROL_DISABLED,
+        false,
+        UART_BAUDRATE_BAUDRATE_Baud115200
+    };
+    app_uart_buffers_t buffers;
+
+    app_uart_comm_params_t comm_params_sigfox =
+    {
+        PIN_DEF_SIGFOX_UART_RX, //RX_PIN_NUMBER,
+        PIN_DEF_SIGFOX_UART_TX,  //TX_PIN_NUMBER,
+        UART_PIN_DISCONNECTED,  //RTS_PIN_NUMBER, //
+        UART_PIN_DISCONNECTED,  //CTS_PIN_NUMBER, //
+        APP_UART_FLOW_CONTROL_DISABLED,
+        false,
+        UART_BAUDRATE_BAUDRATE_Baud9600
+    };
+    app_uart_buffers_t buffers_sigfox;
+
+    
+    unsigned rtt_rd_size;
+    char rtt_rd_bufffer[64];   //check BUFFER_SIZE_DOWN
+
+    SEGGER_RTT_printf(0, "sigfox_bridge_from_uart baud rate:%08x, in rx:%d, in tx:%d\n", baud_rate, rx_pin_no, tx_pin_no);
+    comm_params.baud_rate = baud_rate;
+    comm_params.rx_pin_no = rx_pin_no;
+    comm_params.tx_pin_no = tx_pin_no;
+
+    //Since the TBC can not be executed, it uses TBC buffers.
+    if((2048 <= CTBC_TX_BUF_SIZE))
+    {
+        extern uint8_t m_cTBC_tx_buf[CTBC_TX_BUF_SIZE];
+        extern uint8_t m_cTBC_bypasscmd_buf[CTBC_BYPASS_CMD_BUF_SIZE];
+
+        m_cfg_board_testmode_tx_buf_uart = &m_cTBC_tx_buf[0];
+        m_cfg_board_testmode_rx_buf_uart = &m_cTBC_tx_buf[256];
+        m_cfg_board_testmode_tx_buf_uart_2nd = &m_cTBC_tx_buf[512];
+        m_cfg_board_testmode_rx_buf_uart_2nd = &m_cTBC_tx_buf[768];
+
+
+        //ref APP_UART_FIFO_INIT()
+        buffers.rx_buf      = &m_cTBC_tx_buf[1024];
+        buffers.rx_buf_size = 128;
+        buffers.tx_buf      = &m_cTBC_tx_buf[1152];
+        buffers.tx_buf_size = 128;
+        buffers_sigfox.rx_buf      = &m_cTBC_tx_buf[1280];
+        buffers_sigfox.rx_buf_size = 128;
+        buffers_sigfox.tx_buf      = &m_cTBC_tx_buf[1408];
+        buffers_sigfox.tx_buf_size = 128;
+
+        bridge_from_uart_to_uart_flag_old = m_cfg_bridge_from_uart_to_uart_flag = false;
+        //connect external
+        err_code = app_uart_init(&comm_params, &buffers, cfg_board_uart_bridge_from_external_to_sigfox_event_handle, APP_IRQ_PRIORITY_LOW);
+        APP_ERROR_CHECK(err_code);
+        
+
+        while(1)
+        {
+            //ref cfg_board_RTT_reset_N_factory_reset_proc for RTT Factroy reset
+            rtt_rd_size = SEGGER_RTT_Read(0, rtt_rd_bufffer, 64);  //check BUFFER_SIZE_DOWN 
+            if(rtt_rd_size == 2 && ((rtt_rd_bufffer[0] == 'C') && ((rtt_rd_bufffer[1] == 'R') || (rtt_rd_bufffer[1] == 'F'))))
+            {
+                if((rtt_rd_bufffer[1] == 'R'))
+                {               
+                    cfg_board_reset();  //reset work
+                }
+                else if(rtt_rd_bufffer[1] == 'F')
+                {
+                    module_parameter_erase_and_reset();  //factory reset work
+                }
+            }
+
+            if(bridge_from_uart_to_uart_flag_old != m_cfg_bridge_from_uart_to_uart_flag)
+            {
+                app_uart_close();
+                if(m_cfg_bridge_from_uart_to_uart_flag)
+                {
+                    //connect sigfox
+                    err_code = app_uart_init(&comm_params_sigfox, &buffers_sigfox, cfg_board_uart_bridge_from_sigfox_to_external_event_handle, APP_IRQ_PRIORITY_LOW);
+                    APP_ERROR_CHECK(err_code);
+                }
+                else
+                {
+                    //connect external
+                    err_code = app_uart_init(&comm_params, &buffers, cfg_board_uart_bridge_from_external_to_sigfox_event_handle, APP_IRQ_PRIORITY_LOW);
+                    APP_ERROR_CHECK(err_code);
+                }
+                nrf_delay_ms(1);
+                if(m_cfg_bridge_from_uart_to_uart_flag)  //external to sigfox (uart connected to sigfox)
+                {
+                    CRITICAL_REGION_ENTER();
+                    memcpy(m_cfg_board_testmode_tx_buf_uart_2nd, m_cfg_board_testmode_rx_buf_uart, m_cfg_board_testmode_rx_buf_uart_idx);
+                    m_cfg_board_testmode_tx_buf_uart_idx_2nd = m_cfg_board_testmode_rx_buf_uart_idx;
+                    m_cfg_board_testmode_rx_buf_uart_idx = 0;
+                    CRITICAL_REGION_EXIT();
+                    for(i=0; i<m_cfg_board_testmode_tx_buf_uart_idx_2nd; i++)
+                    {
+                        app_uart_put(m_cfg_board_testmode_tx_buf_uart_2nd[i]);
+                    }
+                    m_cfg_board_testmode_tx_buf_uart_idx_2nd = 0;
+                    m_cfg_testmode_wait_tick = 0;
+                }
+                else  //sigfox to external (uart connected to external)
+                {
+                    CRITICAL_REGION_ENTER();
+                    memcpy(m_cfg_board_testmode_tx_buf_uart, m_cfg_board_testmode_rx_buf_uart_2nd, m_cfg_board_testmode_rx_buf_uart_idx_2nd);
+                    m_cfg_board_testmode_tx_buf_uart_idx = m_cfg_board_testmode_rx_buf_uart_idx_2nd;
+                    m_cfg_board_testmode_rx_buf_uart_idx_2nd = 0;
+                    CRITICAL_REGION_EXIT();
+                    for(i=0; i<m_cfg_board_testmode_tx_buf_uart_idx; i++)
+                    {
+                        app_uart_put(m_cfg_board_testmode_tx_buf_uart[i]);
+                    }
+                    m_cfg_board_testmode_tx_buf_uart_idx = 0;
+                }
+                bridge_from_uart_to_uart_flag_old = m_cfg_bridge_from_uart_to_uart_flag;
+            }
+            
+            if(m_cfg_bridge_from_uart_to_uart_flag)  //wait sigfox resp
+            {
+                if(m_cfg_testmode_wait_tick >= 1)
+                {
+                    if(++m_cfg_testmode_wait_tick > 5)  //timeout
+                    {
+                        m_cfg_bridge_from_uart_to_uart_flag = false; //wait external input
+                        m_cfg_testmode_wait_tick = 0;
+                    }
+                }
+            }
+            nrf_delay_ms(100);
+        }
     }
 }
 
 static void cfg_board_testmode_ble(void)
 {
-    cPrintLog(CDBG_FCTRL_INFO, "====enter ble dtm mode====\n");
+    SEGGER_RTT_printf(0, "====enter ble dtm mode====\n");
     dtm_mode();
 }
 
@@ -747,6 +1312,243 @@ static void cfg_board_check_bootstrap_pin(void)
         }
     }
 }
+#else
+static void cfg_board_check_wifi_downloadmode(void)
+{
+    uint32_t pinLvl_DL_EN;
+    nrf_gpio_cfg_input(PIN_DEF_WIFI_INT, NRF_GPIO_PIN_PULLUP);
+    nrf_delay_ms(1);
+
+    pinLvl_DL_EN = nrf_gpio_pin_read(PIN_DEF_WIFI_INT);
+    nrf_gpio_cfg_default(PIN_DEF_WIFI_INT);
+    cPrintLog(CDBG_FCTRL_INFO, "wifi dl pin lvl:%d\n", pinLvl_DL_EN);
+
+    if(pinLvl_DL_EN == 0)
+    {
+        cfg_board_testmode_gps_wifi_download();
+    }
+}
+#endif
+
+#ifdef FEATURE_CFG_CHECK_NV_BOOT_MODE
+static void cfg_board_testmode_wifi_AP_N_ble_on_adv_evt(ble_adv_evt_t ble_adv_evt)
+{
+//    uint32_t err_code;
+
+    switch (ble_adv_evt)
+    {
+        case BLE_ADV_EVT_FAST:
+ //           err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING);
+ //           APP_ERROR_CHECK(err_code);
+            break;
+
+        case BLE_ADV_EVT_IDLE:
+            break;
+
+        default:
+            break;
+    }
+}
+
+static void cfg_board_testmode_wifi_AP_N_ble(void)
+{
+    uint32_t                err_code;
+    ble_gap_conn_params_t   gap_conn_params;
+    ble_gap_conn_sec_mode_t sec_mode;
+    ble_advdata_t          advdata;
+    ble_adv_modes_config_t options;
+    uint8_t device_name_buf[32];
+    uint32_t device_name_len;
+
+#ifdef CDEV_WIFI_MODULE
+    int wifi_result;
+    int timeout;
+    uint8_t cmd_buf[128];
+    unsigned int cmd_buf_idx;
+    
+    cfg_ble_led_control(true);
+    main_examples_prepare();
+    //disable wifi info log
+    CDBG_mask_clear(CDBG_NUM2MASK(CDBG_WIFI_INFO));
+
+    cWifi_resource_init();  // Initalize resource for WIFI module 
+    cWifi_prepare_start();  // prepare for WIFI module
+
+    wifi_result = cWifi_bypass_req(NULL, NULL);
+    if(wifi_result == CWIFI_Result_OK)
+    {
+        timeout = 5000;
+        while(!cWifiState_is_bypass_mode())
+        {
+            if(--timeout==0)break;  //wait bypassmode
+            nrf_delay_ms(1);
+        }
+        if(timeout > 0)
+        {
+            cmd_buf_idx = sprintf((char *)cmd_buf, "ATE0");
+            cmd_buf_idx += sprintf((char *)&cmd_buf[cmd_buf_idx], "\r\n");
+            //wait bypass ready
+            while(!cWifiState_is_bypass_ready());
+            cWifiState_bypass_write_request((const char *)cmd_buf, (unsigned int)cmd_buf_idx);
+            nrf_delay_ms(500);  //wait for response
+
+            cmd_buf_idx = sprintf((char *)cmd_buf, "AT+CWMODE=2");
+            cmd_buf_idx += sprintf((char *)&cmd_buf[cmd_buf_idx], "\r\n");
+            //wait bypass ready
+            while(!cWifiState_is_bypass_ready());
+            cWifiState_bypass_write_request((const char *)cmd_buf, (unsigned int)cmd_buf_idx);
+            nrf_delay_ms(1000);  //wait for response
+
+            //make at command
+            cmd_buf_idx = sprintf((char *)cmd_buf, "AT+CWSAP=\"SFMTEST%02x%02x\",\"1234567890\",5,3", m_module_peripheral_ID.wifi_MAC_STA[4], m_module_peripheral_ID.wifi_MAC_STA[5]);
+            cmd_buf_idx += sprintf((char *)&cmd_buf[cmd_buf_idx], "\r\n");
+            while(!cWifiState_is_bypass_ready());
+            cWifiState_bypass_write_request((const char *)cmd_buf, (unsigned int)cmd_buf_idx);
+            nrf_delay_ms(500);  //wait for response
+        }
+        else
+        {
+            cPrintLog(CDBG_MAIN_LOG, "Wifi bypassmode timeout!\n");
+        }
+    }
+    else
+    {
+        // WIFI not available or busy
+        cPrintLog(CDBG_MAIN_LOG, "Not Availalble Wifi Module!\n");
+    }
+#endif
+
+    device_name_len = sprintf((char *)device_name_buf, "SFMTEST%02x%02x", m_module_peripheral_ID.ble_MAC[4], m_module_peripheral_ID.ble_MAC[5]);
+
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&sec_mode);
+    err_code = sd_ble_gap_device_name_set(&sec_mode,
+                                      (const uint8_t *)device_name_buf,
+                                      device_name_len);
+
+    memset(&gap_conn_params, 0, sizeof(gap_conn_params));
+
+    gap_conn_params.min_conn_interval = MSEC_TO_UNITS(100, UNIT_1_25_MS) ;
+    gap_conn_params.max_conn_interval = MSEC_TO_UNITS(200, UNIT_1_25_MS);
+    gap_conn_params.slave_latency     = 0;
+    gap_conn_params.conn_sup_timeout  = MSEC_TO_UNITS(4000, UNIT_10_MS) ;
+
+    err_code = sd_ble_gap_ppcp_set(&gap_conn_params);
+    APP_ERROR_CHECK(err_code);
+
+    err_code = sd_ble_gap_tx_power_set(4);
+    APP_ERROR_CHECK(err_code);
+
+    // Build advertising data struct to pass into @ref ble_advertising_init.
+    memset(&advdata, 0, sizeof(advdata));
+
+    advdata.name_type               = BLE_ADVDATA_FULL_NAME;
+    advdata.include_appearance      = false;
+    advdata.flags                   = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
+
+    memset(&options, 0, sizeof(options));
+    options.ble_adv_fast_enabled  = true;
+    options.ble_adv_fast_interval = MSEC_TO_UNITS(50, UNIT_0_625_MS);
+    options.ble_adv_fast_timeout = 0; //APP_ADV_TIMEOUT_IN_SECONDS;
+
+    err_code = ble_advertising_init(&advdata, NULL, &options, cfg_board_testmode_wifi_AP_N_ble_on_adv_evt, NULL);
+    APP_ERROR_CHECK(err_code);
+
+    ble_advertising_start(BLE_ADV_MODE_FAST);
+}
+
+static void cfg_board_check_bootmode(void)
+{
+    int bootmode;
+
+    if(module_parameter_get_bootmode(&bootmode))  //use to sfm_boot_mode START_WAIT_TIME_FOR_BOARD_CONTROL_ATTACH_SEC
+    {
+        switch(bootmode)
+        {
+            case 1:
+                cTBC_setting_erase_wait_for_testmode(3);
+#ifdef CDEV_WIFI_MODULE
+                cfg_board_testmode_wifi();
+#endif
+                break;
+            case 2:
+                cTBC_setting_erase_wait_for_testmode(3);
+#ifdef CDEV_WIFI_MODULE
+                cfg_board_testmode_wifi_always_on();
+#endif
+                break;
+
+            case 3:
+                cTBC_setting_erase_wait_for_testmode(3);
+                cfg_board_testmode_ble();
+                break;
+
+            case 4:
+                cTBC_setting_erase_wait_for_testmode(3);
+#ifdef CDEV_GPS_MODULE
+                cfg_board_testmode_gps();
+#else
+                cfg_board_RTT_reset_N_factory_reset_proc();
+#endif
+                break;
+            case 5:
+                cTBC_setting_erase_wait_for_testmode(3);
+                SEGGER_RTT_printf(0, "====enter wifi rf test bridge_from_RTT_to_uart mode====\n");
+#ifdef CDEV_WIFI_MODULE
+                cWifi_enter_rftest_mode();
+#endif
+                cfg_board_bridge_from_RTT_to_uart(UART_BAUDRATE_BAUDRATE_Baud115200, PIN_DEF_TWIS_BOARD_CTRL_SCL, PIN_DEF_TWIS_BOARD_CTRL_SDA);
+                break;
+
+            case 6:
+                cTBC_setting_erase_wait_for_testmode(3);
+                SEGGER_RTT_printf(0, "====enter sigfox uart over RTT mode====\n");
+                
+                //power enable pin control   
+                cfg_board_common_power_control(module_comm_pwr_sigfox, true);
+                nrf_delay_ms(10);
+                nrf_gpio_cfg_output(PIN_DEF_SIGFOX_PWR_EN);
+                nrf_gpio_pin_write(PIN_DEF_SIGFOX_PWR_EN, 1);
+                nrf_delay_ms(10);  //spec is 4ms
+                nrf_gpio_cfg_output(PIN_DEF_SIGFOX_RESET);
+                nrf_gpio_pin_write(PIN_DEF_SIGFOX_RESET, 0);
+                nrf_delay_ms(10);
+                nrf_gpio_pin_write(PIN_DEF_SIGFOX_RESET, 1);
+                nrf_delay_ms(1000);
+                
+                cfg_board_bridge_from_RTT_to_uart(UART_BAUDRATE_BAUDRATE_Baud9600, PIN_DEF_SIGFOX_UART_RX, PIN_DEF_SIGFOX_UART_TX);
+                break;
+
+            case 7:
+                cTBC_setting_erase_wait_for_testmode(3);
+                SEGGER_RTT_printf(0, "====enter sigfox over Uart====\n");
+                
+                //power enable pin control   
+                cfg_board_common_power_control(module_comm_pwr_sigfox, true);
+                nrf_delay_ms(10);
+                nrf_gpio_cfg_output(PIN_DEF_SIGFOX_PWR_EN);
+                nrf_gpio_pin_write(PIN_DEF_SIGFOX_PWR_EN, 1);
+                nrf_delay_ms(10);  //spec is 4ms
+                nrf_gpio_cfg_output(PIN_DEF_SIGFOX_RESET);
+                nrf_gpio_pin_write(PIN_DEF_SIGFOX_RESET, 0);
+                nrf_delay_ms(10);
+                nrf_gpio_pin_write(PIN_DEF_SIGFOX_RESET, 1);
+                nrf_delay_ms(1000);
+                
+                cfg_board_sigfox_bridge_from_uart(UART_BAUDRATE_BAUDRATE_Baud9600, PIN_DEF_TWIS_BOARD_CTRL_SCL, PIN_DEF_TWIS_BOARD_CTRL_SDA);
+                break;
+
+            case 8:  //WIFI AP(SFMTEST0000) and BLE BEACON(SFMTEST0000)
+                cTBC_setting_erase_wait_for_testmode(3);
+                SEGGER_RTT_printf(0, "====enter WIFI AP(SFMTEST0000) and BLE BEACON(SFMTEST0000)====\n");
+                cfg_board_testmode_wifi_AP_N_ble();
+                cfg_board_RTT_reset_N_factory_reset_proc();
+                break;
+
+            default:
+                break;
+        }
+    }
+}
 #endif
 
 void cfg_board_early_init(void)
@@ -754,6 +1556,11 @@ void cfg_board_early_init(void)
     cfg_board_check_reset_reason();
 #ifdef FEATURE_CFG_CHECK_BOOTSTRAP_PIN
     cfg_board_check_bootstrap_pin();
+#else
+    cfg_board_check_wifi_downloadmode();
+#endif
+#ifdef FEATURE_CFG_CHECK_NV_BOOT_MODE
+    cfg_board_check_bootmode();
 #endif
     cfg_board_gpio_set_default();
     cfg_board_check_bootloader();
