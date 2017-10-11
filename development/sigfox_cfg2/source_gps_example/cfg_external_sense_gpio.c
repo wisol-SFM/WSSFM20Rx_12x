@@ -62,7 +62,7 @@ static bool cfg_magnetic_status_set(bool status)
         if(status)
         {
             cPrintLog(CDBG_EXT_SEN_INFO, "%s The magnet is attached!\n", __func__);
-            cTBC_write_state_noti("MagnetAttached");
+//            cTBC_write_state_noti("MagnetAttached");
             if(m_magnetic_attach_CB)m_magnetic_attach_CB();
 #ifdef CDEV_NUS_MODULE
             m_nus_service_parameter.magnet_event = '1';
@@ -72,7 +72,7 @@ static bool cfg_magnetic_status_set(bool status)
         else
         {
             cPrintLog(CDBG_EXT_SEN_INFO, "%s The magnet is detached!\n", __func__);
-            cTBC_write_state_noti("MagnetDetached");
+//            cTBC_write_state_noti("MagnetDetached");
             if(m_magnetic_detach_CB)m_magnetic_detach_CB();
             m_module_peripheral_data.magnet_status = 0;
         }

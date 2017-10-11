@@ -234,6 +234,46 @@ void bma250_read_chip()
 
 }
 
+uint32_t cfg_bma250_ISR_pin_test(void)
+{
+    uint32_t timeout;
+   
+    // softreset
+    spi_xfer_done = false;
+    m_tx_buf[0] = 0xB6;
+    timeout = MPU_TWI_TIMEOUT;
+    bma250_i2c_bus_write(BMA2x2_RST_ADDR,m_tx_buf,BMA2x2_GEN_READ_WRITE_LENGTH);
+    while((!spi_xfer_done) && --timeout);
+    if(!timeout) return NRF_ERROR_TIMEOUT;
+
+    nrf_delay_ms(10);
+
+    //INT pin to Low
+    spi_xfer_done = false;
+    m_tx_buf[0] = 0x04;
+    timeout = MPU_TWI_TIMEOUT;
+    bma250_i2c_bus_write(BMA2x2_INTR_SET_ADDR,m_tx_buf,BMA2x2_GEN_READ_WRITE_LENGTH);
+    while((!spi_xfer_done) && --timeout);
+    if(!timeout) return NRF_ERROR_TIMEOUT;
+    return NRF_SUCCESS;
+}
+
+uint32_t cfg_bma250_sw_reset(void)
+{
+    uint32_t timeout;
+   
+    // softreset
+    spi_xfer_done = false;
+    m_tx_buf[0] = 0xB6;
+    timeout = MPU_TWI_TIMEOUT;
+    bma250_i2c_bus_write(BMA2x2_RST_ADDR,m_tx_buf,BMA2x2_GEN_READ_WRITE_LENGTH);
+    while((!spi_xfer_done) && --timeout);
+    if(!timeout) return NRF_ERROR_TIMEOUT;
+
+    nrf_delay_ms(10);
+    return NRF_SUCCESS;
+}
+
 uint32_t bma250_req_suppend_mode(void)
 {
     uint32_t timeout;

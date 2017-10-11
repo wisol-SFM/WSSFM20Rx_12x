@@ -2,7 +2,7 @@ version 1.8
 
 overview
 1. module interface : I2c slave
-2. Host can connect before 2 minutes (Unable to connect after)
+2. Host can connect before 2 sec (Unable to connect after)
   * Mode change time out is 10 seconds.
 3. Data must be case-sensitive
 4. I2C device ID IS 0x4A

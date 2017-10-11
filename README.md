@@ -46,6 +46,27 @@ In addition to them, Wisol SDK has been created into the __development/sigfox_cf
 
 Keil projects are embedded into the SDK. We have added additional Makefiles to the different examples in order to compile with gcc.
 
+# Support Modules and devices
+###need to modify "development\sigfox_cfg2\source\cfg_board_def.h"
+##### modules Defines (need to modify MODEL_NAME, MODULE_TYPE)
+SFM20R : MODEL_NAME to "SFM20R"
+         MODULE_TYPE to CDEV_MODULE_SFM20R
+SFM40R : MODEL_NAME to "SFM40R"
+         MODULE_TYPE to CDEV_MODULE_SFM40R
+SFM50R : MODEL_NAME to "SFM50R"
+         MODULE_TYPE to CDEV_MODULE_SFM50R
+SFM60R : MODEL_NAME to "SFM60R"
+         MODULE_TYPE to CDEV_MODULE_SFM60R
+##### Device Defines (need to modify CDEV_BOARD_TYPE)
+CDEV_BOARD_EVB                         (1)
+CDEV_BOARD_IHERE                       (2)
+CDEV_BOARD_IHEREV2                     (4)
+##### eg. (Do not change comments and spaces)
+SFM20R EVB
+define CDEV_MODEL_NAME "SFM20R"   //MODEL NAME SIZE IS 6BYTE
+define CDEV_MODULE_TYPE                        CDEV_MODULE_SFM20R
+define CDEV_BOARD_TYPE                        CDEV_BOARD_EVB  //REPLACE_DEVICE_DEFINE_HERE
+
 ### Flashing the module
 
 Wisol SDK includes Nordic tools and gcc-arm to compile and flash the code for Windows. Linux/macOS version has been added in *tools/sfxtools_embedded*.

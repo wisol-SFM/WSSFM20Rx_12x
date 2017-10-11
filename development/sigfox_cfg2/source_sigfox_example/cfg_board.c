@@ -741,8 +741,8 @@ static void cfg_board_testmode_gps(void)
     uint32_t                     err_code;
     const app_uart_comm_params_t comm_params =
     {
-        PIN_DEF_TWIS_BOARD_CTRL_SCL, //RX_PIN_NUMBER,
-        PIN_DEF_TWIS_BOARD_CTRL_SDA,  //TX_PIN_NUMBER,
+        PIN_DEF_DTM_RX, //RX_PIN_NUMBER,
+        PIN_DEF_DTM_TX,  //TX_PIN_NUMBER,
         UART_PIN_DISCONNECTED,  //RTS_PIN_NUMBER, //
         UART_PIN_DISCONNECTED,  //CTS_PIN_NUMBER, //
         APP_UART_FLOW_CONTROL_DISABLED,
@@ -753,7 +753,7 @@ static void cfg_board_testmode_gps(void)
     unsigned rtt_rd_size;
     char rtt_rd_bufffer[64];   //check BUFFER_SIZE_DOWN
     int i;
-    uint32_t tick_cnt, tick_cnt_old_rtt;
+    uint32_t tick_cnt = 0, tick_cnt_old_rtt = 0;
 
     SEGGER_RTT_printf(0, "====enter gps test mode====\n");
     cGps_gpio_init();
@@ -901,8 +901,8 @@ static void cfg_board_bridge_from_RTT_to_uart(uint32_t baud_rate, uint32_t rx_pi
     uint32_t                     err_code;
     app_uart_comm_params_t comm_params =
     {
-        PIN_DEF_TWIS_BOARD_CTRL_SCL, //RX_PIN_NUMBER,
-        PIN_DEF_TWIS_BOARD_CTRL_SDA,  //TX_PIN_NUMBER,
+        PIN_DEF_DTM_RX, //RX_PIN_NUMBER,
+        PIN_DEF_DTM_TX,  //TX_PIN_NUMBER,
         UART_PIN_DISCONNECTED,  //RTS_PIN_NUMBER, //
         UART_PIN_DISCONNECTED,  //CTS_PIN_NUMBER, //
         APP_UART_FLOW_CONTROL_DISABLED,
@@ -912,7 +912,7 @@ static void cfg_board_bridge_from_RTT_to_uart(uint32_t baud_rate, uint32_t rx_pi
     unsigned rtt_rd_size;
     char rtt_rd_bufffer[64];   //check BUFFER_SIZE_DOWN
     int i;
-    uint32_t rtt_read_time_out;
+    uint32_t rtt_read_time_out=0;
 
     SEGGER_RTT_printf(0, "bridge_from_RTT_to_uart baud rate:%08x, rx:%d, tx:%d\n", baud_rate, rx_pin_no, tx_pin_no);
     comm_params.baud_rate = baud_rate;
@@ -1081,8 +1081,8 @@ static void cfg_board_sigfox_bridge_from_uart(uint32_t baud_rate, uint32_t rx_pi
     bool bridge_from_uart_to_uart_flag_old;
     app_uart_comm_params_t comm_params =
     {
-        PIN_DEF_TWIS_BOARD_CTRL_SCL, //RX_PIN_NUMBER,
-        PIN_DEF_TWIS_BOARD_CTRL_SDA,  //TX_PIN_NUMBER,
+        PIN_DEF_DTM_RX, //RX_PIN_NUMBER,
+        PIN_DEF_DTM_TX,  //TX_PIN_NUMBER,
         UART_PIN_DISCONNECTED,  //RTS_PIN_NUMBER, //
         UART_PIN_DISCONNECTED,  //CTS_PIN_NUMBER, //
         APP_UART_FLOW_CONTROL_DISABLED,
@@ -1496,7 +1496,7 @@ static void cfg_board_check_bootmode(void)
 #ifdef CDEV_WIFI_MODULE
                 cWifi_enter_rftest_mode();
 #endif
-                cfg_board_bridge_from_RTT_to_uart(UART_BAUDRATE_BAUDRATE_Baud115200, PIN_DEF_TWIS_BOARD_CTRL_SCL, PIN_DEF_TWIS_BOARD_CTRL_SDA);
+                cfg_board_bridge_from_RTT_to_uart(UART_BAUDRATE_BAUDRATE_Baud115200, PIN_DEF_DTM_RX, PIN_DEF_DTM_TX);
                 break;
 
             case 6:
@@ -1533,8 +1533,8 @@ static void cfg_board_check_bootmode(void)
                 nrf_delay_ms(10);
                 nrf_gpio_pin_write(PIN_DEF_SIGFOX_RESET, 1);
                 nrf_delay_ms(1000);
-                
-                cfg_board_sigfox_bridge_from_uart(UART_BAUDRATE_BAUDRATE_Baud9600, PIN_DEF_TWIS_BOARD_CTRL_SCL, PIN_DEF_TWIS_BOARD_CTRL_SDA);
+
+                cfg_board_sigfox_bridge_from_uart(UART_BAUDRATE_BAUDRATE_Baud9600, PIN_DEF_DTM_RX, PIN_DEF_DTM_TX);
                 break;
 
             case 8:  //WIFI AP(SFMTEST0000) and BLE BEACON(SFMTEST0000)

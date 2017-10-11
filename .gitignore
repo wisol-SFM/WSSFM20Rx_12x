@@ -102,3 +102,4 @@ development/sigfox_cfg2/source_simplework_example/pca10040/s132/armgcc/_build/
 development/sigfox_cfg2/source_simplework_example/_build_make/
 development/sigfox_cfg2/source_simplework_example/pca10040/s132/arm5_no_packs/*.uvguix.*
 development/sigfox_cfg2/source_simplework_example/pca10040/s132/arm5_no_packs/EventRecorderStub.scvd
+development/sigfox_cfg2/tools/RTTLogger/lastlog.log

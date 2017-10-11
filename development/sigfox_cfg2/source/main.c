@@ -132,6 +132,7 @@ extern int tmp102a, tmp102b;
 #endif
 
 static bool m_softdevice_init_flag;
+static bool m_hitrun_test_flag = false;
 
 bool ble_connect_on = false;
 extern void cfg_examples_check_enter(void);
@@ -195,6 +196,10 @@ bool m_module_parameter_fs_init_flag = false;
 int m_module_ready_wait_timeout_tick = 0;
 
 volatile bool main_wakeup_interrupt;
+
+volatile bool main_wkup_push_detected;
+volatile bool main_magnet_detected;
+volatile bool main_ACC_ISR_detected;
 
 volatile bool mnfc_tag_on = false;
 volatile bool mnfc_init_flag = false;
@@ -649,57 +654,6 @@ static void nus_timer_stop()
     APP_ERROR_CHECK(err_code);
 }
 #endif
-
-#if 0 //disable charging status (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI)
-APP_TIMER_DEF(m_charging_indicator_timer_id);
-static void charging_indicator_timeout_handler(void * p_context)
-{
-    static char led_on_counter = 0;
-
-    if(main_schedule_state_is_idle())
-    {
-        if(!cfg_get_ble_led_status())
-        {
-            if(nrf_gpio_pin_read(PIN_DEF_CHARGING_SIGNAL))
-            {
-//                cPrintLog(CDBG_COMMON_LOG, "====not chg\n");
-                nrf_gpio_pin_write(PIN_DEF_BLE_LED_EN, 0);
-                led_on_counter = 0;
-            }
-            else
-            {
-                if(++led_on_counter >= 4)
-                {
-//                    cPrintLog(CDBG_COMMON_LOG, "====led on\n");
-                    nrf_gpio_pin_write(PIN_DEF_BLE_LED_EN, 1);
-                    led_on_counter = 0;
-                }
-                else
-                {
-
-//                    cPrintLog(CDBG_COMMON_LOG, "====led off\n");
-                    nrf_gpio_pin_write(PIN_DEF_BLE_LED_EN, 0);
-                }
-            }
-        }
-    }
-}
-
-static void charging_indicator_init(void)
-{
-    uint32_t      err_code;
-
-    nrf_gpio_cfg_input(PIN_DEF_CHARGING_SIGNAL, NRF_GPIO_PIN_PULLUP);
-    err_code = app_timer_create(&m_charging_indicator_timer_id, APP_TIMER_MODE_REPEATED, charging_indicator_timeout_handler);
-    APP_ERROR_CHECK(err_code);
-    
-    err_code = app_timer_start(m_charging_indicator_timer_id, APP_TIMER_TICKS((500), APP_TIMER_PRESCALER), NULL);
-    APP_ERROR_CHECK(err_code);
-}
-#else
-#define charging_indicator_init()
-#endif
-
 
 /**@brief callback function for ble event in NUS.
  *
@@ -1450,6 +1404,49 @@ static void get_ble_mac_address()
     m_module_peripheral_ID.ble_MAC[5] = addr.addr[0];
 
 }
+
+
+#define SCAN_INTERVAL           0x00A0                                  /**< Determines scan interval in units of 0.625 millisecond. */
+#define SCAN_WINDOW             0x0050                                  /**< Determines scan window in units of 0.625 millisecond. */
+#define SCAN_TIMEOUT            0x000A                                  /**< Timout when scanning. 0x0000 disables timeout. */
+typedef void (*ble_scan_recv_handler_t)(ble_gap_evt_adv_report_t * p_adv_report);
+
+static ble_gap_scan_params_t const m_ble_scan_params =
+{
+    .active   = 1,
+    .interval = SCAN_INTERVAL,
+    .window   = SCAN_WINDOW,
+    .timeout  = SCAN_TIMEOUT,
+
+    #if (NRF_SD_BLE_API_VERSION <= 2)
+        .selective   = 0,
+        .p_whitelist = NULL,
+    #endif
+    #if (NRF_SD_BLE_API_VERSION >= 3)
+        .use_whitelist = 0,
+    #endif
+};
+bool m_ble_scan_run_flag;
+ble_scan_recv_handler_t m_ble_scan_cb;
+
+/**@brief Function to start scanning. */
+void ble_scan_start(ble_scan_recv_handler_t recv_callback)
+{
+    ret_code_t ret;
+
+    ret = sd_ble_gap_scan_start(&m_ble_scan_params);
+    APP_ERROR_CHECK(ret);
+    m_ble_scan_cb = recv_callback;
+    m_ble_scan_run_flag = true;
+}
+/**@brief Function to start scanning. */
+void ble_scan_stop(void)
+{
+    (void)sd_ble_gap_scan_stop();
+    m_ble_scan_cb = NULL;
+    m_ble_scan_run_flag = false;
+}
+
 /**@brief Function for handling advertising events.
  *
  * @details This function will be called for advertising events which are passed to the application.
@@ -1558,6 +1555,23 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
             APP_ERROR_CHECK(err_code);
             break; // BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST
 #endif
+        case BLE_GAP_EVT_ADV_REPORT:
+            {
+                ble_gap_evt_t * p_gap_evt = &p_ble_evt->evt.gap_evt;
+                ble_gap_evt_adv_report_t * p_adv_report = &p_gap_evt->params.adv_report;
+                if(m_ble_scan_cb)m_ble_scan_cb(p_adv_report);
+            }
+            break;
+
+        case BLE_GAP_EVT_TIMEOUT:
+            {
+                ble_gap_evt_t * p_gap_evt = &p_ble_evt->evt.gap_evt;
+                if (p_gap_evt->params.timeout.src == BLE_GAP_TIMEOUT_SRC_SCAN)
+                {
+                    m_ble_scan_run_flag = false;
+                }
+            }
+            break;
 
         default:
             // No implementation needed.
@@ -2241,26 +2255,21 @@ bool main_schedule_state_is_idle(void)
 
 void main_wkup_det_callback(void)
 {
+    main_wkup_push_detected = true;
+    cTBC_event_noti("WKUP_KEY");
     if(main_schedule_state_is_idle())
     {
-        cTBC_write_state_noti("WKUP_DET");
         main_wakeup_interrupt = true;
     }
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_EVB)
-    else if(cTBC_bypass_mode_is_setting())
-    {
-    }
-#endif
 }
 
 void main_magnet_attach_callback(void)
 {
+    main_magnet_detected = true;
+    cTBC_event_noti("MAGNET_ATT");
     if(main_schedule_state_is_idle())
     {
         main_wakeup_interrupt = true;
-    }
-    else if(cTBC_bypass_mode_is_setting())
-    {
     }
 }
 
@@ -2978,9 +2987,16 @@ void bma250_int_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
     sprintf(display,"g-sensor shaking\n");
     len = strlen(display);
     if(!mnus_acc_report)
-        main_wakeup_interrupt = true;
+    {
+        if(main_schedule_state_is_idle())
+        {
+            main_wakeup_interrupt = true;
+        }
+    }
     cPrintLog(CDBG_FCTRL_INFO,"%s", display);
     cTBC_put_bypass_data((uint8_t *)display,len);
+    main_ACC_ISR_detected = true;
+    cTBC_event_noti("ACC_ISR");
 #ifdef CDEV_NUS_MODULE
     m_nus_service_parameter.accellometer_event = '1';
 #endif
@@ -3018,6 +3034,7 @@ static void nfc_callback(void * p_context, nfc_t2t_event_t event, const uint8_t 
     switch (event)
     {
         case NFC_T2T_EVENT_FIELD_ON:
+            cTBC_event_noti("NFC_TAG");
             mnfc_tag_on = true;
 //            LEDS_ON(BSP_LED_0_MASK);
             break;
@@ -3257,9 +3274,363 @@ void main_examples_prepare(void)
     APP_ERROR_CHECK(err_code);
 }
 
+static int user_cmd_cmd;
+static int user_cmd_param_size;
+static uint8_t user_cmd_param_buf[32];
+static int8_t user_cmd_hitrun_ble_rssi;
+
+static void user_cmd_hitrun_input_test(void)
+{
+    int int_val;
+    int tick_val;
+    uint8_t param_bin[16];
+    bool all_test_OK;
+
+    if(user_cmd_param_size == 2)
+    {
+        cfg_hexadecimal_2_bin((const char *)user_cmd_param_buf, user_cmd_param_size, param_bin);
+        int_val = param_bin[0];
+    }
+    else
+    {
+        int_val = 30;  //default val
+    }
+    m_hitrun_test_flag = true;
+    cPrintLog(CDBG_MAIN_LOG, "input test:%d %d\n", user_cmd_param_size, int_val);
+            
+    if(main_get_param_val(module_parameter_item_magnetic_gpio_enable))
+        main_magnet_detected = false;
+    else
+        main_magnet_detected = true;
+    if(main_get_param_val(module_parameter_item_wkup_gpio_enable)==1)
+        main_wkup_push_detected = false;
+    else
+        main_wkup_push_detected = true;
+    mnfc_tag_on = false;
+    if(!m_cfg_i2c_master_init_flag)cfg_i2c_master_init();
+    main_ACC_ISR_detected = false;
+
+    all_test_OK = false;
+    if(cfg_bma250_ISR_pin_test()==NRF_SUCCESS)
+    {
+        nrf_delay_ms(10);
+        cfg_bma250_sw_reset();
+        tick_val = 0;
+        while(++tick_val < (int_val * 100))
+        {
+            nrf_delay_ms(10);
+            if(
+                main_magnet_detected
+                && main_wkup_push_detected
+                && mnfc_tag_on
+                && main_ACC_ISR_detected
+            )
+            {
+                nrf_delay_ms(10);
+                all_test_OK = true;
+                break;
+            }
+        }
+    }
+    cTBC_usrcmd_msg_noti(user_cmd_cmd, all_test_OK, "InputTest");
+    m_cTBC_dbg_mode_run_func = NULL;
+}
+
+static void user_cmd_hitrun_sense_test(void)
+{
+    bool all_test_OK = true;
+    bool test_result;
+    uint8_t param_bin[16];
+    char noti_str_buf[16];
+    struct bma_accel_data acc_data;
+    memset(param_bin, 0, sizeof(param_bin));
+    if(user_cmd_param_size == 4)
+    {
+        cfg_hexadecimal_2_bin((const char *)user_cmd_param_buf, user_cmd_param_size, param_bin);
+    }
+    cPrintLog(CDBG_MAIN_LOG, "sense test:%d\n", user_cmd_param_size);
+    if(!m_cfg_i2c_master_init_flag)cfg_i2c_master_init();
+
+    //ACC Test
+    memset(&acc_data, 0, sizeof(acc_data));
+    if((cfg_bma250_sw_reset() == NRF_SUCCESS) && cfg_bma250_read_xyz(&acc_data) == true)
+    {
+        sprintf(noti_str_buf,"ACCTest%02x%02x%02x", (uint8_t)acc_data.x, (uint8_t)acc_data.y, (uint8_t)acc_data.z);
+        cTBC_usrcmd_msg_noti(user_cmd_cmd, true, noti_str_buf);
+    }
+    else
+    {
+        cTBC_usrcmd_msg_noti(user_cmd_cmd, false, "ACCErr");
+        all_test_OK = false;
+    }
+
+    //ADC Test
+#ifdef PIN_DEF_BATTERY_ADC_INPUT
+    {
+        adc_configure();
+        cfg_bas_timer_start();
+        nrf_delay_ms(1000);  //wait adc result check plz BATTERY_LEVEL_AVG_CNT and BATTERY_LEVEL_MEAS_INTERVAL
+        sprintf(noti_str_buf,"ADCTest%02x", avg_report_volts);
+        if(((param_bin[0] != 0) && (param_bin[1] != 0))
+            && ((avg_report_volts < param_bin[0]) || (param_bin[1] < avg_report_volts))
+        )
+        {
+            all_test_OK = false;
+            test_result = false;
+        }
+        else
+        {
+            test_result = true;
+        }
+        cTBC_usrcmd_msg_noti(user_cmd_cmd, test_result, noti_str_buf);
+    }
+#endif
+
+    //tmp sensor Test
+    {
+        extern uint32_t tmp102_config_set(void);
+        extern uint32_t tmp102_read_sensor_once(int *tmp102a, int *tmp102b);
+        int tmp_a, tmp_b;
+        if((tmp102_config_set()==NRF_SUCCESS)
+            && (tmp102_read_sensor_once(&tmp_a, &tmp_b)==NRF_SUCCESS)
+        )
+        {
+            test_result = true;
+            sprintf(noti_str_buf,"TMPTest%02x%02x", (uint8_t)tmp_a, (uint8_t)tmp_b);
+        }
+        else
+        {
+            all_test_OK = false;
+            test_result = false;
+            sprintf(noti_str_buf,"TMPTest");
+        }
+        cTBC_usrcmd_msg_noti(user_cmd_cmd, test_result, noti_str_buf);
+    }
+    cTBC_usrcmd_msg_noti(user_cmd_cmd, all_test_OK, "SenseTest");
+    m_cTBC_dbg_mode_run_func = NULL;
+}
+
+static void user_cmd_hitrun_ble_scan_handler(ble_gap_evt_adv_report_t * p_adv_report)
+{
+    uint8_t *p_d;
+
+    p_d = p_adv_report->data;
+    if(p_d[5]=='S' && p_d[6]=='F' && p_d[7]=='M' && p_d[8]=='T' && p_d[9]=='E' && p_d[10]=='S' && p_d[11]=='T')  //SFMTEST0000
+    {
+        if(user_cmd_hitrun_ble_rssi == 0 || user_cmd_hitrun_ble_rssi < p_adv_report->rssi)
+        {
+            user_cmd_hitrun_ble_rssi = p_adv_report->rssi;
+            cPrintLog(CDBG_MAIN_LOG, "ble test:%d\n", user_cmd_hitrun_ble_rssi);
+        }
+    }
+#if 0
+    cPrintLog(CDBG_MAIN_LOG,"Mac:%02x%02x%02x%02x%02x%02x\r\n",
+             p_adv_report->peer_addr.addr[0],
+             p_adv_report->peer_addr.addr[1],
+             p_adv_report->peer_addr.addr[2],
+             p_adv_report->peer_addr.addr[3],
+             p_adv_report->peer_addr.addr[4],
+             p_adv_report->peer_addr.addr[5]
+             );
+    cPrintLog(CDBG_MAIN_LOG,"Data %02x%02x%02x%02x%02x%02x%02x\r\n",p_d[5],p_d[6],p_d[7],p_d[8],p_d[9],p_d[10],p_d[11]);
+#endif
+}
+
+static void user_cmd_hitrun_led_test(void)
+{
+    bool all_test_OK = true;
+    bool test_result;
+    int8_t wifi_rssi = 0, ble_rssi = 0;
+    uint8_t gps_time = 0;
+    uint8_t param_bin[16];
+    char noti_str_buf[16];
+    int i;
+
+    advertising_start(false, false);
+    memset(param_bin, 0, sizeof(param_bin));
+    if(user_cmd_param_size == 6)
+    {
+        cfg_hexadecimal_2_bin((const char *)user_cmd_param_buf, user_cmd_param_size, param_bin);
+        wifi_rssi = (int8_t)param_bin[0];
+        ble_rssi = (int8_t)param_bin[1];
+        gps_time = param_bin[2];
+        if(wifi_rssi || ble_rssi || gps_time)
+        {
+            cPrintLog(CDBG_MAIN_LOG, "Rf test enable WIFI:%d BLE:%d GPS:%d\n", wifi_rssi, ble_rssi, gps_time);
+        }
+    }
+    cPrintLog(CDBG_MAIN_LOG, "Led test:%d\n", user_cmd_param_size);
+
+#ifdef CDEV_GPS_MODULE
+    cGps_power_control(true, true);
+#endif
+
+    //led test 1
+    cfg_ble_led_control(true);
+    nrf_delay_ms(1000);
+
+    //led test 2
+#ifdef CDEV_WIFI_MODULE
+    //disable wifi log
+    CDBG_mask_clear(CDBG_NUM2MASK(CDBG_WIFI_INFO));
+    CDBG_mask_clear(CDBG_NUM2MASK(CDBG_WIFI_ERR));
+
+    cWifi_set_retry_time(1);
+    
+    if(cWifi_ap_get_available_first_BSSID("SFMTEST") != CWIFI_Result_OK)
+    {
+        cPrintLog(CDBG_MAIN_LOG, "WIFI scan Error!\n");
+        all_test_OK = false;
+    }
+    if(all_test_OK)
+    {       
+        uint32_t wifi_get_cnt;
+        int32_t *rssi;
+        cfg_ble_led_control(false);
+        if(cfg_is_3colorled_contorl())
+        {
+            nrf_delay_ms(500);
+            cfg_wkup_output_control(true);
+        }
+
+
+        
+        while(!(!cWifi_is_scan_state() && !cWifi_bus_busy_check()));  //wait scan
+        nrf_delay_ms(10);
+        if(cfg_is_3colorled_contorl())cfg_wkup_output_control(false);
+        
+        if(wifi_rssi)
+        {
+            if((cWifi_get_scan_result(&wifi_get_cnt, NULL, &rssi, NULL) == CWIFI_Result_OK)
+                && (wifi_get_cnt > 0)
+                && (rssi[0] > wifi_rssi)
+            )
+            {
+                test_result = true;
+                sprintf(noti_str_buf,"WIFITest%d", (int)rssi[0]);
+
+            }
+            else
+            {
+                test_result = false;
+                all_test_OK = false;
+                sprintf(noti_str_buf,"WIFITest");
+                cPrintLog(CDBG_MAIN_LOG, "WIFI rssi Error!\n");
+            }
+            cTBC_usrcmd_msg_noti(user_cmd_cmd, test_result, noti_str_buf);
+        }
+    }
+#else
+    cfg_ble_led_control(false);
+    if(cfg_is_3colorled_contorl())cfg_wkup_output_control(true);
+    nrf_delay_ms(1000);
+#endif
+
+    //led test 3
+    if(all_test_OK)
+    {
+        //disable sigfox log
+        CDBG_mask_clear(CDBG_NUM2MASK(CDBG_SIGFOX_INFO));
+        CDBG_mask_clear(CDBG_NUM2MASK(CDBG_SIGFOX_ERR));
+        if((sigfox_bypass_req(NULL, NULL) == NRF_SUCCESS)
+#ifdef CDEV_WIFI_MODULE
+            && (cWifi_bypass_req(NULL, NULL) == CWIFI_Result_OK)
+#endif
+        )
+        {
+            nrf_delay_ms(1000);
+            sigfox_bypass_write_request("AT$CB=-1,1\r\n", 12);
+            nrf_delay_ms(1000);
+            sigfox_bypass_write_request("AT$CB=-1,0\r\n", 12);
+        }
+        else
+        {
+            all_test_OK = false;
+        }
+    }
+
+    //led test all
+    if(all_test_OK)
+    {
+        cfg_ble_led_control(true);
+#ifdef CDEV_WIFI_MODULE
+        cWifiState_bypass_write_request("AT+LEDON\r\n", 10);
+        nrf_delay_ms(500);
+        cWifi_bus_enable(false);
+#endif
+        sigfox_bypass_write_request("AT$CB=-1,1\r\n", 12);
+    }
+
+    if(all_test_OK && ble_rssi)
+    {
+        user_cmd_hitrun_ble_rssi = 0;
+        ble_scan_start(user_cmd_hitrun_ble_scan_handler);
+        nrf_delay_ms(1000);
+        for(i=0; i < 20; i++)
+        {
+            if(user_cmd_hitrun_ble_rssi)break;
+            nrf_delay_ms(100);
+        }
+        ble_scan_stop();
+
+        if(user_cmd_hitrun_ble_rssi && (user_cmd_hitrun_ble_rssi >= ble_rssi))
+        {
+            test_result = true;
+        }
+        else
+        {
+            cPrintLog(CDBG_MAIN_LOG, "BLE scan Error! %d, %d\n", ble_rssi, user_cmd_hitrun_ble_rssi);
+            test_result = false;
+            all_test_OK = false;
+        }
+        sprintf(noti_str_buf,"BLETest%d", user_cmd_hitrun_ble_rssi);
+        cTBC_usrcmd_msg_noti(user_cmd_cmd, test_result, noti_str_buf);
+            
+    }
+
+    if(all_test_OK && gps_time)
+    {
+#ifdef CDEV_GPS_MODULE
+        extern void set_CN0_check_type(int val);
+        uint32_t    gps_acquire_tracking_time_sec_old;
+        gps_acquire_tracking_time_sec_old = m_module_parameter.gps_acquire_tracking_time_sec;
+        m_module_parameter.gps_acquire_tracking_time_sec = gps_time;
+
+        //disable gps log
+        CDBG_mask_clear(CDBG_NUM2MASK(CDBG_GPS_INFO));
+        CDBG_mask_clear(CDBG_NUM2MASK(CDBG_GPS_ERR));
+
+        set_CN0_check_type(0);
+        while(cGps_status_available()!=CGPS_Result_OK)nrf_delay_ms(200);
+        cGps_nmea_acquire_request();
+        nrf_delay_ms(200);
+
+        while(1)
+        {
+            if(cGps_acquire_tracking_check()==CGPS_Result_OK)break;
+            if(!cGps_bus_busy_check())break;
+            nrf_delay_ms(100);
+        }
+        while(cGps_bus_busy_check());
+        m_module_parameter.gps_acquire_tracking_time_sec = gps_acquire_tracking_time_sec_old;
+        cGps_power_control(true, false);
+        test_result = (cGps_acquire_tracking_check()==CGPS_Result_OK);
+        if(!test_result)
+        {
+            cPrintLog(CDBG_MAIN_LOG, "GPS Error! %d, %d\n", cGps_acquire_tracking_check(), cGps_bus_busy_check());
+            all_test_OK = false;
+        }
+        sprintf(noti_str_buf,"GPSTest");
+        cTBC_usrcmd_msg_noti(user_cmd_cmd, test_result, noti_str_buf);
+#endif
+    }
+    cTBC_usrcmd_msg_noti(user_cmd_cmd, all_test_OK, "LedTest");
+    m_cTBC_dbg_mode_run_func = NULL;
+}
+
 void dbg_i2c_user_cmd_proc(int cmd, int param_size, const uint8_t *param)
 {
-    cPrintLog(CDBG_MAIN_LOG, "user cmd : %d, param size:%d\n", cmd, param_size);
+    cPrintLog(CDBG_MAIN_LOG, "user cmd : 0x%02x, param size:%d\n", cmd, param_size);
     switch(cmd /*CTBC_CMD_TYPE*/)
     {
         case 0x80:  //all led on for factory test  //CTBC_CMD_USER_START
@@ -3288,10 +3659,129 @@ void dbg_i2c_user_cmd_proc(int cmd, int param_size, const uint8_t *param)
             }
             break;
 
+        case 0x82:  //input test
+            if(!cTBC_bypass_mode_is_setting() ||  m_cTBC_dbg_mode_run_func)
+            {
+                cTBC_usrcmd_msg_noti(cmd, 0, "Busy");
+            }
+            else
+            {
+                user_cmd_cmd = cmd;
+                if(param_size < sizeof(user_cmd_param_buf)){user_cmd_param_size = param_size;}
+                else{user_cmd_param_size = sizeof(user_cmd_param_buf);}
+                if(user_cmd_param_size > 0)memcpy(user_cmd_param_buf, param, user_cmd_param_size);
+                m_cTBC_dbg_mode_run_func = user_cmd_hitrun_input_test;
+            }
+            break;
+
+        case 0x83:  //sensor_test
+            if(!cTBC_bypass_mode_is_setting() ||  m_cTBC_dbg_mode_run_func)
+            {
+                cTBC_usrcmd_msg_noti(cmd, 0, "Busy");
+            }
+            else
+            {
+                user_cmd_cmd = cmd;
+                if(param_size < sizeof(user_cmd_param_buf)){user_cmd_param_size = param_size;}
+                else{user_cmd_param_size = sizeof(user_cmd_param_buf);}
+                if(user_cmd_param_size > 0)memcpy(user_cmd_param_buf, param, user_cmd_param_size);
+                m_cTBC_dbg_mode_run_func = user_cmd_hitrun_sense_test;
+            }
+            break;
+
+        case 0x84:  //led_test (and rf test)
+            if(!cTBC_bypass_mode_is_setting() ||  m_cTBC_dbg_mode_run_func)
+            {
+                cTBC_usrcmd_msg_noti(cmd, 0, "Busy");
+            }
+            else
+            {
+                user_cmd_cmd = cmd;
+                if(param_size < sizeof(user_cmd_param_buf)){user_cmd_param_size = param_size;}
+                else{user_cmd_param_size = sizeof(user_cmd_param_buf);}
+                if(user_cmd_param_size > 0)memcpy(user_cmd_param_buf, param, user_cmd_param_size);
+                m_cTBC_dbg_mode_run_func = user_cmd_hitrun_led_test;
+            }
+            break;
+
         default:
             break;
     }
 }
+
+static void tbc_over_rtt_sec_tick_proc(void)
+{
+}
+
+#if 0  //sleep test code
+APP_TIMER_DEF(m_test_led_blink_timer_id);
+void main_test_for_sleep_timer_handler(void * p_context)
+{
+    static int timer_tick = 0;
+    (void)p_context;
+
+    if(++timer_tick % 10 == 0)
+    {
+        cfg_ble_led_control(true);
+    }
+    else
+    {
+        cfg_ble_led_control(false);
+    }
+}
+
+void main_test_for_sleep(void)
+{
+    cPrintLog(CDBG_MAIN_LOG, "Sleep Test Mode\n");
+    nrf_delay_ms(2000);
+    cPrintLog(CDBG_MAIN_LOG, "Prepare Sleep\n");
+
+    //sensor power down
+    if(!m_cfg_i2c_master_init_flag)
+        cfg_i2c_master_init();
+    nrf_delay_ms(1);
+    bma250_req_suppend_mode();
+    nrf_delay_ms(1);
+    tmp102_req_shutdown_mode();
+    nrf_delay_ms(1);
+    if(m_cfg_i2c_master_init_flag)
+        cfg_i2c_master_uninit();
+    nrf_delay_ms(1);
+
+    //prepare led blink
+    app_timer_create(&m_test_led_blink_timer_id, APP_TIMER_MODE_REPEATED, main_test_for_sleep_timer_handler);
+    
+    advertising_start(false, true);  //stop ble advertising
+    nfc_uninit();  //stop nfc
+
+#ifdef CDEV_GPS_MODULE  //stop gps backup battery
+    cGps_power_control(false, false);  //gps power off
+    nrf_delay_ms(1);
+
+    //gps backup battery unuse
+    nrf_gpio_cfg_output(PIN_DEF_2ND_POW_EN);
+    nrf_gpio_pin_write(PIN_DEF_2ND_POW_EN, 1);
+    nrf_delay_ms(10);
+    nrf_gpio_pin_write(PIN_DEF_GPS_RESET, 0);
+    nrf_delay_ms(1);
+    nrf_gpio_cfg_output(PIN_DEF_GPS_PWR_EN);
+    nrf_gpio_pin_write(PIN_DEF_GPS_PWR_EN, 1);
+    nrf_delay_ms(1);
+    nrf_gpio_pin_write(PIN_DEF_GPS_PWR_EN, 0);
+    nrf_gpio_pin_write(PIN_DEF_2ND_POW_EN, 0);
+
+    cfg_board_gpio_set_default_gps(); //gpio relese for gps
+#endif
+
+    cfg_board_gpio_set_default();  //release gpio
+    nrf_gpio_cfg_output(PIN_DEF_BLE_LED_EN);  //led gpio settup
+    app_timer_start(m_test_led_blink_timer_id, APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER), NULL);
+    
+    cPrintLog(CDBG_MAIN_LOG, "Start Sleep\n");
+    while(1)power_manage();
+    
+}
+#endif
 
 int main(void)
 {
@@ -3322,8 +3812,8 @@ int main(void)
 #ifdef CDEV_NUS_MODULE
     nus_data_init();
 #endif
-    cTBC_init(dbg_i2c_user_cmd_proc);
-    cTBC_OVER_RTT_init();  //FEATURE_CFG_RTT_MODULE_CONTROL
+    cTBC_init(dbg_i2c_user_cmd_proc, true);
+    cTBC_OVER_RTT_init(tbc_over_rtt_sec_tick_proc); //depend on cTBC_init() //FEATURE_CFG_RTT_MODULE_CONTROL
 
     get_ble_mac_address();
 
@@ -3402,7 +3892,6 @@ int main(void)
         else
             cfg_sigfox_downlink_on_off(false);
         mnfc_tag_on_CB = ihere_mini_current_schedule_start;
-        charging_indicator_init();
     }
     advertising_start(true, true);
 
@@ -3426,8 +3915,9 @@ int main(void)
 #endif
 
     cTBC_check_N_enter_bypassmode(200, main_bypass_enter_CB, main_bypass_exit_CB);
-
+    if(m_hitrun_test_flag)NVIC_SystemReset();
     // Enter main loop.
+//    main_test_for_sleep();  //sleep test
     main_timer_schedule_start();
 
     for (;; )
@@ -3458,6 +3948,21 @@ int main(void)
             }
             cfg_board_gpio_set_default_gps();
             main_prepare_power_down();
+#ifdef CDEV_GPS_MODULE  //stop gps backup battery
+            //gps backup battery unuse
+            nrf_gpio_cfg_output(PIN_DEF_2ND_POW_EN);
+            nrf_gpio_pin_write(PIN_DEF_2ND_POW_EN, 1);
+            nrf_delay_ms(10);
+            nrf_gpio_pin_write(PIN_DEF_GPS_RESET, 0);
+            nrf_delay_ms(1);
+            nrf_gpio_cfg_output(PIN_DEF_GPS_PWR_EN);
+            nrf_gpio_pin_write(PIN_DEF_GPS_PWR_EN, 1);
+            nrf_delay_ms(1);
+            nrf_gpio_pin_write(PIN_DEF_GPS_PWR_EN, 0);
+            nrf_gpio_pin_write(PIN_DEF_2ND_POW_EN, 0);
+            nrf_gpio_cfg_default(PIN_DEF_2ND_POW_EN);
+            cfg_board_gpio_set_default_gps(); //gpio relese for gps
+#endif
             sd_power_system_off();
             while(1);
         }

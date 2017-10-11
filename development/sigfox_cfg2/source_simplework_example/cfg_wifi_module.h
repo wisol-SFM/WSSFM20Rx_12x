@@ -246,6 +246,9 @@ int get_AP_scanResult(uint32_t *get_cnt, uint8_t **ssid /*CWIFI_SSID_SIZE*/, int
 //Able to upload and download data from network.  //not support
 //getter and setter functions compatible with WIFI standard.  //not support
 
+
+void cWifi_bus_enable(bool enable);  //Forcible control can cause wifi module problems.
+
 #ifdef __cplusplus
 }
 #endif

@@ -93,6 +93,8 @@ DEL /Q development\sigfox_cfg2\source_simplework_example\pca10040\s132\arm5_no_p
 DEL /Q development\sigfox_cfg2\source_simplework_example\pca10040\s132\arm5_no_packs\simplework_example_gcc.uvguix.*
 DEL /Q development\sigfox_cfg2\source_simplework_example\pca10040\s132\arm5_no_packs\EventRecorderStub.scvd
 
+DEL /Q development\sigfox_cfg2\tools\RTTLogger\lastlog.log
+
 RD /Q /S development\sigfox_cfg2\tools\decompress
 MKDIR development\sigfox_cfg2\tools\decompress
 ECHO keep > development\sigfox_cfg2\tools\decompress\.keep

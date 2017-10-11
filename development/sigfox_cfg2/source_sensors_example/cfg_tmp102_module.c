@@ -175,6 +175,26 @@ uint32_t tmp102_read_sensor()
     return error_code;
 }
 
+uint32_t tmp102_read_sensor_once(int *tmp102a, int *tmp102b)
+{
+    static uint32_t error_code = NRF_ERROR_NULL;
+    unsigned short tmp_dataU16;
+    uint32_t test_tmp;
+    
+    memset(m_rx_buf,0x00,sizeof(m_rx_buf));
+
+    error_code = tmp102_i2c_reg_read(TMP102_TEMP_REG,m_rx_buf, TMP102_LSB_MSB_READ_LENGTH);
+    if(error_code == NRF_SUCCESS)
+    {
+        tmp_dataU16 = ((m_rx_buf[0] << 4) | ((m_rx_buf[1] & 0xf0) >> 4));
+        test_tmp = (tmp_dataU16 * 625);
+        test_tmp = test_tmp / 100;
+        if(tmp102a)*tmp102a = (test_tmp / 100);
+        if(tmp102b)*tmp102b = (test_tmp % 100);
+    }
+    return error_code;
+}
+
 int tmp102_get_result(int *tmp102_int, int *tmp102_dec)
 {
     int result = 0;
