@@ -748,7 +748,7 @@ static void nus_data_handler(ble_nus_t * p_nus, uint8_t * p_data, uint16_t lengt
                 break;
 
             case 'A' :
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+#ifdef FEATURE_CFG_ACC_REPORT
                 mnus_acc_report = true;
                 bma250_set_state(IO_SETUP);
                 cfg_bma250_timers_stop();
@@ -3236,12 +3236,15 @@ void nfc_restart(void)
 {
     if(mnfc_init_flag)
     {
+        uint32_t len = sizeof(m_ndef_msg_buf);
         nfc_t2t_emulation_stop();
-        nfc_t2t_done();
         nfc_ndef_msg_clear(&NFC_NDEF_MSG(welcome_msg));
+        welcome_msg_encode(m_ndef_msg_buf, &len);
+        nfc_t2t_payload_set(m_ndef_msg_buf, len);
+        nfc_t2t_emulation_start();
     }
-    nfc_init();
 }
+
 
 static void main_schedule_timeout_handler_examples(void * p_context)
 {
@@ -3939,6 +3942,7 @@ int main(void)
         if(main_powerdown_request)
         {
             int i;
+            cPrintLog(CDBG_MAIN_LOG, "proc powerdown\n");
             main_powerdown_request = false;
             app_timer_stop_all();
             for(i=0;i<20;i++)
@@ -3948,6 +3952,7 @@ int main(void)
             }
             cfg_board_gpio_set_default_gps();
             main_prepare_power_down();
+            cPrintLog(CDBG_MAIN_LOG, "power off\n");
 #ifdef CDEV_GPS_MODULE  //stop gps backup battery
             //gps backup battery unuse
             nrf_gpio_cfg_output(PIN_DEF_2ND_POW_EN);
