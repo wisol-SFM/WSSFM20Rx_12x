@@ -100,9 +100,6 @@ funcion feature
 test feature
 *******************************************************/
 //#define SIGFOX_SNEK_TEST
-#ifdef CDEV_WIFI_MODULE
-//#define TEST_FEATURE_CDEV_WIFI_TEST_MODE  //wifi testmode for wifi hw test (start up to wifi bypass)  //depena on CDEV_WIFI_MODULE
-#endif
 //#define TEST_SIGFOX_CURRENT_CONSUMPTION  // Just current consumption test mode(All module mode)
 
 /******************************************************/

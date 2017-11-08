@@ -114,7 +114,7 @@ typedef enum
     module_parameter_item_scenario_mode                                 =  8,  //MAIN_SCENARIO_MODE_DEFAULT                      0 ~ 1
     module_parameter_item_magnetic_gpio_enable                          =  9,  //MAIN_MAGNETIC_GPIO_ENABLE_DEFAULT               0 ~ 1
     module_parameter_item_wkup_gpio_enable                              = 10,  //MAIN_WKUP_GPIO_ENABLE_DEFAULT                   0 ~ 2
-    module_parameter_item_wifi_testmode_enable                          = 11,  //MAIN_WIFI_TESTMODE_ENABLE_DEFAULT               0 ~ 1
+    module_parameter_item_wifi_testmode_enable                          = 11,  //MAIN_WIFI_TESTMODE_ENABLE_DEFAULT               0 ~ 1  //use to disable_battery_power_down
     module_parameter_item_snek_testmode_enable                          = 12,  //MAIN_SIGFOX_SNEK_TESTMODE_ENABLE_DEFAULT        0 ~ 1
     module_parameter_item_gps_cn0_current_savetime_enable               = 13,  //CGPS_CN0_CURRENT_SAVETIME_ENABLE                0 ~ 1
     module_parameter_item_max
@@ -148,7 +148,7 @@ typedef struct
     uint16_t /*MODULE_DEFAULT_SCENARIO_TYPE*/ scenario_mode;    //module_parameter_item_scenario_mode  //MODULE_DEFAULT_SCENARIO_TYPE
     bool        magnetic_gpio_enable;                           //module_parameter_item_magnetic_gpio_enable
     char        wkup_gpio_enable;                               //module_parameter_item_wkup_gpio_enable  //MAIN_WKUP_GPIO_ENABLE_DEFAULT
-    bool        wifi_testmode_enable;                           //module_parameter_item_wifi_testmode_enable
+    bool        wifi_testmode_enable;                           //module_parameter_item_wifi_testmode_enable  //use to disable_battery_power_down
     bool        sigfox_snek_testmode_enable;                    //module_parameter_item_snek_testmode_enable
     bool        cgps_cn0_current_savetime_enable;               //module_parameter_item_gps_cn0_current_savetime_enable
 

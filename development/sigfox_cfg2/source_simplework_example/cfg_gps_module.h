@@ -37,7 +37,7 @@ extern "C" {
 #define CGPS_Result_NotSupported    (-6)
 
 #define CGPS_SPI_BUF_SIZE 192
-#define CGPS_NMEA_BUF_SIZE 72
+#define CGPS_NMEA_BUF_SIZE 96  /* GPRMC:68 GPGSV:60,68,70 GPGGA:75 */
 
 #define CGPS_NMEA_CNT 2
 #define CGPS_NMEA_SIZE 12

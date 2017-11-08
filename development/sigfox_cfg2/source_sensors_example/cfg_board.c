@@ -691,6 +691,7 @@ static void cfg_board_testmode_wifi_always_on(void)
 {
     SEGGER_RTT_printf(0, "====enter wifi always on mode====\n");
 #ifdef CDEV_WIFI_MODULE
+    cfg_board_gpio_set_default();
     cWifi_power_control(true);
 #endif
     cfg_board_RTT_reset_N_factory_reset_proc();

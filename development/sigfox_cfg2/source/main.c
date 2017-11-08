@@ -187,6 +187,7 @@ APP_TIMER_DEF(m_main_timer_id);
 extern uint8_t frame_data[(SIGFOX_SEND_PAYLOAD_SIZE*2)+1];  //for hexadecimal
 
 module_mode_t m_module_mode;
+module_mode_t m_module_mode_old;
 bool m_init_excute;
 module_parameter_t m_module_parameter;
 bool m_module_parameter_update_req;
@@ -929,9 +930,9 @@ void main_set_param_val(module_parameter_item_e item, unsigned int val)
             m_module_parameter.wkup_gpio_enable = (char)val;
             break;
 
-        case module_parameter_item_wifi_testmode_enable:  //not used
-            cPrintLog(CDBG_MAIN_LOG, "not used:%d to %d\n",  m_module_parameter.wifi_testmode_enable, val);
-            m_module_parameter.wifi_testmode_enable = (bool)val;  //not used
+        case module_parameter_item_wifi_testmode_enable:  //use to disable_battery_power_down
+            cPrintLog(CDBG_MAIN_LOG, "use to disable battery power down:%d to %d\n",  m_module_parameter.wifi_testmode_enable, val);
+            m_module_parameter.wifi_testmode_enable = (bool)val;  //use to disable_battery_power_down
             break;
 
         case module_parameter_item_snek_testmode_enable:
@@ -964,14 +965,14 @@ static void module_parameter_default_init(void)
     m_module_parameter.beacon_interval = BEACON_INTERVAL_TIME_DEFAULT;
     m_module_parameter.wifi_scan_retry_time_sec =  CWIFI_SEC_RETRY_TIMEOUT_SEC_DEFAULT;
     m_module_parameter.start_wait_time_for_board_control_attach_sec = START_WAIT_TIME_FOR_BOARD_CONTROL_ATTACH_SEC;
-    m_module_parameter.start_wait_time_for_ctrl_mode_change_sec = START_WAIT_TIME_FOR_CTRL_MODE_CHANGE_SEC;
+    m_module_parameter.start_wait_time_for_ctrl_mode_change_sec = START_WAIT_TIME_FOR_CTRL_MODE_CHANGE_SEC;  //use to sigfox dl enable
     m_module_parameter.gps_acquire_tracking_time_sec = CGPS_ACQUIRE_TRACKING_TIME_SEC;
     m_module_parameter.boot_nfc_unlock = MAIN_BOOT_NFC_UNLOCK_DEFAULT;
     m_module_parameter.fota_enable = MAIN_FOTA_ENABLE_DEFAULT;
     m_module_parameter.scenario_mode = MAIN_SCENARIO_MODE_DEFAULT;
     m_module_parameter.magnetic_gpio_enable = MAIN_MAGNETIC_GPIO_ENABLE_DEFAULT;  //MAIN_MAGNETIC_GPIO_ENABLE_DEFAULT
     m_module_parameter.wkup_gpio_enable = MAIN_WKUP_GPIO_ENABLE_DEFAULT;  //MAIN_WKUP_GPIO_ENABLE_DEFAULT
-    m_module_parameter.wifi_testmode_enable = MAIN_WIFI_TESTMODE_ENABLE_DEFAULT;
+    m_module_parameter.wifi_testmode_enable = 0; //MAIN_WIFI_TESTMODE_ENABLE_DEFAULT;  //use to disable_battery_power_down
     m_module_parameter.sigfox_snek_testmode_enable = MAIN_SIGFOX_SNEK_TESTMODE_ENABLE_DEFAULT;
     m_module_parameter.cgps_cn0_current_savetime_enable = CGPS_CN0_CURRENT_SAVETIME_ENABLE;
 
@@ -1138,9 +1139,8 @@ static bool module_parameter_adjust_value(void)
     {
         adjusted = true;
         old_val = m_module_parameter.wifi_testmode_enable;
-        if((int)(m_module_parameter.wifi_testmode_enable) < 0)m_module_parameter.wifi_testmode_enable = 0;
-        else m_module_parameter.wifi_testmode_enable = 1;
-        cPrintLog(CDBG_MAIN_LOG, "adjust wifi_testmode_enable %d to %d\n", old_val, m_module_parameter.wifi_testmode_enable);
+        m_module_parameter.wifi_testmode_enable = 0;  //use to disable_battery_power_down
+        cPrintLog(CDBG_MAIN_LOG, "adjust disable_battery_power_down %d to %d\n", old_val, m_module_parameter.wifi_testmode_enable);
     }
 
     if(((int)(m_module_parameter.sigfox_snek_testmode_enable) < 0) || ((int)(m_module_parameter.sigfox_snek_testmode_enable) > 1))
@@ -2289,6 +2289,11 @@ static void main_schedule_timeout_handler_asset_tracker(void * p_context)
     static int work_mode = GPS_START;  //module_work_e
 #endif
     static bool old_ble_led = false;
+    if(m_module_mode != m_module_mode_old)
+    {
+        cPrintLog(CDBG_FCTRL_INFO, "main state changed %d to %d\n", m_module_mode_old, m_module_mode);
+        m_module_mode_old = m_module_mode;
+    }
 
     main_schedule_tick++;
     switch(m_module_mode)
@@ -2336,12 +2341,13 @@ static void main_schedule_timeout_handler_asset_tracker(void * p_context)
                     avg_batt_lvl_in_milli_volts = get_avg_batt_lvl_in_milli_volts();
                     if(3000 <= avg_batt_lvl_in_milli_volts && 5200 >= avg_batt_lvl_in_milli_volts)
                     {
-                        if(!cTBC_check_host_connected() && avg_batt_lvl_in_milli_volts < 3550)  //low battery
+                        if(m_module_parameter.wifi_testmode_enable /*disable_battery_power_down*/)cPrintLog(CDBG_MAIN_LOG, "Battery Pwr Off Disabled\n");
+                        if(!m_module_parameter.wifi_testmode_enable /*disable_battery_power_down*/ && !cTBC_check_host_connected() && avg_batt_lvl_in_milli_volts < 3500)  //low battery
                         {
                             if(log_once_flag)cPrintLog(CDBG_MAIN_LOG, "Battery Low:%d\n", avg_batt_lvl_in_milli_volts);
                             main_powerdown_request = true;
                         }
-                        else if(avg_batt_lvl_in_milli_volts < 3650)
+                        else if(!m_module_parameter.wifi_testmode_enable /*disable_battery_power_down*/ && avg_batt_lvl_in_milli_volts < 3600)  //battery warning
                         {
                             if(log_once_flag)cPrintLog(CDBG_MAIN_LOG, "Battery Warning:%d\n", avg_batt_lvl_in_milli_volts);
                             if(m_module_ready_wait_timeout_tick > (APP_MAIN_SCHEDULE_HZ * 4))  //wait more 2 sec for warning noti
@@ -3527,6 +3533,7 @@ static void user_cmd_hitrun_led_test(void)
     cfg_ble_led_control(false);
     if(cfg_is_3colorled_contorl())cfg_wkup_output_control(true);
     nrf_delay_ms(1000);
+    if(cfg_is_3colorled_contorl())cfg_wkup_output_control(false);
 #endif
 
     //led test 3
@@ -3562,6 +3569,7 @@ static void user_cmd_hitrun_led_test(void)
         cWifi_bus_enable(false);
 #endif
         sigfox_bypass_write_request("AT$CB=-1,1\r\n", 12);
+        if(cfg_is_3colorled_contorl())cfg_wkup_output_control(true);
     }
 
     if(all_test_OK && ble_rssi)
