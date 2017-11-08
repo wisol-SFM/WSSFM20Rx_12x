@@ -73,7 +73,8 @@ define CDEV_BOARD_TYPE                        CDEV_BOARD_EVB  //REPLACE_DEVICE_D
 
 Wisol SDK includes Nordic tools and gcc-arm to compile and flash the code for Windows. Linux/macOS version has been added in *tools/sfxtools_embedded*.
 
-![Alt](development/sigfox_cfg2/documentation/pics/WisolNordicEVK.jpg "Wisol EVK and Nordic EVK")
+![Alt](development/sigfox_cfg2/documentation/pics/WisolNordicEVK.jpg "Wisol EVK and Nordic DK")
+![Alt](development/sigfox_cfg2/documentation/pics/how_to_fix_SWD_path_of_DK_board.jpg "modify DK for SWD")
 ![Alt](development/sigfox_cfg2/documentation/pics/ihere_connect.jpg "Wisol iHere and jtag device")
 
 Go into the example directory to be flashed, ie source_sigfox_example:
