@@ -8,7 +8,7 @@ __SFM20Rx__ is a multi-mode module including __Sigfox__ connectivity, __WiFi__, 
 The main core of the module is based on the Nordic nRF52832 SOC. Wisol has developed an application layer on top of Nordic SDK to interact with all connectivity blocks and sensors. BLE can be directly programmed using Nordic SDK directives as it is embedded into the nRF52 chip.
 
 # Keil development environment (windows)
-##@ [Development_Environment_Setup_Guide](development/sigfox_cfg2/documentation/manual/[WISOL]Development_Environment_Setup_Guide_V202.pdf)
+[Development_Environment_Setup_Guide](development/sigfox_cfg2/documentation/manual/[WISOL]Development_Environment_Setup_Guide_V202.pdf)
 
 # GCC development environment (linux or mac)
 ### Prerequisites
@@ -29,6 +29,7 @@ pip install nrfutil
 For more information, see the link https://github.com/NordicSemiconductor/pc-nrfutil
 
 ### Architecture of the SDK
+[AppNote_SFM20R_Architecture_of_SW](development/sigfox_cfg2/documentation/manual/[WISOL]AppNote_SFM20R_Architecture_of_SW_V204_1122.pdf)
 
 The Wisol SDK is based on top of Nordic nRF5x SDK (based on v12.1 as of today). You will find the regular Nordic directories:
 - components
@@ -60,6 +61,7 @@ SFM60R : MODEL_NAME to "SFM60R" and MODULE_TYPE to CDEV_MODULE_SFM60R
 CDEV_BOARD_EVB                         (1)
 CDEV_BOARD_IHERE                       (2)
 CDEV_BOARD_IHEREV2                     (4)
+CDEV_BOARD_M3                          (5)
 ```
 ##### eg. (Do not change comments and spaces)
 ```
@@ -72,10 +74,12 @@ define CDEV_BOARD_TYPE                        CDEV_BOARD_EVB  //REPLACE_DEVICE_D
 ### Flashing the module
 
 Wisol SDK includes Nordic tools and gcc-arm to compile and flash the code for Windows. Linux/macOS version has been added in *tools/sfxtools_embedded*.
-
+- How to use J-LINK with DK board (EVB)
 ![Alt](development/sigfox_cfg2/documentation/pics/WisolNordicEVK.jpg "Wisol EVK and Nordic DK")
-![Alt](development/sigfox_cfg2/documentation/pics/how_to_fix_SWD_path_of_DK_board.jpg "modify DK for SWD")
+- How to use J-LINK (iHere)
 ![Alt](development/sigfox_cfg2/documentation/pics/ihere_connect.jpg "Wisol iHere and jtag device")
+- How to fix SWD path of DK board (The SWD of the DK board is fixed)
+![Alt](development/sigfox_cfg2/documentation/pics/how_to_fix_SWD_path_of_DK_board.jpg "modify DK for SWD")
 
 Go into the example directory to be flashed, ie source_sigfox_example:
 

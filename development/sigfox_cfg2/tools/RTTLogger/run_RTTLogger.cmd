@@ -1,0 +1,1 @@
+JLinkRTTLogger.exe < RTTLoggerCfg.cfg

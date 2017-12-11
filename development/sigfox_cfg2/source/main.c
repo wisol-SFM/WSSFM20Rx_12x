@@ -84,6 +84,7 @@
 #define MANUFACTURER_NAME               "WISOL_Corp"                       /**< Manufacturer. Will be passed to Device Information Service. */
 #define ASSETTRACKER_NAME               "ihere"
 #define MINI_ASSETTRACKER_NAME          "ihere mini"
+#define M3_ASSETTRACKER_NAME            "M3"
 #define NUS_SERVICE_UUID_TYPE           BLE_UUID_TYPE_VENDOR_BEGIN                  /**< UUID type for the Nordic UART Service (vendor specific). */
 
 #define APP_ADV_INTERVAL                300                                         /**< The advertising interval (in units of 0.625 ms. This value corresponds to 187.5 ms). */
@@ -167,7 +168,7 @@ static void ble_dfu_evt_handler(ble_dfu_t * p_dfu, ble_dfu_evt_t * p_evt)
 }
 
 
-#define BATTERY_LEVEL_MEAS_INTERVAL      APP_TIMER_TICKS(200, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
+#define BATTERY_LEVEL_MEAS_INTERVAL      APP_TIMER_TICKS(50, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
 #define USE_UICR_FOR_MAJ_MIN_VALUES 1
 #define BATTERY_LEVEL_AVG_CNT 3
 
@@ -197,7 +198,10 @@ bool m_module_parameter_fs_init_flag = false;
 int m_module_ready_wait_timeout_tick = 0;
 
 volatile bool main_wakeup_interrupt;
-
+volatile int main_wakeup_reason = main_wakeup_reason_normal;  //main_wakeup_reason_type
+#ifdef PIN_DEF_BUTTON  //CDEV_BOARD_M3
+volatile bool main_button_detected;
+#endif
 volatile bool main_wkup_push_detected;
 volatile bool main_magnet_detected;
 volatile bool main_ACC_ISR_detected;
@@ -206,6 +210,10 @@ volatile bool mnfc_tag_on = false;
 volatile bool mnfc_init_flag = false;
 main_nfg_tag_on_callback mnfc_tag_on_CB = NULL;
 volatile bool main_powerdown_request = false;
+#ifdef PIN_DEF_GPS_BKUP_CTRL_WITH_PULLUP  //GPS_BKUP_CTRL
+int main_GPS_BKUP_time_out = 0;  //GPS_BKUP_CTRL
+#endif
+unsigned int main_Sec_tick = 0;
 
 #ifdef CDEV_NUS_MODULE
 nus_service_parameter_t m_nus_service_parameter;
@@ -259,6 +267,9 @@ APP_TIMER_DEF(m_battery_timer_id);                                              
 #elif  (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI)
 #define ADJUST_BATTERY_VALUE    50
 #define ADC_RESULT_IN_MILLI_VOLTS(ADC_VALUE) (((((ADC_VALUE) * ADC_REF_VOLTAGE_IN_MILLIVOLTS) / ADC_RES_10BIT) * ADC_PRE_SCALING_COMPENSATION) * 5/3)
+#elif  (CDEV_BOARD_TYPE == CDEV_BOARD_M3) 
+#define ADJUST_BATTERY_VALUE    50
+#define ADC_RESULT_IN_MILLI_VOLTS(ADC_VALUE) (((((ADC_VALUE) * ADC_REF_VOLTAGE_IN_MILLIVOLTS) / ADC_RES_10BIT) * ADC_PRE_SCALING_COMPENSATION) * 168/100)
 #else
 #define ADJUST_BATTERY_VALUE    0 //1344 //270                                          /**< Typical forward voltage drop of the diode (Part no: SD103ATW-7-F) that is connected in series with the voltage supply. This is the voltage drop when the forward current is 1mA. Source: Data sheet of 'SURFACE MOUNT SCHOTTKY BARRIER DIODE ARRAY' available at www.diodes.com. */
 #define ADC_RESULT_IN_MILLI_VOLTS(ADC_VALUE) (((((ADC_VALUE) * ADC_REF_VOLTAGE_IN_MILLIVOLTS) / ADC_RES_10BIT) * ADC_PRE_SCALING_COMPENSATION) * 5/3)
@@ -728,6 +739,7 @@ static void nus_data_handler(ble_nus_t * p_nus, uint8_t * p_data, uint16_t lengt
             case 'T':
                 nus_send_data('I');
                 main_wakeup_interrupt = true;
+                main_wakeup_reason = main_wakeup_reason_ble_event;
 //                err_code = ble_nus_string_send(&m_nus, (uint8_t*)respose, 2);
                 break;
 
@@ -1945,7 +1957,7 @@ static void gap_params_init(void)
     }
     else
     {
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2) 
         err_code = sd_ble_gap_device_name_set(&sec_mode,
                                               (const uint8_t *)ASSETTRACKER_NAME,
                                               strlen(ASSETTRACKER_NAME));
@@ -1953,6 +1965,14 @@ static void gap_params_init(void)
         err_code = sd_ble_gap_device_name_set(&sec_mode,
                                               (const uint8_t *)MINI_ASSETTRACKER_NAME,
                                               strlen(MINI_ASSETTRACKER_NAME));
+#elif (CDEV_BOARD_TYPE == CDEV_BOARD_M3)
+        {
+            char device_name[32];
+            sprintf(device_name, "%s_V%s", M3_ASSETTRACKER_NAME /*ASSETTRACKER_NAME*/, m_cfg_sw_ver);
+            err_code = sd_ble_gap_device_name_set(&sec_mode,
+                                                  (const uint8_t *)device_name,
+                                                  strlen(device_name));
+        }
 #else
         err_code = sd_ble_gap_device_name_set(&sec_mode,
                                               (const uint8_t *)DEVICE_NAME,
@@ -2257,8 +2277,9 @@ void main_wkup_det_callback(void)
 {
     main_wkup_push_detected = true;
     cTBC_event_noti("WKUP_KEY");
-    if(main_schedule_state_is_idle())
+    if(!main_wakeup_interrupt && main_schedule_state_is_idle())
     {
+        main_wakeup_reason = main_wakeup_reason_key_event;
         main_wakeup_interrupt = true;
     }
 }
@@ -2267,11 +2288,33 @@ void main_magnet_attach_callback(void)
 {
     main_magnet_detected = true;
     cTBC_event_noti("MAGNET_ATT");
-    if(main_schedule_state_is_idle())
+    if(!main_wakeup_interrupt && main_schedule_state_is_idle())
     {
+        main_wakeup_reason = main_wakeup_reason_magnetic_event;
         main_wakeup_interrupt = true;
     }
 }
+
+#ifdef PIN_DEF_BUTTON  //CDEV_BOARD_M3
+void main_button_short_press_callback(void)
+{
+    cPrintLog(CDBG_FCTRL_INFO, "pwr key short\n");
+    cTBC_event_noti("BUTTON_KEY");
+    main_button_detected = true;
+    if(!main_wakeup_interrupt && main_schedule_state_is_idle())
+    {
+        cPrintLog(CDBG_FCTRL_INFO, "Wakeup occurred\n");
+        main_wakeup_reason = main_wakeup_reason_key_event;
+        main_wakeup_interrupt = true;
+    }
+}
+
+void main_button_long_press_callback(void)
+{
+    cPrintLog(CDBG_FCTRL_INFO, "request power off\n");
+    main_powerdown_request = true;
+}
+#endif
 
 /**
  * @brief Callback function for handling main state  from main schedule timer.
@@ -2330,7 +2373,7 @@ static void main_schedule_timeout_handler_asset_tracker(void * p_context)
             }
             else
             {
-                if(m_module_ready_wait_timeout_tick >= (APP_MAIN_SCHEDULE_HZ * 2))  //wait 2 sec
+                if(m_module_ready_wait_timeout_tick > (APP_MAIN_SCHEDULE_HZ/2))  //wait 500ms
                 {
                     bool log_once_flag = false;
                     uint16_t avg_batt_lvl_in_milli_volts;
@@ -2412,6 +2455,7 @@ static void main_schedule_timeout_handler_asset_tracker(void * p_context)
             m_nus_service_parameter.magnet_event = '0';
             m_nus_service_parameter.accellometer_event = '0';
 #endif
+            main_wakeup_reason = main_wakeup_reason_normal;  //clear event reason
             main_timer_schedule_stop();
             main_timer_idle_start();
             main_set_module_state(IDLE);
@@ -2423,6 +2467,10 @@ static void main_schedule_timeout_handler_asset_tracker(void * p_context)
 
             if(work_mode == GPS_START)
             {
+#ifdef PIN_DEF_GPS_BKUP_CTRL_WITH_PULLUP  //GPS_BKUP_CTRL
+                cfg_board_GPS_BKUP_ctrl(true);  //GPS_BKUP_CTRL
+                main_GPS_BKUP_time_out = (2*60*60)/*COLD_START_TIME*/;  //GPS_BKUP_CTRL
+#endif
                 if(cfg_is_3colorled_contorl())
                 {
                     old_ble_led = cfg_ble_led_control(false);
@@ -2926,11 +2974,13 @@ static void main_prepare_power_down(void)
             nrf_gpio_cfg_sense_input(PIN_DEF_MAGNETIC_SIGNAL, NRF_GPIO_PIN_NOPULL, NRF_GPIO_PIN_SENSE_LOW);
             nrf_delay_ms(1);
         }
+        
         NRF_NFCT->TASKS_SENSE = 1;
         NRF_NFCT->INTENCLR = 
             (NFCT_INTENCLR_RXFRAMEEND_Clear << NFCT_INTENCLR_RXFRAMEEND_Pos) |
             (NFCT_INTENCLR_RXERROR_Clear    << NFCT_INTENCLR_RXERROR_Pos);
     }
+    
     nrf_delay_ms(1);
 }
 
@@ -2964,7 +3014,7 @@ static void main_deepsleep_control(void)
                 mnfc_tag_on = false;
                 cPrintLog(CDBG_FCTRL_INFO, "wakeup reason swreset:%d, gpio:%d, nfc:%d %d, jtag:%d, magnet:%d, wkup:%d\n", 
                               m_cfg_sw_reset_detected, m_cfg_GPIO_wake_up_detected, m_cfg_NFC_wake_up_detected, mnfc_tag_on, m_cfg_debug_interface_wake_up_detected, magnetdet, wkupdet);
-                break;
+                return;
             }
             if(cTBC_is_busy())
             {
@@ -2994,8 +3044,9 @@ void bma250_int_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
     len = strlen(display);
     if(!mnus_acc_report)
     {
-        if(main_schedule_state_is_idle())
+        if(!main_wakeup_interrupt && main_schedule_state_is_idle())
         {
+            main_wakeup_reason = main_wakeup_reason_acc_event;
             main_wakeup_interrupt = true;
         }
     }
@@ -3294,6 +3345,9 @@ static void user_cmd_hitrun_input_test(void)
     int tick_val;
     uint8_t param_bin[16];
     bool all_test_OK;
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+    bool check_INT_SENSOR = false;
+#endif
 
     if(user_cmd_param_size == 2)
     {
@@ -3316,6 +3370,11 @@ static void user_cmd_hitrun_input_test(void)
     else
         main_wkup_push_detected = true;
     mnfc_tag_on = false;
+    if(int_val > 128)  //disable NFC
+    {
+        mnfc_tag_on = true;
+        int_val -= 128;
+    }
     if(!m_cfg_i2c_master_init_flag)cfg_i2c_master_init();
     main_ACC_ISR_detected = false;
 
@@ -3328,8 +3387,22 @@ static void user_cmd_hitrun_input_test(void)
         while(++tick_val < (int_val * 100))
         {
             nrf_delay_ms(10);
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)  //for magnetic and key (Use the same GPIO)
+            if(!check_INT_SENSOR)
+            {
+                if(main_magnet_detected)
+                {
+                    main_magnet_detected = false;
+                    check_INT_SENSOR = true;
+                }
+            }
+#endif
             if(
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)  //for magnetic and key (Use the same GPIO)
+                (check_INT_SENSOR && main_magnet_detected)
+#else
                 main_magnet_detected
+#endif
                 && main_wkup_push_detected
                 && mnfc_tag_on
                 && main_ACC_ISR_detected
@@ -3639,12 +3712,88 @@ static void user_cmd_hitrun_led_test(void)
     m_cTBC_dbg_mode_run_func = NULL;
 }
 
+static void user_cmd_set_sigfox_power(void)
+{
+    uint8_t param_bin[16];
+    uint8_t sigfox_tx_pwr;
+    bool all_test_OK = false;
+
+    if(user_cmd_param_size == 2)
+    {
+        cfg_hexadecimal_2_bin((const char *)user_cmd_param_buf, user_cmd_param_size, param_bin);
+        sigfox_tx_pwr = param_bin[0];
+        cPrintLog(CDBG_MAIN_LOG, "Sigfox Tx Pwr:%d\n", sigfox_tx_pwr);
+        if(cfg_sigfox_set_powerlevel(sigfox_tx_pwr))
+        {
+            all_test_OK = true;
+        }
+    }
+    cTBC_usrcmd_msg_noti(user_cmd_cmd, all_test_OK, "SigfoxTxPwr");
+    m_cTBC_dbg_mode_run_func = NULL;
+}
+
+static void user_cmd_set_wifi_power(void)
+{
+    bool all_test_OK = false;
+    uint8_t param_bin[16];
+
+    if(user_cmd_param_size == 12)
+    {
+        cfg_hexadecimal_2_bin((const char *)user_cmd_param_buf, user_cmd_param_size, param_bin);
+        cPrintLog(CDBG_MAIN_LOG, "WIFI Tx Tables:%d,%d,%d,%d,%d,%d\n", param_bin[0], param_bin[1], param_bin[2], param_bin[3], param_bin[4], param_bin[5]);
+#ifdef CDEV_WIFI_MODULE
+        if(cWifi_bypass_req(NULL, NULL) == CWIFI_Result_OK)
+        {
+            char sendAtCmd[32];
+            int sendATCmdSize;
+            int timeout;
+
+            timeout = 5000;
+            while(!cWifiState_is_bypass_mode())
+            {
+                if(--timeout==0)break;  //wait bypassmode
+                nrf_delay_ms(1);
+            }
+
+            if(timeout > 0)
+            {
+/************/
+//AT Cmd Examples (Tx Power Table)
+/* AT+TXPREAD           // Default 524E4A444038                      */
+/* RNJD@8                                                            */
+/* OK                                                                */
+/* AT+TXPWRITE="445544553322"   // 445544553322                      */
+/* WRITTEN                                                           */
+/* OK                                                                */
+/* AT+TXPREAD                                                        */
+/* DUDU3"                                                            */
+/* OK                                                                */
+/* AT+TXPWRITE="524E4A444038"  // Default 524E4A444038 rewrite       */
+/* WRITTEN                                                           */
+/* OK                                                                */
+/* AT+TXPREAD                                                        */
+/* RNJD@8                                                            */
+/* OK                                                                */
+/*************/
+                sendATCmdSize = sprintf((char *)sendAtCmd, "AT+TXPWRITE=\"%02X%02X%02X%02X%02X%02X\"\r\n", param_bin[0], param_bin[1], param_bin[2], param_bin[3], param_bin[4], param_bin[5]);
+                cPrintLog(CDBG_MAIN_LOG, "send to WIFI :%s", sendAtCmd);
+                cWifiState_bypass_write_request(sendAtCmd, sendATCmdSize);
+                all_test_OK = true;
+                nrf_delay_ms(500);
+            }
+        }
+#endif
+    }
+    cTBC_usrcmd_msg_noti(user_cmd_cmd, all_test_OK, "WIFITxPwr");
+    m_cTBC_dbg_mode_run_func = NULL;
+}
+
 void dbg_i2c_user_cmd_proc(int cmd, int param_size, const uint8_t *param)
 {
     cPrintLog(CDBG_MAIN_LOG, "user cmd : 0x%02x, param size:%d\n", cmd, param_size);
     switch(cmd /*CTBC_CMD_TYPE*/)
     {
-        case 0x80:  //all led on for factory test  //CTBC_CMD_USER_START
+        case 0x80:  //led on //CTBC_CMD_USER_START
             cPrintLog(CDBG_MAIN_LOG, "led on\n");
             if(cfg_is_3colorled_contorl())
             {
@@ -3657,7 +3806,7 @@ void dbg_i2c_user_cmd_proc(int cmd, int param_size, const uint8_t *param)
             }
             break;
 
-        case 0x81:  //all led off for factory test
+        case 0x81:  //led off
             cPrintLog(CDBG_MAIN_LOG, "led off\n");
             if(cfg_is_3colorled_contorl())
             {
@@ -3715,6 +3864,36 @@ void dbg_i2c_user_cmd_proc(int cmd, int param_size, const uint8_t *param)
             }
             break;
 
+        case 0x85:  //Set Sigfox Tx Power
+            if(!cTBC_bypass_mode_is_setting() ||  m_cTBC_dbg_mode_run_func)
+            {
+                cTBC_usrcmd_msg_noti(cmd, 0, "Busy");
+            }
+            else
+            {
+                user_cmd_cmd = cmd;
+                if(param_size < sizeof(user_cmd_param_buf)){user_cmd_param_size = param_size;}
+                else{user_cmd_param_size = sizeof(user_cmd_param_buf);}
+                if(user_cmd_param_size > 0)memcpy(user_cmd_param_buf, param, user_cmd_param_size);
+                m_cTBC_dbg_mode_run_func = user_cmd_set_sigfox_power;
+            }
+            break;
+
+        case 0x86:  //Set Wifi Tx Power in flash
+            if(!cTBC_bypass_mode_is_setting() ||  m_cTBC_dbg_mode_run_func)
+            {
+                cTBC_usrcmd_msg_noti(cmd, 0, "Busy");
+            }
+            else
+            {
+                user_cmd_cmd = cmd;
+                if(param_size < sizeof(user_cmd_param_buf)){user_cmd_param_size = param_size;}
+                else{user_cmd_param_size = sizeof(user_cmd_param_buf);}
+                if(user_cmd_param_size > 0)memcpy(user_cmd_param_buf, param, user_cmd_param_size);
+                m_cTBC_dbg_mode_run_func = user_cmd_set_wifi_power;
+            }
+            break;
+
         default:
             break;
     }
@@ -3722,6 +3901,18 @@ void dbg_i2c_user_cmd_proc(int cmd, int param_size, const uint8_t *param)
 
 static void tbc_over_rtt_sec_tick_proc(void)
 {
+    main_Sec_tick++;
+#ifdef PIN_DEF_GPS_BKUP_CTRL_WITH_PULLUP  //GPS_BKUP_CTRL
+    if(main_GPS_BKUP_time_out > 0)  //GPS_BKUP_CTRL
+    {
+        if(--main_GPS_BKUP_time_out == 0)
+        {
+            cfg_board_GPS_BKUP_ctrl(false);
+            cPrintLog(CDBG_FCTRL_INFO, "GPS_BKUP Off\n");
+        }
+    }
+#endif
+
 }
 
 #if 0  //sleep test code
@@ -3823,7 +4014,13 @@ int main(void)
 #ifdef CDEV_NUS_MODULE
     nus_data_init();
 #endif
+
+
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_M3)  // M3 : I2c0_SCL_DBG->BUTTON,  I2c0_SDA_DBG->BCKP_GPS  
+    cTBC_init(dbg_i2c_user_cmd_proc, false);  // not use I2C Slave
+#else
     cTBC_init(dbg_i2c_user_cmd_proc, true);
+#endif
     cTBC_OVER_RTT_init(tbc_over_rtt_sec_tick_proc); //depend on cTBC_init() //FEATURE_CFG_RTT_MODULE_CONTROL
 
     get_ble_mac_address();
@@ -3841,6 +4038,9 @@ int main(void)
 
     if(main_get_param_val(module_parameter_item_magnetic_gpio_enable))cfg_magnetic_sensor_init(main_magnet_attach_callback, NULL);
     if(main_get_param_val(module_parameter_item_wkup_gpio_enable)==1)cfg_wkup_gpio_init(main_wkup_det_callback);
+#ifdef PIN_DEF_BUTTON  //CDEV_BOARD_M3
+    cfg_button_init(1 /*Active High*/, PIN_DEF_BUTTON, main_button_short_press_callback, main_button_long_press_callback);
+#endif
 
 //    nfc_init();
 //    sigfox_power_on(true);
@@ -3883,7 +4083,7 @@ int main(void)
             cfg_sigfox_downlink_on_off(true);
         else
             cfg_sigfox_downlink_on_off(false);
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI)
+#if 0 //(CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI) //disable nfc tag restart
         mnfc_tag_on_CB = main_timer_schedule_restart_check_idle;
 #endif
     }
@@ -3929,6 +4129,7 @@ int main(void)
     if(m_hitrun_test_flag)NVIC_SystemReset();
     // Enter main loop.
 //    main_test_for_sleep();  //sleep test
+    main_wakeup_reason = main_wakeup_reason_powerup;
     main_timer_schedule_start();
 
     for (;; )
@@ -3962,6 +4163,10 @@ int main(void)
             main_prepare_power_down();
             cPrintLog(CDBG_MAIN_LOG, "power off\n");
 #ifdef CDEV_GPS_MODULE  //stop gps backup battery
+#ifdef PIN_DEF_GPS_BKUP_CTRL_WITH_PULLUP
+            cfg_board_gpio_set_default_gps(); //gpio relese for gps
+            cfg_board_GPS_BKUP_ctrl(false);  //GPS_BKUP_CTRL
+#else
             //gps backup battery unuse
             nrf_gpio_cfg_output(PIN_DEF_2ND_POW_EN);
             nrf_gpio_pin_write(PIN_DEF_2ND_POW_EN, 1);
@@ -3975,6 +4180,7 @@ int main(void)
             nrf_gpio_pin_write(PIN_DEF_2ND_POW_EN, 0);
             nrf_gpio_cfg_default(PIN_DEF_2ND_POW_EN);
             cfg_board_gpio_set_default_gps(); //gpio relese for gps
+#endif
 #endif
             sd_power_system_off();
             while(1);

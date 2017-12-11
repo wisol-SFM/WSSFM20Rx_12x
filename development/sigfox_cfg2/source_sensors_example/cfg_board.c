@@ -349,7 +349,7 @@ bool cfg_ble_led_control(bool bOn)
     if(!bGpioInit)
     {
         nrf_gpio_cfg_output(PIN_DEF_BLE_LED_EN);
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2) || (CDEV_BOARD_TYPE == CDEV_BOARD_M3)
         nrf_gpio_pin_write(PIN_DEF_BLE_LED_EN, 1);
 #else
         nrf_gpio_pin_write(PIN_DEF_BLE_LED_EN, 0);
@@ -360,7 +360,7 @@ bool cfg_ble_led_control(bool bOn)
     old_ble_led_status = bOn;
     if(bOn)
     {
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2) || (CDEV_BOARD_TYPE == CDEV_BOARD_M3)
         nrf_gpio_pin_write(PIN_DEF_BLE_LED_EN, 0);
 #else
         nrf_gpio_pin_write(PIN_DEF_BLE_LED_EN, 1);
@@ -368,7 +368,7 @@ bool cfg_ble_led_control(bool bOn)
     }
     else
     {
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2) || (CDEV_BOARD_TYPE == CDEV_BOARD_M3)
         nrf_gpio_pin_write(PIN_DEF_BLE_LED_EN, 1);
 #else
         nrf_gpio_pin_write(PIN_DEF_BLE_LED_EN, 0);
@@ -394,7 +394,7 @@ void cfg_wkup_output_control(bool bOn)  // ihere 3color led reference m_module_p
         if(!bGpioInit)
         {
             nrf_gpio_cfg_output(PIN_DEF_WKUP);
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)|| (CDEV_BOARD_TYPE == CDEV_BOARD_M3)
             nrf_gpio_pin_write(PIN_DEF_WKUP, 1);
 #else
             nrf_gpio_pin_write(PIN_DEF_WKUP, 0);
@@ -403,7 +403,7 @@ void cfg_wkup_output_control(bool bOn)  // ihere 3color led reference m_module_p
         }
         if(bOn)
         {
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2) || (CDEV_BOARD_TYPE == CDEV_BOARD_M3)
             nrf_gpio_pin_write(PIN_DEF_WKUP, 0);
 #else
             nrf_gpio_pin_write(PIN_DEF_WKUP, 1);
@@ -411,7 +411,7 @@ void cfg_wkup_output_control(bool bOn)  // ihere 3color led reference m_module_p
         }
         else
         {
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2) || (CDEV_BOARD_TYPE == CDEV_BOARD_M3)
             nrf_gpio_pin_write(PIN_DEF_WKUP, 1);
 #else
             nrf_gpio_pin_write(PIN_DEF_WKUP, 0);
@@ -562,6 +562,26 @@ void cfg_board_gpio_set_default_gps(void)
 #endif
 }
 
+#ifdef PIN_DEF_GPS_BKUP_CTRL_WITH_PULLUP  //GPS_BKUP_CTRL
+void cfg_board_GPS_BKUP_ctrl(bool on)
+{
+    if(on)
+    {
+        //GPS_BKUP on
+        nrf_gpio_cfg_output(PIN_DEF_GPS_BKUP_CTRL_WITH_PULLUP);
+        nrf_gpio_pin_write(PIN_DEF_GPS_BKUP_CTRL_WITH_PULLUP, 1);
+    }
+    else
+    {
+        //GPS_BKUP off with pulled up
+        nrf_gpio_cfg_output(PIN_DEF_GPS_BKUP_CTRL_WITH_PULLUP);
+        nrf_gpio_pin_write(PIN_DEF_GPS_BKUP_CTRL_WITH_PULLUP, 0);
+        nrf_delay_ms(1);
+        nrf_gpio_cfg_default(PIN_DEF_GPS_BKUP_CTRL_WITH_PULLUP);  //GPS_BKUP off for pull up
+    }
+}
+#endif
+
 void cfg_board_gpio_set_default(void)
 {
 #ifdef CDEV_WIFI_MODULE
@@ -610,7 +630,7 @@ void cfg_board_gpio_set_default(void)
 
     nrf_gpio_cfg_default(PIN_DEF_MAGNETIC_SIGNAL);
     
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2) || (CDEV_BOARD_TYPE == CDEV_BOARD_M3)
     nrf_gpio_cfg_output(PIN_DEF_WKUP);
     nrf_gpio_pin_write(PIN_DEF_WKUP, 1);
     nrf_gpio_cfg_output(PIN_DEF_BLE_LED_EN);
@@ -1351,6 +1371,17 @@ static void cfg_board_testmode_wifi_AP_N_ble_on_adv_evt(ble_adv_evt_t ble_adv_ev
     }
 }
 
+#ifdef CDEV_WIFI_MODULE
+static void cfg_board_testmode_wifi_reset_detect(const uint8_t *pData, uint32_t dataSize)
+{
+    if(dataSize == 9 && (strncmp((const char*)pData, (const char*)"\r\nready\r\n",9) == 0))
+    {
+        cPrintLog(CDBG_MAIN_LOG, "Wifi reset!\n");
+        cfg_board_reset();  //reset work
+    }
+}
+#endif
+
 static void cfg_board_testmode_wifi_AP_N_ble(void)
 {
     uint32_t                err_code;
@@ -1375,7 +1406,7 @@ static void cfg_board_testmode_wifi_AP_N_ble(void)
     cWifi_resource_init();  // Initalize resource for WIFI module 
     cWifi_prepare_start();  // prepare for WIFI module
 
-    wifi_result = cWifi_bypass_req(NULL, NULL);
+    wifi_result = cWifi_bypass_req(cfg_board_testmode_wifi_reset_detect, NULL);
     if(wifi_result == CWIFI_Result_OK)
     {
         timeout = 5000;
@@ -1584,9 +1615,12 @@ void cfg_board_init(void)
 #ifdef CDEV_GPS_MODULE
     cGps_resource_init();
     cGps_prepare_start();
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2) || (CDEV_BOARD_TYPE == CDEV_BOARD_M3)
     set_CN0_check_type(2);  /*for common lib*/
     set_CN0_enable(CGPS_CNO_CHECK_ENABLE);  /*for common lib*/  //move to here
+#endif
+#ifdef PIN_DEF_GPS_BKUP_CTRL_WITH_PULLUP  //GPS_BKUP_CTRL
+    cfg_board_GPS_BKUP_ctrl(true);  //GPS_BKUP_CTRL
 #endif
 #endif /* CDEV_GPS_MODULE */
     cfg_board_common_power_control(module_comm_pwr_pon_init, false);

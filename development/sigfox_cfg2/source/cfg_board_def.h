@@ -56,6 +56,7 @@ board feature
 #define CDEV_BOARD_IHERE                       (2)
 #define CDEV_BOARD_IHERE_MINI                  (3)
 #define CDEV_BOARD_IHEREV2                     (4)
+#define CDEV_BOARD_M3                          (5)
 
 #define CDEV_BOARD_TYPE                        CDEV_BOARD_EVB  //REPLACE_DEVICE_DEFINE_HERE
 /******************************************************
@@ -83,7 +84,7 @@ funcion feature
 #define FEATURE_CFG_DEBUG_PRINT_OUT //debug print out
 #define FEATURE_CFG_DEBUG_OUT_TO_TBC //depend on FEATURE_CFG_DEBUG_PRINT_OUT
 #define FEATURE_CFG_BYPASS_CONTROL
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2) || (CDEV_BOARD_TYPE == CDEV_BOARD_M3)
 #define FEATURE_CFG_ACC_REPORT
 #endif
 #define FEATURE_CFG_RTT_MODULE_CONTROL //RTT over TBC(twis board control), Test mode control via RTT
@@ -91,6 +92,9 @@ funcion feature
 #ifdef CDEV_GPS_MODULE
 //#define CDEV_UBLOX_GPS_MODULE  //  not used
 //#define CDEV_CSR_GPS_MODULE // not used - CSR gps
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_M3)
+#define PIN_DEF_GPS_BKUP_CTRL_WITH_PULLUP PIN_DEF_TWIS_BOARD_CTRL_SDA  //V_BCKP_GPS contorl by gpio with pulledup  //GPS_BKUP_CTRL
+#endif
 #endif
 #define CDEV_NUS_MODULE
 #define CDEV_RTC2_DATE_TIME_CLOCK
@@ -160,8 +164,8 @@ test feature
 #define PIN_DEF_GPS_RESET      22
 #endif
 
-#define PIN_DEF_TWIS_BOARD_CTRL_SCL   12
-#define PIN_DEF_TWIS_BOARD_CTRL_SDA   14
+#define PIN_DEF_TWIS_BOARD_CTRL_SCL   (12)  //I2c0_SCL_DBG
+#define PIN_DEF_TWIS_BOARD_CTRL_SDA   (14)  //I2c0_SDA_DBG
 
 #define PIN_DEF_ACCELEROMETER_DEVICE_ID      (0x18)  //check SDO pin (to GND:0x18, to VDD:0x19)
 
@@ -169,7 +173,7 @@ test feature
 #define PIN_DEF_ACC_TWIS_SDA   16
 #define PIN_DEF_ACC_INT1       11
 
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2) || (CDEV_BOARD_TYPE == CDEV_BOARD_M3)
 #define PIN_DEF_MAGNETIC_SIGNAL       2
 #else
 #define PIN_DEF_MAGNETIC_SIGNAL       3
@@ -193,14 +197,20 @@ test feature
 #define PIN_DEF_DTM_RX    PIN_DEF_TWIS_BOARD_CTRL_SCL //used source_direct_test_mode
 #define PIN_DEF_DTM_TX    PIN_DEF_TWIS_BOARD_CTRL_SDA //used source_direct_test_mode
 #endif
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)|| (CDEV_BOARD_TYPE == CDEV_BOARD_M3)
 #define PIN_DEF_BATTERY_ADC_INPUT NRF_SAADC_INPUT_AIN1
 #else
 #define PIN_DEF_BATTERY_ADC_INPUT NRF_SAADC_INPUT_AIN0
 #endif
 
+#ifdef FEATURE_CFG_CHECK_BOOTSTRAP_PIN
 #define PIN_DEF_BOOTSTRAP_CONFIG0  PIN_DEF_BLE_LED_EN         //STATE0/P0.18
 #define PIN_DEF_BOOTSTRAP_CONFIG1  PIN_DEF_WKUP                //WKUP/P0.20
+#endif
+
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_M3)
+#define PIN_DEF_BUTTON PIN_DEF_TWIS_BOARD_CTRL_SCL
+#endif
 
 // Low frequency clock source to be used by the SoftDevice
 #define NRF_CLOCK_LFCLKSRC_250_PPM      {.source        = NRF_CLOCK_LF_SRC_XTAL,            \

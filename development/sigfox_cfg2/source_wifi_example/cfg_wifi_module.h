@@ -218,6 +218,11 @@ bool cWifiState_is_bypass_ready(void);
 #endif
 
 /**
+ * @brief       Function for spi resource change WIFI_SPI_INSTANCE to TBC_TWIS_INSTANCE
+*/
+void wifi_spi_resource_change_to_TBC_TWIS_INSTANCE(void);
+
+/**
  * @brief       wifi driver Function for wifi init
  * @return      CWIFI_Result_OK on success 
  */

@@ -1,0 +1,37 @@
+old
+user1.1024.new.2_mainslp.bin
+esp_init_data_default_AD_GPIO13.bin
+
+/*********************************************************************************************/
+20170510 : wifi버전 읽는 커맨드 추가 
+           SPI_AT_ModemSLP_GPIO_VER.bin
+               AT+VER 커맨드 추가됨 (init_data_default의 버젼정보)
+           esp_init_data_default_V0101.bin
+               버젼필드 지정 : (126 & 127 byte) -> 0x01 0x01
+
+/*********************************************************************************************/               
+20171117 : FCC, CE, TELEC용 바이너리 (3개로 변경됨.)
+
+SPT_AT_ModemSLP_GPIO_VER_FLASH_CE_301117.bin    : Channel 1~13  //"Nov 30 2017 10:31:44"
+SPT_AT_ModemSLP_GPIO_VER_FLASH_FCC_301117.bin   : Channel 1~11  //"Nov 30 2017 10:31:51"
+SPT_AT_ModemSLP_GPIO_VER_FLASH_TELEC_301117.bin : Channel 1~14  //"Nov 30 2017 10:31:35"
+
+CE : WIFI VER - wifi_030301
+FCC : WIFI VER - wifi_040401
+TELEC : WIFI VER - wifi_050501
+
+체크리스트
+-공통
+추가된 AT커맨드
+AT+TXPWRITE : AT+TXPWRITE="524E4A444038"
+AT+TXPREAD : RNJD@8 -> OK
+AT+VER : -> OK
+AT+LEDON : -> OK
+AT+LEDOFF : -> OK
+AT+MODEMSLP : Modem Sleep mode -> OK
+AT+STATEHIGH : -> OK
+AT+STATELOW : -> OK
+
+AP SCAN TEST
+  . AT+CWLAPOPT=1,127
+  . AT+CWLAP

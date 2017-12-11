@@ -291,7 +291,7 @@ uint32_t bma250_slope_set()
 {
     uint32_t timeout;
 
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2) || (CDEV_BOARD_TYPE == CDEV_BOARD_M3)
     spi_xfer_done = false;
     m_tx_buf[0] = 0xB6;
     timeout = MPU_TWI_TIMEOUT;
@@ -309,7 +309,7 @@ uint32_t bma250_slope_set()
     bma250_i2c_bus_write(BMA2x2_MODE_CTRL_ADDR,m_tx_buf,BMA2x2_GEN_READ_WRITE_LENGTH);
     while((!spi_xfer_done) && --timeout);
     if(!timeout) return NRF_ERROR_TIMEOUT;
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2) || (CDEV_BOARD_TYPE == CDEV_BOARD_M3)
     spi_xfer_done = false;
     m_tx_buf[0] = BMA2x2_RANGE_2G;
     timeout = MPU_TWI_TIMEOUT;

@@ -38,7 +38,7 @@
 #include "cfg_board.h"
 #include "nrf_delay.h"
 
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2) || (CDEV_BOARD_TYPE == CDEV_BOARD_M3)
 #define FEATURE_TMP108
 #endif
 

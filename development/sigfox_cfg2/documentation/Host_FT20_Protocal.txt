@@ -1,14 +1,14 @@
 version 1.8
 
 overview
-1. module interface : I2c slave
+1. module interface : I2c slave, SWD (Over RTT Viewer)
 2. Host can connect before 2 sec (Unable to connect after)
   * Mode change time out is 10 seconds.
 3. Data must be case-sensitive
 4. I2C device ID IS 0x4A
 
 work flow
-1. The host periodically reads 64 bytes.
+1. The host periodically reads 64 bytes (I2C Onlu).
 2. 64 bytes are encoded as a string and may not have a NULL value. (End of string in case of NULL)
 3. The basic data is composed of log data and can include a response to the command.
 4. Host -> Module : 
@@ -134,4 +134,43 @@ command
          ....<SR>000aOKSFM20R_V204_01,build-Jun 12 2017 13:55:52,wifi_020101
 
   0x80~0x9F : user defined command
-  
+
+////////////////////////////////////////////////////////////////////////////////
+Extended commands for RTT (not support over I2C, uppercase, end of line is none)
+"CC" -> Connect PC tool over RTT (Only available early in the boot)
+"CR" -> Target reset
+"CF" -> Change setting value to default
+"CMx" -> Set boot mode (x is value of mode)
+
+
+////////////////////////////////////////////////////////////////////////////////
+user commands
+
+0x80:  //led on
+  <SC>0280
+
+0x81:  //led off
+  <SC>0280
+
+0x82:  //input test
+  <SC>04821E
+    * cmd send and run input (press key, attach magnetic, tagging NFC ...)
+      param : 1E is timeout sec
+
+0x83:  //sensor test (ACC, TMP, ADC ....)
+  <SC>0683202B
+    * param : 202B is Battery Check Min Max (Set to 0000 if not used)
+
+0x84:  //led test
+  <SC>0884000000
+    * wifi AP and BLE beacons must be installed. -> Setting evb to boot mode 8 (send "CM8" over RTT Viewer)
+    * param : 00, 00, 00 -> check for wifi scan rssi, check ble for scan rssi, gps timeout (eg. <SC>0884D3D814)
+    * sigfox is running in CW mode.
+
+0x85:  //set sigfox tx power
+  <SC>04850E
+    * param : 0E is Tx power (14dbm)
+    
+0x86:  //set wifi tx power table
+  <SC>0E863E3E3E3E3E3E
+    * param : 3E, 3E, 3E, 3E, 3E, 3E -> Tx Power Tables

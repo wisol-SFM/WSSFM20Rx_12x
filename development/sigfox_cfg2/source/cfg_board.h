@@ -41,7 +41,7 @@ extern "C" {
 #define CWIFI_SEC_RETRY_TIMEOUT_SEC_MAX 60
 #define CGPS_ACQUIRE_TRACKING_TIME_SEC 60 // 60 sec
 
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2) || (CDEV_BOARD_TYPE == CDEV_BOARD_M3)
 #define CGPS_CN0_CURRENT_SAVETIME_ENABLE true
 #else
 #define CGPS_CN0_CURRENT_SAVETIME_ENABLE false
@@ -51,11 +51,16 @@ extern "C" {
 #define MAIN_BOOT_NFC_UNLOCK_DEFAULT true
 #define MAIN_FOTA_ENABLE_DEFAULT true
 #define MAIN_MAGNETIC_GPIO_ENABLE_DEFAULT true
-#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2)
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE) || (CDEV_BOARD_TYPE == CDEV_BOARD_IHEREV2) || (CDEV_BOARD_TYPE == CDEV_BOARD_M3)
 
 #define MAIN_WKUP_GPIO_ENABLE_DEFAULT 2   //LED CONTROL
 #undef CWIFI_SEC_RETRY_TIMEOUT_SEC_DEFAULT
 #define CWIFI_SEC_RETRY_TIMEOUT_SEC_DEFAULT CWIFI_SEC_RETRY_TIMEOUT_SEC_MIN
+
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_M3)
+#undef MAIN_BOOT_NFC_UNLOCK_DEFAULT
+#define MAIN_BOOT_NFC_UNLOCK_DEFAULT false
+#endif
 
 #elif (CDEV_BOARD_TYPE == CDEV_BOARD_IHERE_MINI)
 
@@ -218,6 +223,20 @@ typedef struct
 } cfg_date_time_t;
 #endif
 
+typedef enum
+{
+    main_wakeup_reason_normal,
+    main_wakeup_reason_powerup,
+    main_wakeup_reason_powerdown,
+    main_wakeup_reason_key_event,
+    main_wakeup_reason_nfc_event,
+    main_wakeup_reason_ble_event,
+    main_wakeup_reason_magnetic_event,
+    main_wakeup_reason_acc_event,
+    main_wakeup_reason_sensor_event,
+    main_wakeup_reason_type_max
+}main_wakeup_reason_type;
+
 extern const nrf_drv_spi_config_t m_spi_config_default;
 extern module_parameter_t m_module_parameter;
 extern bool m_module_parameter_update_req;
@@ -320,6 +339,9 @@ void cfg_board_reset(void);
 void cfg_board_check_reset_reason(void);
 void cfg_board_gpio_set_default(void);
 void cfg_board_gpio_set_default_gps(void);
+#ifdef PIN_DEF_GPS_BKUP_CTRL_WITH_PULLUP  //GPS_BKUP_CTRL
+void cfg_board_GPS_BKUP_ctrl(bool on);
+#endif
 
 #ifdef __cplusplus
 }
