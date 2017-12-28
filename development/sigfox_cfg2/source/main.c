@@ -2385,12 +2385,24 @@ static void main_schedule_timeout_handler_asset_tracker(void * p_context)
                     if(3000 <= avg_batt_lvl_in_milli_volts && 5200 >= avg_batt_lvl_in_milli_volts)
                     {
                         if(m_module_parameter.wifi_testmode_enable /*disable_battery_power_down*/)cPrintLog(CDBG_MAIN_LOG, "Battery Pwr Off Disabled\n");
-                        if(!m_module_parameter.wifi_testmode_enable /*disable_battery_power_down*/ && !cTBC_check_host_connected() && avg_batt_lvl_in_milli_volts < 3500)  //low battery
+                        if(!m_module_parameter.wifi_testmode_enable /*disable_battery_power_down*/ && !cTBC_check_host_connected() 
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_M3)
+                            && avg_batt_lvl_in_milli_volts < 3100
+#else
+                            && avg_batt_lvl_in_milli_volts < 3500
+#endif
+                        )  //low battery
                         {
                             if(log_once_flag)cPrintLog(CDBG_MAIN_LOG, "Battery Low:%d\n", avg_batt_lvl_in_milli_volts);
                             main_powerdown_request = true;
                         }
-                        else if(!m_module_parameter.wifi_testmode_enable /*disable_battery_power_down*/ && avg_batt_lvl_in_milli_volts < 3600)  //battery warning
+                        else if(!m_module_parameter.wifi_testmode_enable /*disable_battery_power_down*/ 
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_M3)
+                            && avg_batt_lvl_in_milli_volts < 3300
+#else
+                            && avg_batt_lvl_in_milli_volts < 3600
+#endif
+                        )  //battery warning
                         {
                             if(log_once_flag)cPrintLog(CDBG_MAIN_LOG, "Battery Warning:%d\n", avg_batt_lvl_in_milli_volts);
                             if(m_module_ready_wait_timeout_tick > (APP_MAIN_SCHEDULE_HZ * 4))  //wait more 2 sec for warning noti
@@ -3378,6 +3390,10 @@ static void user_cmd_hitrun_input_test(void)
     if(!m_cfg_i2c_master_init_flag)cfg_i2c_master_init();
     main_ACC_ISR_detected = false;
 
+#ifdef PIN_DEF_BUTTON  //CDEV_BOARD_M3
+    main_button_detected = false;
+#endif
+
     all_test_OK = false;
     if(cfg_bma250_ISR_pin_test()==NRF_SUCCESS)
     {
@@ -3403,6 +3419,9 @@ static void user_cmd_hitrun_input_test(void)
 #else
                 main_magnet_detected
 #endif
+#ifdef PIN_DEF_BUTTON  //CDEV_BOARD_M3
+                && main_button_detected
+#endif
                 && main_wkup_push_detected
                 && mnfc_tag_on
                 && main_ACC_ISR_detected
@@ -3422,8 +3441,8 @@ static void user_cmd_hitrun_sense_test(void)
 {
     bool all_test_OK = true;
     bool test_result;
-    uint8_t param_bin[16];
-    char noti_str_buf[16];
+    uint8_t param_bin[32];
+    char noti_str_buf[32];
     struct bma_accel_data acc_data;
     memset(param_bin, 0, sizeof(param_bin));
     if(user_cmd_param_size == 4)
@@ -3524,8 +3543,8 @@ static void user_cmd_hitrun_led_test(void)
     bool test_result;
     int8_t wifi_rssi = 0, ble_rssi = 0;
     uint8_t gps_time = 0;
-    uint8_t param_bin[16];
-    char noti_str_buf[16];
+    uint8_t param_bin[32];
+    char noti_str_buf[32];
     int i;
 
     advertising_start(false, false);
@@ -4025,6 +4044,12 @@ int main(void)
 
     get_ble_mac_address();
 
+#if (CDEV_BOARD_TYPE == CDEV_BOARD_M3)  // M3 : I2c0_SCL_DBG->BUTTON,  I2c0_SDA_DBG->BCKP_GPS  
+    cfg_ble_led_control(true);
+    nrf_delay_ms(200);
+    cfg_ble_led_control(false);
+#endif
+
     nfc_init();
     main_deepsleep_control();
     cfg_board_gpio_set_default_gps();
@@ -4182,6 +4207,7 @@ int main(void)
             cfg_board_gpio_set_default_gps(); //gpio relese for gps
 #endif
 #endif
+            sigfox_power_on(false);
             sd_power_system_off();
             while(1);
         }
