@@ -44,8 +44,12 @@ HighLight:
 --------------
 EVBSFM20R_V204       
 --------------
-Release Date : June 02 2017
+Release Date : Jan 10 2018
 
 HighLight:	  
 - GPS SPI mode change (spi0 mode)
 - ADD to GPS example code(NMEA data)
+- Support Connect PC Tool via RTT
+- Support Factory Command
+- Wifi Version Update (R1~R4) R1:CE,R2:FCC,R3:TELEC,R4:FCC
+- Module base version (PVR) - SFM20R, SFM60R

@@ -60,6 +60,10 @@
 #include "nrf_drv_clock.h"
 #include "cfg_external_sense_gpio.h"
 
+//#define TEST_FEATURE_SIGFOX_CW
+#ifdef TEST_FEATURE_SIGFOX_CW
+#define SIGFOX_CW_CMD "AT$CW=868130000,1,15\r\n"
+#endif
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT 1                                           /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
 
@@ -4004,6 +4008,38 @@ void main_test_for_sleep(void)
 }
 #endif
 
+#ifdef TEST_FEATURE_SIGFOX_CW
+static void cfg_enter_sigfox_CW_mode(void)
+{
+    cPrintLog(CDBG_MAIN_LOG, "prepare sigfox CW mode\n");
+    cfg_board_gpio_set_default_gps();
+    if(!m_cfg_i2c_master_init_flag)
+        cfg_i2c_master_init();
+    nrf_delay_ms(1);
+    bma250_req_suppend_mode();
+    nrf_delay_ms(1);
+    tmp102_req_shutdown_mode();
+    nrf_delay_ms(1);
+    if(m_cfg_i2c_master_init_flag)
+        cfg_i2c_master_uninit();
+    nrf_delay_ms(1);
+    cfg_sigfox_prepare_start();
+    nrf_delay_ms(1000);
+
+    if(sigfox_bypass_req(NULL, NULL) == NRF_SUCCESS)
+    {
+        nrf_delay_ms(3000);
+        cPrintLog(CDBG_MAIN_LOG, "start sigfox CW:%s", SIGFOX_CW_CMD);
+        sigfox_bypass_write_request(SIGFOX_CW_CMD, strlen(SIGFOX_CW_CMD));
+    }
+    else
+    {
+        cPrintLog(CDBG_MAIN_LOG, "start sigfox CW ERROR!");
+    }
+    while(1)power_manage();
+}
+#endif
+
 int main(void)
 {
     bool    erase_bonds = 0;
@@ -4029,6 +4065,10 @@ int main(void)
     ble_stack_init();
     sd_power_dcdc_mode_set(1);
     module_parameter_init();
+
+#ifdef TEST_FEATURE_SIGFOX_CW  //for cw test
+    cfg_enter_sigfox_CW_mode();
+#endif
 
 #ifdef CDEV_NUS_MODULE
     nus_data_init();
