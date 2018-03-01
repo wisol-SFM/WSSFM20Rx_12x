@@ -76,6 +76,8 @@ void cWifi_resource_init(void);
  * @brief       Function for prepare wifi module
  */
 void cWifi_prepare_start(void);
+bool cWifi_get_STA_MAC(uint8_t *get_mac_buf /*6byte buf*/);
+bool cWifi_get_tx_power_tables(uint8_t *get_tx_pwr_buf /*6byte buf*/);
 
 /**
  * @brief       Function for wifi scan time.
@@ -113,6 +115,17 @@ int cWifi_ap_scan_req(void);
  * @return      CWIFI_Result_OK on success. Otherwise an error code(eg.CWIFI_Result_Busy).
  */
 int cWifi_ap_get_available_first_BSSID(const char *p_SSID_header_str);
+
+
+/**
+ * @brief       Function for request scan work.
+ *
+ * @param[in]   mac_cnt : count of mac list item
+ * @param[in]   mac_list : point of mac list array (item of 6 byte in array)
+ * @return      CWIFI_Result_OK on success. Otherwise an error code(eg.CWIFI_Result_Busy).
+ */
+int cWifi_ap_scan_req_priority_mac_list(uint32_t mac_cnt, const uint8_t *mac_list /*item of 6 byte in array*/);
+
 
 /**
  * @brief       Function for bypass mode (for i2c slavle control).

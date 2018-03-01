@@ -591,11 +591,11 @@ void nus_send_data(char module)
                 nus_send_buffer[2]=m_nus_service_parameter.wifi_scan_time[0];
                 nus_send_buffer[3]=m_nus_service_parameter.gps_tracking_time[0];
                 err_code = ble_nus_string_send(&m_nus, (uint8_t*)&nus_send_buffer, 4);
-                break;	
+                break;
             case 'Z':
                 nus_send_buffer[0]='Z';
                 err_code = ble_nus_string_send(&m_nus, (uint8_t*)&nus_send_buffer, 1);
-                break;				
+                break;
             default:
                 break;
         }
@@ -2338,7 +2338,7 @@ static void main_schedule_timeout_handler_asset_tracker(void * p_context)
     static bool old_ble_led = false;
     if(m_module_mode != m_module_mode_old)
     {
-        cPrintLog(CDBG_FCTRL_INFO, "main state changed %d to %d\n", m_module_mode_old, m_module_mode);
+        cPrintLog(CDBG_FCTRL_DBG, "main state changed %d to %d\n", m_module_mode_old, m_module_mode);
         m_module_mode_old = m_module_mode;
     }
 
@@ -2513,7 +2513,7 @@ static void main_schedule_timeout_handler_asset_tracker(void * p_context)
                 }
                 else  if(get_nmea_result ==  CGPS_Result_Busy)
                 {
-					;
+                    ;
                 }
                 else
                 {
@@ -2967,6 +2967,8 @@ static void main_prepare_power_down(void)
     if(!m_cfg_i2c_master_init_flag)
         cfg_i2c_master_init();
     nrf_delay_ms(1);
+    bma250_read_chip();
+
     bma250_req_suppend_mode();
     nrf_delay_ms(1);
     tmp102_req_shutdown_mode();
@@ -4115,7 +4117,7 @@ int main(void)
 
     cfg_i2c_master_init();
     cfg_bma250_interrupt_init();
-
+    bma250_read_chip();
 //    err_code = bsp_init(BSP_INIT_LED, APP_TIMER_TICKS(100, APP_TIMER_PRESCALER), NULL);
 //    APP_ERROR_CHECK(err_code);
     peer_manager_init(erase_bonds);

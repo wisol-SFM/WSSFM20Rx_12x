@@ -145,6 +145,8 @@ bool cfg_bma250_write_reg(uint8_t reg_addr, uint8_t reg_data);
 uint32_t cfg_bma250_ISR_pin_test(void);
 uint32_t cfg_bma250_sw_reset(void);
 
+void  bma250_read_chip(void);
+
 #ifdef __cplusplus
 }
 #endif

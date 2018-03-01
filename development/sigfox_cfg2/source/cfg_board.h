@@ -341,6 +341,7 @@ void cfg_board_gpio_set_default(void);
 void cfg_board_gpio_set_default_gps(void);
 #ifdef PIN_DEF_GPS_BKUP_CTRL_WITH_PULLUP  //GPS_BKUP_CTRL
 void cfg_board_GPS_BKUP_ctrl(bool on);
+void cfg_board_check_update_wifi_tx_pwr_tables(void);
 #endif
 
 #ifdef __cplusplus

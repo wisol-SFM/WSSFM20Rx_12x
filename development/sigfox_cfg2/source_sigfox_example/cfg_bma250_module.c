@@ -53,6 +53,8 @@ struct bma_accel_data m_accel;
 
 bma250_state_s m_bma250_state;
 
+uint8_t chip_id;
+
 #define I2C_BUFFER_LEN 8
 #define SPI_BUFFER_LEN 5
 #define BMA2x2_BUS_READ_WRITE_ARRAY_INDEX   1
@@ -229,8 +231,17 @@ uint32_t acc_bypass_read(u8 reg_addr, u8 cnt)
 }
 void bma250_read_chip()
 {
+    uint32_t timeout;
+
+    spi_xfer_done = false;
+    timeout = MPU_TWI_TIMEOUT;
+
     memset(m_rx_buf,0x00,sizeof(m_rx_buf));
     bma250_i2c_bus_read(BMA2x2_CHIP_ID_REG,m_rx_buf,BMA2x2_GEN_READ_WRITE_LENGTH);
+    while((!spi_xfer_done) && --timeout);
+    if(timeout) 
+        chip_id = m_rx_buf[0];
+    
 
 }
 
@@ -564,28 +575,56 @@ void bma250_read_accel_xyz(struct bma_accel_data *accel)
     BMA2x2_INIT_VALUE, BMA2x2_INIT_VALUE};
 
     memcpy(data_u8,m_rx_buf,6);
-    accel->x = (s16)((((s32)((s8)
-    data_u8[BMA2x2_SENSOR_DATA_XYZ_X_MSB]))
-    << BMA2x2_SHIFT_EIGHT_BITS) |
-    (data_u8[BMA2x2_SENSOR_DATA_XYZ_X_LSB] &
-    BMA2x2_10_BIT_SHIFT));
-    accel->x = accel->x >> BMA2x2_SHIFT_SIX_BITS;
+    if(chip_id==0xf9)
+    {
+        accel->x = (s16)((((s32)((s8)
+                        data_u8[BMA2x2_SENSOR_DATA_XYZ_X_MSB]))
+                        << BMA2x2_SHIFT_EIGHT_BITS) |
+                        (data_u8[BMA2x2_SENSOR_DATA_XYZ_X_LSB] &
+                        BMA2x2_10_BIT_SHIFT));
+        accel->x = accel->x >> BMA2x2_SHIFT_SIX_BITS;
 
-    /* read the y data_u8*/
-    accel->y = (s16)((((s32)((s8)
-    data_u8[BMA2x2_SENSOR_DATA_XYZ_Y_MSB]))
-    << BMA2x2_SHIFT_EIGHT_BITS) |
-    (data_u8[BMA2x2_SENSOR_DATA_XYZ_Y_LSB] &
-    BMA2x2_10_BIT_SHIFT));
-    accel->y = accel->y >> BMA2x2_SHIFT_SIX_BITS;
+        /* read the y data_u8*/
+        accel->y = (s16)((((s32)((s8)
+                        data_u8[BMA2x2_SENSOR_DATA_XYZ_Y_MSB]))
+                        << BMA2x2_SHIFT_EIGHT_BITS) |
+                        (data_u8[BMA2x2_SENSOR_DATA_XYZ_Y_LSB] &
+                        BMA2x2_10_BIT_SHIFT));
+        accel->y = accel->y >> BMA2x2_SHIFT_SIX_BITS;
 
-    /* read the z data_u8*/
-    accel->z = (s16)((((s32)((s8)
-    data_u8[BMA2x2_SENSOR_DATA_XYZ_Z_MSB]))
-    << BMA2x2_SHIFT_EIGHT_BITS) |
-    (data_u8[BMA2x2_SENSOR_DATA_XYZ_Z_LSB] &
-    BMA2x2_10_BIT_SHIFT));
-    accel->z = accel->z >> BMA2x2_SHIFT_SIX_BITS;
+        /* read the z data_u8*/
+        accel->z = (s16)((((s32)((s8)
+                        data_u8[BMA2x2_SENSOR_DATA_XYZ_Z_MSB]))
+                        << BMA2x2_SHIFT_EIGHT_BITS) |
+                        (data_u8[BMA2x2_SENSOR_DATA_XYZ_Z_LSB] &
+                        BMA2x2_10_BIT_SHIFT));
+        accel->z = accel->z >> BMA2x2_SHIFT_SIX_BITS;
+    }
+    else if(chip_id==0xfa)
+    {
+        accel->x = (s16)((((s32)((s8)
+                        data_u8[BMA2x2_SENSOR_DATA_XYZ_X_MSB]))
+                        << BMA2x2_SHIFT_EIGHT_BITS) |
+                        (data_u8[BMA2x2_SENSOR_DATA_XYZ_X_LSB] &
+                        BMA2x2_12_BIT_SHIFT));
+        accel->x = accel->x >> BMA2x2_SHIFT_FOUR_BITS;
+
+        /* read the y data_u8*/
+        accel->y = (s16)((((s32)((s8)
+                        data_u8[BMA2x2_SENSOR_DATA_XYZ_Y_MSB]))
+                        << BMA2x2_SHIFT_EIGHT_BITS) |
+                        (data_u8[BMA2x2_SENSOR_DATA_XYZ_Y_LSB] &
+                        BMA2x2_12_BIT_SHIFT));
+        accel->y = accel->y >> BMA2x2_SHIFT_FOUR_BITS;
+
+        /* read the z data_u8*/
+        accel->z = (s16)((((s32)((s8)
+                        data_u8[BMA2x2_SENSOR_DATA_XYZ_Z_MSB]))
+                        << BMA2x2_SHIFT_EIGHT_BITS) |
+                        (data_u8[BMA2x2_SENSOR_DATA_XYZ_Z_LSB] &
+                        BMA2x2_12_BIT_SHIFT));
+        accel->z = accel->z >> BMA2x2_SHIFT_FOUR_BITS;
+    }
 }
 
 bool cfg_bma250_read_xyz(struct bma_accel_data *maccel)
@@ -660,6 +699,7 @@ static void bma250_state_handler(void * p_context)
             break;
         case SET_S:
             spi_xfer_done = false;
+            bma250_read_chip();
             error_code = bma250_slope_set();
 //            error_code = bma250_high_set();
 

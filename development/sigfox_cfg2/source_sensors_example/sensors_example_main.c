@@ -185,6 +185,7 @@ int main(void)
 
     //accelerometer interrupt init
     cfg_i2c_master_init();
+    bma250_read_chip();
     cfg_bma250_timer_create();
     bma250_set_state(NONE_ACC);
     if(bma250_get_state() == NONE_ACC)
