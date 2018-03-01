@@ -1,11 +1,15 @@
-# Getting started with Wisol SFM20Rx EVK SDK and gcc
-
-## Introduction
+# Introduction
 
 The purpose of this tutorial is to help you getting started with Wisol quad-mode module SFM20Rx, especially how-to setup their SDK with gcc.
 
 __SFM20Rx__ is a multi-mode module including __Sigfox__ connectivity, __WiFi__, __BLE__ and __GPS__ and multiple sensors (magnetic, temperature, accelerometer). The EVK also comes with an NFC tag.
 The main core of the module is based on the Nordic nRF52832 SOC. Wisol has developed an application layer on top of Nordic SDK to interact with all connectivity blocks and sensors. BLE can be directly programmed using Nordic SDK directives as it is embedded into the nRF52 chip.
+
+# Issue
+- __Acceleration sensor inside the module will be changed around Q3.2018 from BMA250E to BMA253.__
+  - Main difference between two parts is resolution of the acceleration. 10bit for BMA250E and 12bit for BMA253.
+  - BMA250E was declared  E.O.L part from BOSH in JAN, 2018.
+  - Please refer to the datasheet for accelerometer. [BMA253_Datasheet](development/sigfox_cfg2/documentation/datasheet/Bosch_01242017_BMA253-1217713.pdf)
 
 # Keil development environment (windows)
 [Development_Environment_Setup_Guide](development/sigfox_cfg2/documentation/manual/[WISOL]Development_Environment_Setup_Guide_V202.pdf)
