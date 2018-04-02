@@ -40,7 +40,7 @@
 #define TMP102_SIZE 2
 #define TMP102_SUM_S_CNT 2
 #define TMP102_SUM_E_CNT 8
-#define TMP102_AVERAGE_TOTAL_CNT 6
+#define TMP102_AVERAGE_TOTAL_CNT (TMP102_SUM_E_CNT - TMP102_SUM_S_CNT)  // 6
 
 #define TMP102_BITWISE_MATH 0.0625
 
@@ -54,35 +54,28 @@ extern "C" {
 //#include <stdint.h>
 /************************************************/
 
-/*unsigned integer types*/
-typedef uint8_t u8;/**< used for unsigned 8bit */
-typedef uint16_t u16;/**< used for unsigned 16bit */
-typedef uint32_t u32;/**< used for unsigned 32bit */
-typedef uint64_t u64;/**< used for unsigned 64bit */
-
-/*signed integer types*/
-typedef int8_t s8;/**< used for signed 8bit */
-typedef int16_t s16;/**< used for signed 16bit */
-typedef int32_t s32;/**< used for signed 32bit */
-typedef int64_t s64;/**< used for signed 64bit */
 
 #define TMP102_CONF_REG_DATA_DEFAULT (0x60A0)
 #define TMP108_CONF_REG_DATA_DEFAULT (0x2610)
 
-#define TMP102_INIT_VALUE               ((u8)0)
-#define TMP102_GEN_READ_WRITE_LENGTH    ((u8)1)
-#define TMP102_LSB_MSB_READ_LENGTH      ((u8)2)
+#define TMP102_INIT_VALUE               ((uint8_t)0)
+#define TMP102_GEN_READ_WRITE_LENGTH    ((uint8_t)1)
+#define TMP102_LSB_MSB_READ_LENGTH      ((uint8_t)2)
 
 
-#define TMP102_I2C_ADDRESS 72 /* This is the I2C address for our chip */
+#define TMP10X_I2C_ADDRESS 72 //TMP108_ADDR_GND// 72 /* This is the I2C address for our chip */
 
 #define TMP102_TEMP_REG         0x00
 #define TMP102_CONF_REG         0x01
 #define TMP102_TLOW_REG         0x02
 #define TMP102_THIGH_REG        0x03
 
-#define TMP102_LOW_DATA         10 // 'c
-#define TMP102_HIGH_DATA        60 // 'c
+/* interrupt set value : -30 ~ 80 'C */
+#define TMP10x_INT_LOW           10 // 'c
+#define TMP10x_INT_HIGH          40 // 'c
+#define TMP10x_LOWHIGH_OFFSET    5 // 'c
+#define TMP10x_DEFAULT_LOW_DATA  0x8000  // -128 'c
+#define TMP10x_DEFAULT_HIGH_DATA 0x7FF8  // +127.9375 'c
 
 /* note: these bit definitions are byte swapped */
 #define TMP102_CONF_SD          0x0100
@@ -113,18 +106,18 @@ typedef int64_t s64;/**< used for signed 64bit */
 
 struct tmp102 {
     struct regmap *regmap;
-    u16 config_orig;
+    uint16_t config_orig;
     unsigned long ready_time;
 };
 
 /* convert left adjusted 13-bit TMP102 register value to milliCelsius */
-static inline int tmp102_reg_to_mC(s16 val)
+static inline int tmp102_reg_to_mC(int16_t val)
 {
     return ((val & ~0x01) * 1000) / 128;
 }
 
 /* convert milliCelsius to left adjusted 13-bit TMP102 register value */
-static inline u16 tmp102_mC_to_reg(int val)
+static inline uint16_t tmp102_mC_to_reg(int val)
 {
     return (val * 128) / 1000;
 }
@@ -138,10 +131,60 @@ typedef enum
     TMP_SET_R,
     TMP_READ_DATA_S,
     TMP_READ_DATA_R,
+    TMP_READ_ONLY_S,
+    TMP_READ_ONLY_R,
     TMP_SLEEP_S, //5
     TMP_SLEEP_R,
+    TMP_INTERRUPT_S,
+    TMP_INTERRUPT_R,
+    TMP_INTERRUPT_CLEAR_S,
+    TMP_INTERRUPT_CLEAR_R,
     EXIT_TMP
 } tmp102_state_s;
+
+typedef enum
+{
+    TMP_DISABLE,
+    TMP_ENABLE,
+    TMP_NONE,
+} tmp102_sensor_s;
+
+typedef enum
+{
+    TMP_INTR_NONE,
+    TMP_INTR_LOW,
+    TMP_INTR_HIGH,
+} tmp102_event_intr_s;
+
+typedef enum
+{
+    TMP_INTR_SET_DISABLE,  /* Interrupt low & high disable */
+    TMP_INTR_SET_LOW,
+    TMP_INTR_SET_HIGH,
+    TMP_INTR_SET_LOWHIGH,
+} tmp102_set_intr_s;
+
+/* List of common tmp error codes that can be returned */
+enum tec_error_list {
+    /* Success - no error */
+    TEC_SUCCESS = 0,
+    /* Unknown error */
+    TEC_ERROR_UNKNOWN = 1,
+    /* Function not implemented yet */
+    TEC_ERROR_UNIMPLEMENTED = 2,
+    /* Overflow error; too much input provided. */
+    TEC_ERROR_OVERFLOW = 3,
+    /* Timeout */
+    TEC_ERROR_TIMEOUT = 4,
+    /* Invalid argument */
+    TEC_ERROR_INVAL = 5,
+    /* Already in use, or not ready yet */
+    TEC_ERROR_BUSY = 6,
+    /* Access denied */
+    TEC_ERROR_ACCESS_DENIED = 7,
+    TEC_ERROR_LAST =  0x1FFFF
+};
+
 
 /**
  * @brief       Function for TMP102 timer create
@@ -159,12 +202,12 @@ void cfg_tmp102_timers_start(void);
 void cfg_tmp102_timers_stop(void);
 
 /**
- * @brief       Function for gps get state
+ * @brief       Function for TMP102 get state
  */
 tmp102_state_s tmp102_get_state(void);
 
 /**
- * @brief       Function for gps set state
+ * @brief       Function for TMP102 set state
  */
 void tmp102_set_state(tmp102_state_s m_state);
 
@@ -178,15 +221,38 @@ void cfg_tmp102_i2c_init(void);
  */
 uint32_t tmp102_req_shutdown_mode(void);
 
-/**
- * @brief       Function for get temerature of tmp102
- */
-int get_temperature(int *tmp_int, int *tmp_dec);
 
 /**
- * @brief       Function for set threshold temperature bounds(upper and lower) of tmp102
+ * @brief       Function for set interrupt low/high temperature bounds(upper and lower) of tmp102
  */
-uint32_t set_alert_threshold(u16 tmp_min, u16 tmp_max);
+void tmp102_set_lowhigh_intr(void);
+
+/**
+ * @brief       Function for set tmp102 i2c init
+ */
+void tmp102_i2c_init(void);
+
+/**
+ * @brief       Function for TMP10x get configuration register
+ */
+uint32_t tmp102_get_config(void);
+
+
+/**
+ * @brief       Function for TMP10x get temperature('C)
+ */
+uint32_t tmp102_get_tmp_data(void);
+
+/**
+ * @brief       Function for TMP10x get temperature('C) - just once
+ */
+uint32_t tmp102_get_tmp_data_once(int16_t *tmp102a, int16_t *tmp102b);
+
+uint32_t tmp102_get_tmp(void);
+
+uint32_t tmp102_set_low_intr(uint16_t tmp_min);
+
+uint32_t tmp102_set_high_intr(uint16_t tmp_max);
 
 #ifdef __cplusplus
 }

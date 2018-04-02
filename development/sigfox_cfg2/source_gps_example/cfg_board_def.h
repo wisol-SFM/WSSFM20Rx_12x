@@ -64,6 +64,7 @@ module feature
 *******************************************************/
 #define CDEV_WIFI_MODULE  //ESP8285
 #define CDEV_GPS_MODULE   //UBX-G8020
+//#define FEATURE_ONSEMI_IHERE_DEMO_TEST // 2018.03.27
 
 #define CDEV_BLE_ADVERTISING_ENABLE
 //#define CDEV_SIGFOX_RCZ24

@@ -1509,9 +1509,7 @@ static void cfg_board_check_bootmode(void)
         {
             case 1:
                 cTBC_setting_erase_wait_for_testmode(3);
-#ifdef CDEV_WIFI_MODULE
                 cfg_board_testmode_wifi();
-#endif
                 break;
             case 2:
                 cTBC_setting_erase_wait_for_testmode(3);

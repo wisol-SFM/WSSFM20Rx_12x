@@ -64,7 +64,7 @@ module_parameter_t m_module_parameter;  //setting values
 bool m_module_parameter_update_req;
 uint8_t   avg_report_volts;
 
-int tmp102_int, tmp102_dec;
+int16_t tmp102_int, tmp102_dec;
 
 #if (NRF_SD_BLE_API_VERSION == 3)
 #define NRF_BLE_MAX_MTU_SIZE            GATT_MTU_SIZE_DEFAULT                       /**< MTU size used in the softdevice enabling and to reply to a BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST event. */
@@ -169,7 +169,7 @@ void accelerometer_interrupt_init(void)
 int main(void)
 {
     int result =0;
-    uint32_t threshold_result = 0;
+    uint32_t threshold_low_result = 0, threshold_high_result = 0 ;
         
     //timer Initialize
     APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, false);
@@ -220,8 +220,10 @@ int main(void)
         cfg_tmp102_timers_start();
 
 //set threshold temperature bounds(upper and lower)
-        threshold_result = set_alert_threshold(TMP102_LOW_DATA, TMP102_HIGH_DATA);
-        if(threshold_result == NRF_SUCCESS)
+        threshold_low_result = tmp102_set_low_intr(TMP10x_INT_LOW);
+        threshold_high_result = tmp102_set_high_intr(TMP10x_INT_HIGH);
+
+        if((threshold_low_result == NRF_SUCCESS) && (threshold_high_result == NRF_SUCCESS))
             cPrintLog(CDBG_MAIN_LOG, "%s %d Temperature High/Low reg success \n",  __func__, __LINE__);
         else
             cPrintLog(CDBG_MAIN_LOG, "%s %d Temperature threshold reg fail \n",  __func__, __LINE__);
@@ -232,10 +234,10 @@ int main(void)
             if(tmp102_get_state() == EXIT_TMP)
             {
 // get temerature
-                result = get_temperature(&tmp102_int, &tmp102_dec);
-                if(result)
-                {
-                    cPrintLog(CDBG_MAIN_LOG, "Temperature TMP102[%d.%d]'C \n", tmp102_int, tmp102_dec);
+                result = tmp102_get_tmp_data_once(&tmp102_int, &tmp102_dec);  /* Read the TMP10x sensor data value again. */
+                if(result == TEC_SUCCESS)
+                {   
+                    cPrintLog(CDBG_MAIN_LOG, "Temperature TMP10x[%d.%d]'C \n", tmp102_int, tmp102_dec);
                 }
 
                 cfg_tmp102_timers_stop();

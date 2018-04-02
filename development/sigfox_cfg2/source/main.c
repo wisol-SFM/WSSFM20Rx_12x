@@ -133,8 +133,9 @@ static ble_nus_t                        m_nus;                                  
 #endif
 
 #if (CDEV_MODULE_TYPE == CDEV_MODULE_SFM50R)
-extern int tmp102a, tmp102b;
+extern int16_t tmp102a, tmp102b;
 #endif
+extern uint8_t tmp102a_sigfox, tmp102b_sigfox;
 
 static bool m_softdevice_init_flag;
 static bool m_hitrun_test_flag = false;
@@ -2673,17 +2674,27 @@ static void main_schedule_timeout_handler_asset_tracker(void * p_context)
                 m_module_peripheral_data.sigfixdata_wifi_flag = 0;
 #if (CDEV_MODULE_TYPE == CDEV_MODULE_SFM50R)
                 send_data[0] = avg_report_volts;
-                send_data[1] = tmp102a;
-                send_data[2] = tmp102b;
+                send_data[1] = tmp102a_sigfox;
+                send_data[2] = tmp102b_sigfox;
 
                 cPrintLog(CDBG_FCTRL_INFO, "%s %d CDEV_WIFI_MODULE Not Defined!\n", __func__, __LINE__);
                 cPrintLog(CDBG_FCTRL_INFO, "%s %d Voltage[%d][0x%02x]-100mV / Tmp102[%d.%d][0x%02x.0x%02x]  !\n", __func__, __LINE__, 
-                    avg_report_volts, avg_report_volts, tmp102a,tmp102b, tmp102a,tmp102b);
-#else
+                    avg_report_volts, avg_report_volts, tmp102a_sigfox,tmp102b_sigfox, tmp102a_sigfox,tmp102b_sigfox);
+#else /* CDEV_MODULE_SFM50R */
                 cPrintLog(CDBG_FCTRL_INFO, "%s %d CDEV_WIFI_MODULE Not Defined! send NUll data!\n", __func__, __LINE__);
-#endif
+
+#ifdef FEATURE_ONSEMI_IHERE_DEMO_TEST
+                send_data[8] = avg_report_volts;
+                send_data[10] = tmp102a_sigfox;
+                send_data[11] = tmp102b_sigfox;
+                cPrintLog(CDBG_FCTRL_INFO, "%s %d Voltage[%d][0x%02x]-100mV / Tmp102[%d.%d][0x%02x.0x%02x]  !\n", __func__, __LINE__, 
+                    avg_report_volts, avg_report_volts, tmp102a_sigfox,tmp102b_sigfox, tmp102a_sigfox,tmp102b_sigfox);
+
+#endif /* FEATURE_ONSEMI_IHERE_DEMO_TEST */
+
+#endif /* CDEV_MODULE_SFM50R */
                 send_data_req = true;
-#endif
+#endif /* CDEV_WIFI_MODULE */
                 if(send_data_req)
                 {
                     memcpy(m_module_peripheral_data.sigfixdata_wifi, send_data, sizeof(m_module_peripheral_data.sigfixdata_wifi));
@@ -3495,11 +3506,11 @@ static void user_cmd_hitrun_sense_test(void)
 
     //tmp sensor Test
     {
-        extern uint32_t tmp102_config_set(void);
-        extern uint32_t tmp102_read_sensor_once(int *tmp102a, int *tmp102b);
-        int tmp_a, tmp_b;
-        if((tmp102_config_set()==NRF_SUCCESS)
-            && (tmp102_read_sensor_once(&tmp_a, &tmp_b)==NRF_SUCCESS)
+        extern uint32_t tmp102_set_config(void);
+        extern uint32_t tmp102_get_tmp_data_once(int16_t *tmp102a, int16_t *tmp102b);
+        int16_t tmp_a, tmp_b;
+        if((tmp102_set_config()==NRF_SUCCESS)
+            && (tmp102_get_tmp_data_once(&tmp_a, &tmp_b)==NRF_SUCCESS)
         )
         {
             test_result = true;
