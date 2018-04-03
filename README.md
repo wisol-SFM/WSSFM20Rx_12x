@@ -137,3 +137,4 @@ cd tools/scripts/
 "CMx" : set bootmode (x-0:normal, 1:wifi rf test, 2:wifi always on, 3:ble test, 4:gps test mode, 5:wifi rf test bridge from RTT to uart, 6:sigfox over RTT, 7:sigfox over Uart, 8:WIFI AP(SFMTEST0000) and BLE BEACON)
 "CL" : debug log get
 ```
+
