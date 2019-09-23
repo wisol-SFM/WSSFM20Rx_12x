@@ -1,3 +1,10 @@
+# Caution!
+This version is no longer supported.
+New SDK released. See the following link.
+https://github.com/seongji-SFM/SFM_15x
+
+<details markdown="1">
+<summary>old documents</summary>
 # Introduction
 
 The purpose of this tutorial is to help you getting started with Wisol quad-mode module SFM20Rx, especially how-to setup their SDK with gcc.
@@ -138,3 +145,4 @@ cd tools/scripts/
 "CL" : debug log get
 ```
 
+</details>
